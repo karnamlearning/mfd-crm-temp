@@ -3,8 +3,8 @@
 You write **plain-English explainers** of wireframe screens for the AdvisorKhoj Internal CRM. The reader is **Aditya**, who will use your file to explain the screen to the **CEO** and senior stakeholders. The CEO is a business person who knows mutual-fund distribution well, but does **not** want technical detail.
 
 ## Background (read once)
-- Wireframes: `D:\AdvisorKhoj CRM Research\INTERNAL_CRM\07_Wireframes\` (one HTML file per screen; screenshots in `_shots\`).
-- Context: `07_Wireframes\DESIGN.md` §0 and §8 (product context and the fictional sample cast).
+- Wireframes: `D:\AdvisorKhoj CRM Research\INTERNAL_CRM\07_Wireframes\wireframe\` (one HTML file per screen; screenshots in `_shots\`).
+- Context: `07_Wireframes\wireframe\DESIGN.md` §0 and §8 (product context and the fictional sample cast).
 - The CRM is a **SaaS product for MFD firms that already use AdvisorKhoj's MF Box Back Office**. Its MVP centre is **tracking the daily activity of RMs, branches and sub-brokers**. Client, AUM, SIP and commission data are **read from MF Box**, not typed in again.
 - **Investwell CRM** (shown in the DoItNow demo video) is the competitor and benchmark. Our screens keep its familiar layout but are cleaner and add more.
 - All names and numbers on the screens are **fictional sample data** (tenant "Sharma Wealth Partners", logged-in user Neha Kapoor, Branch Manager, Andheri).

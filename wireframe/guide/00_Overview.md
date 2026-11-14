@@ -4,7 +4,7 @@
 
 > **In one line:** a clickable picture of the CRM we plan to build for MFD firms that use MF Box Back Office. It has 20 screens, in light and dark themes.
 >
-> **Open it:** double-click `07_Wireframes/index.html`. It opens in any browser; nothing needs to be installed.
+> **Open it:** double-click `wireframe/index.html`. It opens in any browser; nothing needs to be installed.
 
 ## What this CRM is (the 30-second version)
 

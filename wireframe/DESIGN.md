@@ -1,7 +1,7 @@
 # AdvisorKhoj Internal CRM — Design System (DESIGN.md)
 
-> Version 1.0 · 14 Nov 2026 · Applies to every wireframe in `07_Wireframes/`.
-> Reference product: Investwell CRM as used by DoItNow Financial Services (screens in `../01_Video_Analysis/screenshots/investwell_demo/`).
+> Version 1.0 · 14 Nov 2026 · Applies to every wireframe in this `wireframe/` folder.
+> Reference product: Investwell CRM as used by DoItNow Financial Services (screens in the research pack, `INTERNAL_CRM/01_Video_Analysis/screenshots/investwell_demo/`; not in this repo).
 > Goal: keep DoItNow's layout and workflows the team already knows, but make it **calmer, cleaner and faster**: minimal blue and white, with a full dark theme.
 
 ## 0. Product context (stakeholder answers, 13 Nov 2026)

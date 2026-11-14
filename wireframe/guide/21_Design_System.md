@@ -5,7 +5,7 @@
 
 > **In one line:** one set of colours, fonts and building blocks used by all 20 screens, so the product looks and feels like one thing.
 >
-> **Full technical spec:** `07_Wireframes/DESIGN.md` (for designers and developers)
+> **Full technical spec:** `wireframe/DESIGN.md` (for designers and developers)
 
 ## Why a design system matters
 - **Faster to build:** developers reuse the same 30 or so building blocks (buttons, tables, cards, side panels) instead of designing each screen from scratch.
