@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lead · Karan Malhotra · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---------- Lead header ---------- */
+    .ld-head { padding: var(--sp-5); display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: var(--sp-4); row-gap: 6px; align-items: center; }
+    .ld-head .avatar-lg { width: 52px; height: 52px; font-size: 17px; background: var(--danger-soft); color: var(--danger); grid-row: span 2; align-self: start; }
+    .ld-id { min-width: 0; }
+    .ld-head .ld-meta { grid-column: 2 / 4; margin-top: 0; }
+    .ld-name-row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+    .ld-name { font-size: var(--fs-lg); line-height: 28px; font-weight: 600; letter-spacing: -.01em; margin-right: 4px; }
+    .ld-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; margin-top: 6px; font-size: 13px; color: var(--text-2); }
+    .ld-meta > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .ld-meta .i { color: var(--text-3); }
+    .ld-meta .reveal { border: 0; background: none; padding: 0; color: var(--primary-text); font-size: 12px; font-weight: 500; }
+    .ld-actions { display: flex; gap: var(--sp-2); align-items: center; flex-wrap: wrap; }
+
+    /* ---------- Stage path (stepper) ---------- */
+    .ld-path-wrap { border-top: 1px solid var(--border); padding: var(--sp-4) var(--sp-5); }
+    .ld-path { display: flex; align-items: stretch; gap: 0; list-style: none; margin: 0; padding: 0; overflow-x: auto; }
+    .ld-step { flex: 1 1 0; min-width: 128px; margin-left: -6px; }
+    .ld-step:first-child { margin-left: 0; }
+    .ld-step button {
+      width: 100%; height: 44px; border: 0; padding: 0 18px 0 24px; display: flex; align-items: center; gap: 8px;
+      background: var(--surface-2); color: var(--text-2); font-size: 13px; font-weight: 500; text-align: left;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+    }
+    .ld-step:first-child button { padding-left: 14px; border-radius: var(--r-md) 0 0 var(--r-md); clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); }
+    .ld-step button:hover { background: var(--surface-3); color: var(--text); }
+    .ld-step .ld-step-txt { display: flex; flex-direction: column; line-height: 16px; min-width: 0; }
+    .ld-step .ld-step-txt small { font-size: 11px; color: var(--text-3); font-weight: 500; }
+    .ld-step-ico { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; flex: none; border: 1.5px solid var(--border-strong); font-size: 10px; font-weight: 700; }
+    .ld-step-ico .i { width: 12px; height: 12px; stroke-width: 3; }
+    .ld-step.is-done button { background: var(--primary-soft); color: var(--primary-text); }
+    .ld-step.is-done button:hover { background: var(--primary-soft-2); }
+    .ld-step.is-done .ld-step-ico { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+    .ld-step.is-done small { color: var(--primary-text); opacity: .75; }
+    .ld-step.is-current button { background: var(--primary); color: var(--on-primary); font-weight: 600; }
+    .ld-step.is-current button:hover { background: var(--primary-hover); color: var(--on-primary); }
+    .ld-step.is-current .ld-step-ico { border-color: var(--on-primary); background: var(--on-primary); color: var(--primary); }
+    .ld-step.is-current small { color: var(--on-primary); opacity: .8; }
+    .ld-final { flex: 1.35 1 0; min-width: 210px; margin-left: -6px; display: flex; background: var(--surface-2);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%); border-radius: 0 var(--r-md) var(--r-md) 0; padding-left: 14px; }
+    .ld-final button { flex: 1; border: 0; background: transparent; height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-2); border-radius: 0; }
+    .ld-final button + button { border-left: 1px solid var(--border-strong); }
+    .ld-final button:hover.is-won { background: var(--success-soft); color: var(--success); }
+    .ld-final button:hover.is-lost { background: var(--danger-soft); color: var(--danger); }
+    .ld-final .ld-final-label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); display: grid; place-items: center; padding: 0 6px 0 4px; }
+    .ld-path-note { display: flex; align-items: center; gap: 6px 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--text-3); }
+    .ld-path-note > span { display: inline-flex; align-items: center; gap: 6px; }
+    .ld-path-note b { color: var(--text-2); font-weight: 600; }
+
+    /* ---------- Body ---------- */
+    .ld-split { margin-top: var(--sp-4); }
+    .ld-tabs { padding: 0 var(--sp-5); margin-bottom: 0; }
+    .ld-composer .seg-sm button { height: 26px; padding: 0 10px; font-size: 12.5px; }
+    .ld-composer .composer-top { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 8px 0; flex-wrap: wrap; }
+    .ld-composer .composer-top .outcome { margin-left: auto; width: 180px; height: 30px; font-size: 13px; }
+    .ld-composer textarea { min-height: 56px; }
+    .ld-feed-head { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-5) 0 var(--sp-4); }
+    .ld-feed-head .overline { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .ld-day { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: 0 0 var(--sp-3) 44px; }
+    .tl-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .tl-head .tl-meta { margin: 0 0 0 auto; white-space: nowrap; }
+    .tl-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .tl-ai { margin-top: 8px; padding: 10px 12px; border: 1px solid var(--border); border-left: 3px solid var(--ai); border-radius: var(--r-md); background: var(--surface); font-size: 13.5px; color: var(--text); }
+    .tl-ai .row { margin-top: 8px; gap: 6px; }
+    .strike-from { text-decoration: line-through; color: var(--text-3); }
+
+    .ld-list .list-row { padding: 12px 0; }
+    .ld-list .lr-main { flex: 1; min-width: 0; }
+    .ld-list .lr-title { font-weight: 500; color: var(--text); }
+    .ld-list a.lr-title:hover { color: var(--primary-text); }
+    .ld-list .lr-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .file-ico { width: 36px; height: 36px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); flex: none; }
+    .file-ico.pdf { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+    .file-ico.img { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+
+    /* Right column */
+    .dup-banner { align-items: flex-start; border-color: var(--warning-soft); }
+    .dup-banner .i { margin-top: 2px; }
+    .dup-banner .dup-text { color: var(--text-2); line-height: 18px; }
+    .dup-banner .dup-text b { color: var(--warning); }
+    .dup-banner .dup-actions { display: flex; gap: 12px; margin-top: 8px; font-weight: 500; }
+    .dup-banner .dup-actions a { color: var(--warning); text-decoration: underline; text-underline-offset: 2px; }
+    .dup-banner .dup-actions button { border: 0; background: none; padding: 0; color: var(--text-3); font-size: 13px; }
+    .ld-kv { margin: 0; grid-template-columns: 112px 1fr; gap: 12px 12px; font-size: 13px; align-items: center; }
+    .ld-kv dd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .ld-kv .kv-sep { grid-column: 1 / -1; height: 1px; background: var(--border); margin: 2px 0; }
+    .ld-kv .sub { font-weight: 400; color: var(--text-3); font-size: 12px; }
+    .ld-kv .avatar-group .avatar { width: 28px; height: 28px; font-size: 10.5px; margin-left: -4px; }
+    .ld-kv .avatar-group .avatar:first-child { margin-left: 0; }
+    .add-dashed { width: 28px; height: 28px; border-radius: 50%; border: 1px dashed var(--border-strong); background: transparent; color: var(--text-3); display: inline-grid; place-items: center; padding: 0; }
+    .add-dashed:hover { color: var(--primary-text); border-color: var(--primary); }
+    .next-card .card-body { display: flex; flex-direction: column; gap: 10px; }
+    .next-item { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--text-2); }
+    .next-item b { color: var(--text); font-weight: 600; }
+
+    /* ---------- Create lead drawer ---------- */
+    #drawer-lead { width: min(600px, 100vw); }
+    #drawer-lead .drawer-header .card-icon { width: 36px; height: 36px; }
+    .multi { min-height: 36px; padding: 3px 6px 3px 4px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; flex: 1; min-width: 0; cursor: text; }
+    .multi:hover { border-color: var(--text-3); }
+    .multi .chip { height: 26px; }
+    .multi input { border: 0; outline: none; background: transparent; flex: 1; min-width: 90px; height: 26px; padding: 0 6px; font-size: 14px; }
+    .multi input::placeholder { color: var(--text-3); }
+    .with-btn { display: flex; gap: 8px; align-items: flex-start; }
+    .with-btn > .btn-icon { flex: none; }
+    .suggest { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .suggest .choice { height: 26px; padding: 0 10px; font-size: 12px; border-style: dashed; }
+    .prefix { display: grid; place-items: center; padding: 0 10px; border: 1px solid var(--border-strong); background: var(--surface-2); color: var(--text-2); font-size: 13px; font-weight: 500; height: 36px; }
+    .help.is-ok { color: var(--success); display: inline-flex; align-items: center; gap: 4px; }
+    .person-pick { display: flex; align-items: center; gap: 8px; }
+    .person-pick .input { padding-left: 40px; }
+    .person-pick .avatar { position: absolute; left: 8px; }
+    .dot-select { display: flex; align-items: center; gap: 8px; text-align: left; }
+    .dot-select .chev { margin-left: auto; color: var(--text-3); }
+    .status-menu { width: 230px; }
+    .status-menu .menu-item .check-mark { margin-left: auto; color: var(--primary-text); }
+    .seg-nature button { min-width: 72px; justify-content: center; }
+    .seg-nature .dot { width: 7px; height: 7px; }
+    .collab { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .pchip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 4px 0 3px; border-radius: var(--r-full); border: 1px solid var(--border); background: var(--surface-2); font-size: 13px; font-weight: 500; }
+    .pchip .chip-remove { color: var(--text-3); }
+    .pchip-add { height: 30px; border-radius: var(--r-full); border: 1px dashed var(--border-strong); background: transparent; color: var(--text-2); padding: 0 12px 0 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+    .pchip-add:hover { color: var(--primary-text); border-color: var(--primary); background: var(--primary-soft); }
+    .dropzone { border: 1.5px dashed var(--border-strong); border-radius: var(--r-md); padding: 16px; display: flex; align-items: center; gap: 12px; background: var(--surface-2); color: var(--text-2); font-size: 13px; }
+    .dropzone:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .dropzone .empty-icon { width: 36px; height: 36px; margin: 0; flex: none; }
+    .dropzone .empty-icon .i { width: 18px; height: 18px; }
+    .file-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-md); margin-top: 8px; font-size: 13px; }
+    .file-row .file-ico { width: 30px; height: 30px; }
+    .file-row .progress { width: 80px; }
+    #drawer-lead .form-section-title { display: flex; align-items: center; gap: 8px; }
+    #drawer-lead .form-section-title .sec-num { width: 18px; height: 18px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); display: grid; place-items: center; font-size: 10px; color: var(--text-2); letter-spacing: 0; }
+    .rel { position: relative; }
+    .rel .popover { left: 0; right: auto; }
+
+    @media (max-width: 1280px) {
+      .ld-step button { padding: 0 12px 0 22px; }
+      .ld-step { min-width: 112px; }
+      .ld-composer .seg-sm button { padding: 0 8px; }
+      .ld-composer .composer-top .outcome { width: 156px; }
+      .cfg-note { display: none !important; }
+    }
+    @media (max-width: 768px) {
+      .ld-id { min-width: 0; }
+      .ld-head { padding: var(--sp-4); }
+      .ld-path-wrap { padding: var(--sp-3) var(--sp-4); }
+    }
+  </style>
+</head>
+<body data-page="leads" data-crumb="Leads|Karan Malhotra" data-open="drawer-lead">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- ===== Lead header + stage path ===== -->
+        <section class="card">
+          <div class="ld-head">
+            <span class="avatar avatar-lg">KM</span>
+            <div class="ld-id">
+              <div class="ld-name-row">
+                <h1 class="ld-name">Karan Malhotra</h1>
+                <span class="badge badge-dot badge-danger">Hot</span>
+                <span class="badge badge-dot badge-danger badge-square">Hot lead</span>
+                <span class="tag">MF-SIP · <span class="tnum">₹5,00,000</span></span>
+              </div>
+            </div>
+            <div class="ld-actions">
+              <button class="btn btn-secondary" onclick="AK.toast('Calling +91 98••• ••214 via click-to-call…', {icon:'phone', undo:false})"><svg class="i"><use href="#i-phone"/></svg>Call</button>
+              <a class="btn btn-secondary" href="15-inbox-whatsapp.html"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</a>
+              <button class="btn btn-secondary" onclick="document.getElementById('composer-text').focus()"><svg class="i"><use href="#i-activity"/></svg>Log activity</button>
+              <button class="btn btn-primary" onclick="AK.toast('Karan Malhotra converted to client · sent to MF Box onboarding')"><svg class="i"><use href="#i-user-plus"/></svg>Convert to client</button>
+              <div class="popover-wrap">
+                <button class="btn btn-ghost btn-icon" data-popover="pop-more" title="More actions"><svg class="i"><use href="#i-more-h"/></svg></button>
+                <div class="popover" id="pop-more">
+                  <div class="menu">
+                    <button class="menu-item" data-open-drawer="drawer-lead"><svg class="i"><use href="#i-edit"/></svg>Edit lead<span class="menu-hint">E</span></button>
+                    <a class="menu-item" href="10-task-create.html"><svg class="i"><use href="#i-check-square"/></svg>Create task</a>
+                    <a class="menu-item" href="13-meetings.html"><svg class="i"><use href="#i-video"/></svg>Schedule meeting</a>
+                    <button class="menu-item"><svg class="i"><use href="#i-users"/></svg>Reassign</button>
+                    <div class="menu-sep"></div>
+                    <button class="menu-item is-danger"><svg class="i"><use href="#i-archive"/></svg>Mark as lost</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ld-meta">
+                <span><svg class="i"><use href="#i-phone"/></svg><span class="tnum">+91 98••• ••214</span> <button class="reveal" type="button" onclick="AK.toast('Number revealed · access logged', {icon:'eye', undo:false})">Show</button></span>
+                <span><svg class="i"><use href="#i-mail"/></svg>kar•••••@gmail.com</span>
+                <span><svg class="i"><use href="#i-globe"/></svg>Source: <span class="badge badge-neutral">Website form</span></span>
+                <span><svg class="i"><use href="#i-user"/></svg>Owner <span class="person"><span class="avatar avatar-xs">NK</span><span class="person-name">Neha Kapoor</span></span></span>
+                <span class="faint"><svg class="i"><use href="#i-hash"/></svg>LD-2611-042</span>
+              </div>
+          </div>
+
+          <div class="ld-path-wrap">
+            <ol class="ld-path" aria-label="Lead stage">
+              <li class="ld-step is-done"><button type="button"><span class="ld-step-ico"><svg class="i"><use href="#i-check"/></svg></span><span class="ld-step-txt">New<small>02 Nov</small></span></button></li>
+              <li class="ld-step is-done"><button type="button"><span class="ld-step-ico"><svg class="i"><use href="#i-check"/></svg></span><span class="ld-step-txt">Contacted<small>04 Nov</small></span></button></li>
+              <li class="ld-step is-done"><button type="button"><span class="ld-step-ico"><svg class="i"><use href="#i-check"/></svg></span><span class="ld-step-txt">Follow-up<small>09 Nov</small></span></button></li>
+              <li class="ld-step is-current"><button type="button" aria-current="step"><span class="ld-step-ico">4</span><span class="ld-step-txt">Hot lead<small>Since 12 Nov · 2 days</small></span></button></li>
+              <li class="ld-final">
+                <span class="ld-final-label">Close</span>
+                <button type="button" class="is-won" onclick="AK.toast('Stage moved to Completed')"><svg class="i"><use href="#i-check"/></svg>Completed</button>
+                <button type="button" class="is-lost" onclick="AK.toast('Stage moved to Lost · reason required')"><svg class="i"><use href="#i-x"/></svg>Lost</button>
+              </li>
+            </ol>
+            <div class="ld-path-note">
+              <span><svg class="i i-sm"><use href="#i-clock"/></svg>Lead age <b class="tnum">12 days</b></span>
+              <span>Avg. time in Hot lead <b>4 days</b></span>
+              <span>Last acted on <b>Today, 11:20</b></span>
+              <span class="due-today"><svg class="i i-sm"><use href="#i-calendar"/></svg>Next follow-up Today · 15:30 video call</span>
+              <span class="ml-auto cfg-note">Stages are configurable in <a href="06-leads-pipeline.html">Leads → Configurations</a></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Two columns ===== -->
+        <div class="split ld-split">
+          <!-- Left: tabs -->
+          <section class="card">
+            <div class="tabs ld-tabs" data-tabs="lead">
+              <button class="tab is-active" data-tab="activity">Activity &amp; comments <span class="count">9</span></button>
+              <button class="tab" data-tab="tasks">Tasks <span class="count">3</span></button>
+              <button class="tab" data-tab="meetings">Meetings <span class="count">2</span></button>
+              <button class="tab" data-tab="files">Attachments <span class="count">3</span></button>
+            </div>
+
+            <!-- Activity -->
+            <div class="card-body is-active" data-tab-panel="activity" data-tab-scope="lead">
+              <div class="composer ld-composer">
+                <div class="composer-top">
+                  <div class="segmented seg-sm" data-segmented role="group" aria-label="Entry type">
+                    <button aria-pressed="false"><svg class="i i-sm"><use href="#i-message"/></svg>Comment</button>
+                    <button aria-pressed="true"><svg class="i i-sm"><use href="#i-phone"/></svg>Call</button>
+                    <button aria-pressed="false"><svg class="i i-sm"><use href="#i-map-pin"/></svg>Visit</button>
+                    <button aria-pressed="false"><svg class="i i-sm"><use href="#i-whatsapp"/></svg>WhatsApp</button>
+                    <button aria-pressed="false"><svg class="i i-sm"><use href="#i-mail"/></svg>Email</button>
+                  </div>
+                  <select class="select outcome" aria-label="Call outcome"><option>✓ Interested</option><option>Call back later</option><option>Not reachable</option><option>Not interested</option></select>
+                </div>
+                <textarea id="composer-text" placeholder="What happened on the call? Type @ to mention a teammate…"></textarea>
+                <div class="composer-bar">
+                  <button class="btn btn-ghost btn-icon btn-sm" title="Mention"><svg class="i"><use href="#i-at"/></svg></button>
+                  <button class="btn btn-ghost btn-icon btn-sm" title="Attach"><svg class="i"><use href="#i-paperclip"/></svg></button>
+                  <button class="btn btn-ghost btn-icon btn-sm" title="Voice note"><svg class="i"><use href="#i-mic"/></svg></button>
+                  <button class="btn btn-ghost btn-sm" title="Set next follow-up"><svg class="i"><use href="#i-calendar"/></svg>Next follow-up</button>
+                  <span class="ml-auto faint text-sm">Visible to owner &amp; collaborators</span>
+                  <button class="btn btn-primary btn-sm" onclick="AK.toast('Call logged on Karan Malhotra')">Log call</button>
+                </div>
+              </div>
+
+              <div class="ld-feed-head">
+                <span class="overline">Timeline</span>
+                <div class="segmented seg-sm ml-auto" data-segmented role="group" aria-label="Filter timeline" style="padding:2px">
+                  <button aria-pressed="true">All</button><button aria-pressed="false">Comments</button><button aria-pressed="false">Activities</button><button aria-pressed="false">Changes</button>
+                </div>
+              </div>
+
+              <div class="ld-day">Today · Sat 14 Nov</div>
+              <div class="timeline">
+                <div class="tl-item">
+                  <span class="tl-dot is-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI suggestion</span><span class="tl-text">Next best action for this lead</span><span class="tl-meta">11:24</span></div>
+                    <div class="tl-ai">Karan asked about ₹25,000/month across 2 funds. Send the <b>SIP proposal</b> with a 10-year projection and book a KYC check before today’s 3:30 PM video call.
+                      <div class="row"><button class="btn btn-secondary btn-sm" onclick="AK.toast('Draft WhatsApp opened for review', {icon:'sparkles', undo:false})"><svg class="i"><use href="#i-whatsapp"/></svg>Review WhatsApp draft</button><button class="btn btn-ghost btn-sm">Dismiss</button><span class="ml-auto faint text-sm">AI drafts, a human approves</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <span class="tl-dot is-primary"><svg class="i"><use href="#i-phone"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text"><b>Neha Kapoor</b> logged a <b>call</b> · 6 min</span><span class="badge badge-dot badge-success">Interested</span><span class="tl-meta">11:20</span></div>
+                    <div class="tl-comment">Confirmed ₹25,000/month SIP split between a flexi-cap and an ELSS fund. Wants the tax-saving part to start in December. Will share PAN and cancelled cheque on WhatsApp.</div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <span class="tl-dot"><svg class="i"><use href="#i-message"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text"><b>Sneha Iyer</b> commented</span><span class="tl-meta">10:05</span></div>
+                    <div class="tl-comment"><a href="#">@Neha Kapoor</a> he filled the risk profile online: <b>Moderately aggressive</b>. Sharing the PDF in Attachments.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ld-day">Thu 12 Nov</div>
+              <div class="timeline">
+                <div class="tl-item">
+                  <span class="tl-dot is-danger"><svg class="i"><use href="#i-flag"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text"><b>Neha Kapoor</b> moved stage <span class="strike-from">Follow-up</span> → <b>Hot lead</b> and nature <span class="strike-from">Warm</span> → <b>Hot</b></span><span class="tl-meta">16:40</span></div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <span class="tl-dot is-success"><svg class="i"><use href="#i-map-pin"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text"><b>Neha Kapoor</b> completed a <b>visit</b> at Andheri office · 45 min</span><span class="tl-meta">15:10</span></div>
+                    <div class="tl-chips"><a class="tag" href="14-meeting-detail.html"><svg class="i"><use href="#i-video"/></svg>Goal planning – Karan Malhotra</a><span class="tag">With Sneha Iyer</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="ld-day">Mon 09 Nov</div>
+              <div class="timeline">
+                <div class="tl-item">
+                  <span class="tl-dot is-warning"><svg class="i"><use href="#i-calendar"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text"><b>Neha Kapoor</b> updated follow-up date from <span class="strike-from">10 Nov 2026</span> to <b>14 Nov 2026</b></span><span class="tl-meta">12:32</span></div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <span class="tl-dot is-primary"><svg class="i"><use href="#i-whatsapp"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text">WhatsApp template <b>“SIP calculator link”</b> sent by Neha Kapoor</span><span class="badge badge-dot badge-success">Read</span><span class="tl-meta">12:30</span></div>
+                  </div>
+                </div>
+                <div class="tl-item">
+                  <span class="tl-dot"><svg class="i"><use href="#i-user-plus"/></svg></span>
+                  <div class="tl-body">
+                    <div class="tl-head"><span class="tl-text">Lead created from <b>Website form</b> · auto-assigned to <b>Neha Kapoor</b></span><span class="tl-meta">02 Nov · 09:12</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tasks -->
+            <div class="card-body" data-tab-panel="tasks" data-tab-scope="lead">
+              <div class="row mb-3"><span class="faint text-sm">3 tasks linked to this lead</span><a class="btn btn-secondary btn-sm ml-auto" href="10-task-create.html"><svg class="i"><use href="#i-plus"/></svg>Add task</a></div>
+              <ul class="list-plain ld-list">
+                <li class="list-row"><label class="check"><input type="checkbox"></label><div class="lr-main"><a class="lr-title" href="11-task-detail.html">Collect PAN &amp; cancelled cheque – Karan Malhotra</a><div class="lr-sub">KYC update · Created by Neha Kapoor</div></div><span class="badge badge-dot badge-warning">Pending</span><span class="due-today text-sm"><svg class="i i-sm"><use href="#i-clock"/></svg>Today</span><span class="avatar avatar-sm">NK</span></li>
+                <li class="list-row"><label class="check"><input type="checkbox"></label><div class="lr-main"><a class="lr-title" href="11-task-detail.html">Share SIP proposal (₹25,000/month)</a><div class="lr-sub">Proposal: Investment Proposal</div></div><span class="badge badge-dot badge-info">In progress</span><span class="text-sm muted">16 Nov 2026</span><span class="avatar avatar-sm a4">SI</span></li>
+                <li class="list-row"><label class="check"><input type="checkbox" checked></label><div class="lr-main"><a class="lr-title" href="11-task-detail.html">Send risk profile form</a><div class="lr-sub">Done by Sneha Iyer · 14 Nov</div></div><span class="badge badge-dot badge-success">Done</span><span class="text-sm muted">13 Nov 2026</span><span class="avatar avatar-sm a4">SI</span></li>
+              </ul>
+            </div>
+
+            <!-- Meetings -->
+            <div class="card-body" data-tab-panel="meetings" data-tab-scope="lead">
+              <div class="row mb-3"><span class="faint text-sm">2 meetings</span><a class="btn btn-secondary btn-sm ml-auto" href="13-meetings.html"><svg class="i"><use href="#i-plus"/></svg>Schedule meeting</a></div>
+              <ul class="list-plain ld-list">
+                <li class="list-row"><span class="file-ico img"><svg class="i"><use href="#i-video"/></svg></span><div class="lr-main"><a class="lr-title" href="14-meeting-detail.html">SIP onboarding call</a><div class="lr-sub">Today, Sat 14 Nov · 15:30–16:00 · Video call (Google Meet)</div></div><span class="badge badge-dot badge-info">Scheduled</span></li>
+                <li class="list-row"><span class="file-ico"><svg class="i"><use href="#i-map-pin"/></svg></span><div class="lr-main"><a class="lr-title" href="14-meeting-detail.html">Goal planning – Karan Malhotra</a><div class="lr-sub">Thu 12 Nov · 14:25–15:10 · Andheri office · with Sneha Iyer</div></div><span class="badge badge-dot badge-success">Completed</span></li>
+              </ul>
+            </div>
+
+            <!-- Attachments -->
+            <div class="card-body" data-tab-panel="files" data-tab-scope="lead">
+              <div class="dropzone mb-3"><span class="empty-icon"><svg class="i"><use href="#i-upload"/></svg></span><div><b style="color:var(--text)">Drop files here</b> or <a href="#">browse</a><div class="faint text-sm">PDF, JPG or PNG up to 10 MB</div></div></div>
+              <ul class="list-plain ld-list">
+                <li class="list-row"><span class="file-ico pdf"><svg class="i"><use href="#i-file"/></svg></span><div class="lr-main"><div class="lr-title">Risk_profile_Karan_Malhotra.pdf</div><div class="lr-sub">184 KB · Sneha Iyer · 14 Nov</div></div><button class="btn btn-ghost btn-icon btn-sm" title="Download"><svg class="i"><use href="#i-download"/></svg></button></li>
+                <li class="list-row"><span class="file-ico pdf"><svg class="i"><use href="#i-file"/></svg></span><div class="lr-main"><div class="lr-title">SIP_proposal_draft_v1.pdf</div><div class="lr-sub">312 KB · Neha Kapoor · 12 Nov</div></div><button class="btn btn-ghost btn-icon btn-sm" title="Download"><svg class="i"><use href="#i-download"/></svg></button></li>
+                <li class="list-row"><span class="file-ico img"><svg class="i"><use href="#i-image"/></svg></span><div class="lr-main"><div class="lr-title">Website_enquiry.png</div><div class="lr-sub">96 KB · System · 02 Nov</div></div><button class="btn btn-ghost btn-icon btn-sm" title="Download"><svg class="i"><use href="#i-download"/></svg></button></li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- Right: duplicate warning + details -->
+          <aside class="stack">
+            <div class="banner banner-warning dup-banner" role="status">
+              <svg class="i"><use href="#i-alert"/></svg>
+              <div>
+                <div class="dup-text"><b>Possible duplicate:</b> a client with this mobile exists in MF Box.</div><div class="faint text-sm mt-1">Karan Malhotra · Malhotra Family · <span style="white-space:nowrap">AUM ₹18.6 L</span></div>
+                <div class="dup-actions"><a href="08-client-360.html">View →</a><button type="button">Merge</button><button type="button">Not a duplicate</button></div>
+              </div>
+            </div>
+
+            <section class="card">
+              <div class="card-header"><span class="card-title">Details</span><div class="card-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-lead"><svg class="i"><use href="#i-edit"/></svg>Edit</button></div></div>
+              <div class="card-body">
+                <dl class="kv ld-kv">
+                  <dt>Interested in</dt><dd><span class="tag">MF-SIP</span><span class="tag">MF-Lumpsum</span></dd>
+                  <dt>Lead value</dt><dd class="tnum">₹5,00,000 <span class="sub">/ year</span></dd>
+                  <dt>Nature</dt><dd><span class="badge badge-dot badge-danger">Hot</span></dd>
+                  <dt>PAN</dt><dd class="tnum" style="letter-spacing:.02em">ABCPM••••K</dd>
+                  <div class="kv-sep"></div>
+                  <dt>Primary user</dt><dd><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></dd>
+                  <dt>Collaborators</dt><dd><span class="avatar-group"><span class="avatar avatar-sm a4" title="Sneha Iyer">SI</span></span><button class="add-dashed" title="Add collaborator"><svg class="i i-sm"><use href="#i-plus"/></svg></button></dd>
+                  <dt>Follow-up date</dt><dd><span class="due-today" style="font-weight:600">Today, 14 Nov 2026</span><span class="sub row gap-1"><svg class="i i-sm"><use href="#i-bell"/></svg>Video call 3:30 PM</span></dd>
+                  <div class="kv-sep"></div>
+                  <dt>Source</dt><dd><span class="badge badge-neutral"><svg class="i"><use href="#i-globe"/></svg>Website form</span></dd>
+                  <dt>Created at</dt><dd>02 Nov 2026, 09:12 <span class="sub">by system</span></dd>
+                  <dt>Last acted on</dt><dd>14 Nov 2026, 11:20 <span class="sub">2 h ago</span></dd>
+                </dl>
+              </div>
+            </section>
+
+            <section class="card next-card">
+              <div class="card-header"><span class="card-title">Up next</span><a class="text-sm ml-auto" href="02-my-day.html">My Day →</a></div>
+              <div class="card-body">
+                <div class="next-item"><span class="tl-dot is-warning" style="width:28px;height:28px"><svg class="i"><use href="#i-check-square"/></svg></span><div><b>Collect PAN &amp; cancelled cheque</b><div class="due-today text-sm">Due today · Neha Kapoor</div></div></div>
+                <div class="next-item"><span class="tl-dot is-primary" style="width:28px;height:28px"><svg class="i"><use href="#i-video"/></svg></span><div><b>SIP onboarding call</b><div class="faint text-sm">Today · 3:30 PM · Video call</div></div></div>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== Create lead drawer ===== -->
+  <aside class="drawer" id="drawer-lead" aria-label="Create lead">
+    <div class="drawer-header">
+      <span class="card-icon"><svg class="i"><use href="#i-user-plus"/></svg></span>
+      <div><div class="drawer-title">Create lead</div><div class="drawer-sub">Fields marked <span style="color:var(--primary)">*</span> are required · Esc to close</div></div>
+      <button class="btn btn-ghost btn-icon ml-auto" data-close-drawer title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="form-section">
+        <div class="form-section-title"><span class="sec-num">1</span>Contact</div>
+        <div class="form-grid">
+          <div class="field span-2"><label class="label" for="f-name">Name <span class="req">*</span></label><input class="input" id="f-name" value="Ishita Bose"></div>
+          <div class="field"><label class="label" for="f-mob">Mobile <span class="req">*</span></label>
+            <div class="input-combo"><span class="prefix" style="border-radius:var(--r-sm) 0 0 var(--r-sm)">+91</span><input class="input tnum" id="f-mob" value="98201 •••••"></div>
+            <span class="help is-ok"><svg class="i i-sm"><use href="#i-check"/></svg>No client or lead with this mobile</span>
+          </div>
+          <div class="field"><label class="label" for="f-email">Email</label><input class="input" id="f-email" placeholder="name@example.com"></div>
+          <div class="field"><label class="label" for="f-pan">PAN</label><input class="input mono" id="f-pan" placeholder="ABCDE1234F" style="text-transform:uppercase;font-size:14px"><span class="help">Used to match the investor in MF Box</span></div>
+          <div class="field"><label class="label" for="f-src">Source</label>
+            <select class="select" id="f-src"><option>Referral</option><option>Website form</option><option>QR code</option><option>WhatsApp</option><option>Walk-in</option><option>Manual</option></select>
+            <span class="help">Referred by <a href="08-client-360.html">Rahul Verma</a></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title"><span class="sec-num">2</span>Interest</div>
+        <div class="form-grid">
+          <div class="field span-2"><label class="label">Interested in <span class="req">*</span><span class="label-action faint text-sm">Pick one or more</span></label>
+            <div class="with-btn">
+              <div class="multi" onclick="this.querySelector('input').focus()">
+                <span class="chip">Term Insurance<button class="chip-remove" type="button" title="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                <span class="chip">Health Insurance<button class="chip-remove" type="button" title="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                <input placeholder="Add product…" aria-label="Add product">
+              </div>
+              <a class="btn btn-secondary btn-icon" href="06-leads-pipeline.html" title="Configure products"><svg class="i"><use href="#i-settings"/></svg></a>
+            </div>
+            <div class="suggest"><span class="faint text-sm">Add:</span><button class="choice" type="button">MF-SIP</button><button class="choice" type="button">MF-Lumpsum</button><button class="choice" type="button">NPS</button><button class="choice" type="button">ITR e-filing</button><button class="choice" type="button">Fixed Deposit</button><button class="choice" type="button">PMS</button></div>
+          </div>
+          <div class="field"><label class="label" for="f-val">Lead value</label>
+            <label class="input-group"><svg class="i"><use href="#i-rupee"/></svg><input class="input tnum" id="f-val" value="45,000"><span class="input-suffix text-sm">/ year</span></label>
+            <span class="help">Expected premium or investment</span>
+          </div>
+          <div class="field"><label class="label">Nature</label>
+            <div class="segmented seg-nature" data-segmented role="group" aria-label="Nature">
+              <button type="button" aria-pressed="false"><span class="dot dot-danger"></span>Hot</button>
+              <button type="button" aria-pressed="true"><span class="dot dot-warning"></span>Warm</button>
+              <button type="button" aria-pressed="false"><span class="dot"></span>Cold</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title"><span class="sec-num">3</span>Ownership &amp; follow-up</div>
+        <div class="form-grid">
+          <div class="field"><label class="label" for="f-owner">Primary user <span class="req">*</span></label>
+            <label class="input-group person-pick"><span class="avatar avatar-sm">NK</span><input class="input" id="f-owner" value="Neha Kapoor (You)"><svg class="i input-suffix"><use href="#i-search"/></svg></label>
+          </div>
+          <div class="field"><label class="label">Status</label>
+            <div class="with-btn">
+              <div class="popover-wrap rel" style="flex:1">
+                <button class="select dot-select" type="button" data-popover="pop-status"><span class="dot"></span>New</button>
+                <div class="popover" id="pop-status">
+                  <div class="menu status-menu">
+                    <div class="menu-label">New stage</div>
+                    <button class="menu-item" type="button"><span class="dot"></span>New<svg class="i check-mark"><use href="#i-check"/></svg></button>
+                    <div class="menu-label">In progress</div>
+                    <button class="menu-item" type="button"><span class="dot dot-neutral"></span>Contacted</button>
+                    <button class="menu-item" type="button"><span class="dot dot-warning"></span>Follow-up</button>
+                    <button class="menu-item" type="button"><span class="dot dot-danger"></span>Hot lead</button>
+                    <div class="menu-label">Final</div>
+                    <button class="menu-item" type="button"><span class="dot dot-success"></span>Completed</button>
+                    <button class="menu-item" type="button"><span class="dot dot-neutral"></span>Lost</button>
+                  </div>
+                </div>
+              </div>
+              <a class="btn btn-secondary btn-icon" href="06-leads-pipeline.html" title="Configure stages"><svg class="i"><use href="#i-settings"/></svg></a>
+            </div>
+          </div>
+          <div class="field"><label class="label" for="f-fu">Follow-up date</label>
+            <label class="input-group"><svg class="i"><use href="#i-calendar"/></svg><input class="input" id="f-fu" value="Tue, 17 Nov 2026"></label>
+            <label class="check mt-1"><input type="checkbox" checked>Remind me 1 day before</label>
+          </div>
+          <div class="field"><label class="label">Collaborators</label>
+            <div class="collab">
+              <span class="pchip"><span class="avatar avatar-sm a2">RM</span>Rohan Mehta<button class="chip-remove" type="button" title="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <div class="popover-wrap rel">
+                <button class="pchip-add" type="button" data-popover="pop-collab"><svg class="i i-sm"><use href="#i-plus"/></svg>Add</button>
+                <div class="popover" id="pop-collab">
+                  <div class="menu" style="width:240px">
+                    <label class="input-group" style="margin:4px"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search team" style="height:32px"></label>
+                    <button class="menu-item" type="button"><span class="avatar avatar-xs a4">SI</span>Sneha Iyer<span class="menu-hint">RM</span></button>
+                    <button class="menu-item" type="button"><span class="avatar avatar-xs a3">AG</span>Aman Gupta<span class="menu-hint">Thane</span></button>
+                    <button class="menu-item" type="button"><span class="avatar avatar-xs a5">KM</span>Kavya Menon<span class="menu-hint">Sub-broker</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span class="help">They can view, comment and get updates</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title"><span class="sec-num">4</span>Notes &amp; files</div>
+        <div class="form-grid">
+          <div class="field span-2"><label class="label" for="f-msg">Message / notes</label><textarea class="textarea" id="f-msg" placeholder="Context for the team, e.g. what they asked for">Referred by Rahul Verma. Wants a ₹1 Cr term cover before her home loan is disbursed in Dec. Prefers calls after 6 pm.</textarea></div>
+          <div class="field span-2"><label class="label">Attachments</label>
+            <div class="dropzone"><span class="empty-icon"><svg class="i"><use href="#i-upload"/></svg></span><div><b style="color:var(--text)">Drop files here</b> or <a href="#">browse</a><div class="faint text-sm">PDF, JPG or PNG · up to 10 MB each</div></div></div>
+            <div class="file-row"><span class="file-ico pdf"><svg class="i i-sm"><use href="#i-file"/></svg></span><div style="flex:1;min-width:0"><div class="truncate fw-500">Existing_policy_summary.pdf</div><div class="faint text-sm">220 KB</div></div><div class="progress p-success"><span style="width:100%"></span></div><button class="btn btn-ghost btn-icon btn-sm" type="button" title="Remove"><svg class="i"><use href="#i-x"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="drawer-footer">
+      <span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to create</span>
+      <span class="spacer"></span>
+      <button class="btn btn-ghost" data-close-drawer>Cancel</button>
+      <button class="btn btn-secondary" id="btn-create-another">Create &amp; add another</button>
+      <button class="btn btn-primary" id="btn-create">Create lead</button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      function create(another) {
+        var name = document.getElementById('f-name').value || 'Lead';
+        AK.toast(name + ' created · assigned to Neha Kapoor');
+        if (another) { document.getElementById('f-name').value = ''; document.getElementById('f-name').focus(); }
+        else AK.closeDrawer('drawer-lead');
+      }
+      document.getElementById('btn-create').addEventListener('click', function () { create(false); });
+      document.getElementById('btn-create-another').addEventListener('click', function () { create(true); });
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && document.getElementById('drawer-lead').classList.contains('is-open')) { e.preventDefault(); create(false); }
+      });
+      // Product suggestions -> chips
+      document.querySelectorAll('#drawer-lead .suggest .choice').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var multi = document.querySelector('#drawer-lead .multi');
+          var chip = document.createElement('span'); chip.className = 'chip';
+          chip.innerHTML = b.textContent + '<button class="chip-remove" type="button" title="Remove">' + AK.icon('x', 'i-sm') + '</button>';
+          multi.insertBefore(chip, multi.querySelector('input')); b.remove();
+        });
+      });
+      document.addEventListener('click', function (e) {
+        var rm = e.target.closest('#drawer-lead .chip-remove');
+        if (rm) { var c = rm.closest('.chip, .pchip'); if (c) c.remove(); }
+        var st = e.target.closest('#pop-status .menu-item');
+        if (st) {
+          var btn = document.querySelector('[data-popover="pop-status"]');
+          btn.innerHTML = st.querySelector('.dot').outerHTML + st.textContent.trim();
+          document.querySelectorAll('#pop-status .check-mark').forEach(function (m) { m.remove(); });
+          st.insertAdjacentHTML('beforeend', AK.icon('check', 'check-mark'));
+          document.getElementById('pop-status').classList.remove('is-open');
+        }
+        var step = e.target.closest('.ld-step button');
+        if (step) AK.toast('Stage changed to ' + step.querySelector('.ld-step-txt').firstChild.textContent.trim());
+      });
+    })();
+  </script>
+</body>
+</html>

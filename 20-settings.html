@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---------- Settings layout ---------- */
+    .set-layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+    .set-nav { position: sticky; top: calc(var(--topbar-h) + var(--sp-6)); padding: var(--sp-2) var(--sp-2) var(--sp-3); }
+    .set-nav-group + .set-nav-group { margin-top: var(--sp-3); }
+    .set-nav-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); padding: var(--sp-2) 10px 6px; }
+    .set-nav a { display: flex; align-items: center; gap: 10px; height: 34px; padding: 0 10px; border-radius: var(--r-md); color: var(--text-2); font-weight: 500; font-size: 13.5px; text-decoration: none; white-space: nowrap; }
+    .set-nav a:hover { background: var(--surface-2); color: var(--text); }
+    .set-nav a.is-active { background: var(--primary-soft); color: var(--primary-text); font-weight: 600; }
+    .set-nav a .i { color: currentColor; }
+    .set-nav .meta { margin-left: auto; font-size: 12px; color: var(--text-3); font-weight: 500; display: inline-flex; align-items: center; gap: 5px; }
+    .set-nav a.is-active .meta { color: var(--primary-text); }
+    .set-nav-foot { margin: var(--sp-3) var(--sp-1) 0; padding: var(--sp-3) 10px 0; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+
+    .set-panel { display: none; min-width: 0; }
+    .set-panel.is-active { display: block; }
+    .set-head { display: flex; align-items: flex-start; gap: var(--sp-4); margin-bottom: var(--sp-4); flex-wrap: wrap; }
+    .set-head h2 { font-size: 18px; line-height: 26px; font-weight: 600; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
+    .set-head p { color: var(--text-2); margin-top: 2px; font-size: 13.5px; }
+    .set-head > div:first-child { flex: 1 1 360px; min-width: 0; }
+    .set-head .page-actions { margin-left: auto; }
+    .set-stack > * + * { margin-top: var(--sp-4); }
+    .card-sub { font-size: 12.5px; color: var(--text-3); font-weight: 400; margin-top: 1px; }
+
+    /* ---------- Org chart ---------- */
+    .org { padding: var(--sp-5) var(--sp-5) var(--sp-4); }
+    .org-root { display: flex; justify-content: center; position: relative; padding-bottom: 22px; }
+    .org-root::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 1px; height: 22px; background: var(--border-strong); }
+    .org-node { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); box-shadow: var(--shadow-sm); min-width: 0; }
+    .org-node.is-root { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+    .org-node b { font-weight: 600; font-size: 13.5px; display: block; line-height: 18px; }
+    .org-node small { font-size: 12px; color: var(--text-3); display: block; line-height: 16px; white-space: nowrap; }
+    .org-lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); position: relative; padding-top: 20px; align-items: start; }
+    .org-lanes::before { content: ""; position: absolute; top: 0; height: 1px; background: var(--border-strong); left: calc((100% - 32px) / 6); right: calc((100% - 32px) / 6); }
+    .org-lane { position: relative; min-width: 0; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2); padding: var(--sp-2); }
+    .org-lane::before { content: ""; position: absolute; top: -21px; left: 50%; width: 1px; height: 20px; background: var(--border-strong); }
+    .org-branch { display: flex; align-items: center; gap: 10px; padding: 8px 8px 10px; }
+    .org-branch .card-icon { width: 28px; height: 28px; }
+    .org-branch b { font-size: 13.5px; font-weight: 600; display: block; line-height: 18px; }
+    .org-branch small { font-size: 12px; color: var(--text-3); }
+    .ot, .ot ul { list-style: none; margin: 0; padding: 0; }
+    .ot { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 6px; }
+    .ot ul { margin-left: 11px; padding-left: 8px; border-left: 1px solid var(--border-strong); }
+    .ot ul > li { position: relative; }
+    .ot ul > li::before { content: ""; position: absolute; left: -8px; top: 17px; width: 6px; height: 1px; background: var(--border-strong); }
+    .ot-row { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 6px; border-radius: 6px; min-width: 0; }
+    .ot-row:hover { background: var(--surface-2); }
+    .ot-row .nm { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .ot-row .rl { margin-left: auto; padding-left: 6px; font-size: 11px; color: var(--text-3); white-space: nowrap; }
+    .ot-row .rl.text-danger { color: var(--danger); font-weight: 500; }
+    .ot-row.is-you .nm::after { content: " (you)"; color: var(--text-3); font-weight: 400; }
+    .ot-row.is-empty { border: 1px dashed var(--border-strong); color: var(--text-3); font-size: 12.5px; }
+    .ot-row.is-invited .nm { color: var(--text-3); }
+    .org-foot { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-5); border-top: 1px solid var(--border); font-size: 13px; color: var(--text-2); flex-wrap: wrap; }
+    .org-foot .solo { display: inline-flex; align-items: center; gap: 8px; }
+
+    .mini-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+    .mini-stats .stat { padding: 12px 14px; }
+    .mini-stats .stat-value { font-size: 22px; line-height: 28px; margin-top: 2px; }
+
+    .users td, .users th { padding: 0 10px; }
+    .users td:last-child { padding-right: 12px; width: 40px; }
+    .id-code { font-family: var(--mono); font-size: 12.5px; color: var(--text); }
+    .valid { font-size: 12px; line-height: 16px; display: inline-flex; align-items: center; gap: 4px; color: var(--text-3); }
+    .valid.ok::before, .valid.soon::before, .valid.bad::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .valid.ok { color: var(--success); } .valid.soon { color: var(--warning); } .valid.bad { color: var(--danger); }
+
+    /* ---------- Roles matrix ---------- */
+    .matrix th.role { text-align: center; }
+    .matrix td.c { text-align: center; }
+    .matrix .role-h { display: flex; flex-direction: column; align-items: center; gap: 2px; line-height: 16px; }
+    .matrix .role-h small { font-weight: 500; color: var(--text-3); font-size: 11.5px; }
+    .matrix .grp td { background: var(--surface-2); height: 34px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .matrix tbody tr.grp:hover td { background: var(--surface-2); }
+    .matrix .perm { font-weight: 500; }
+    .matrix .perm-sub { font-size: 12px; color: var(--text-3); line-height: 16px; }
+    .matrix .cell { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+    .matrix .cell small { font-size: 11px; color: var(--text-3); line-height: 14px; }
+    .matrix .check input:disabled { opacity: .55; cursor: not-allowed; }
+    .matrix .select { height: 30px; font-size: 12.5px; width: 122px; padding-left: 8px; padding-right: 24px; background-position: right 6px center; }
+    .matrix td:first-child { white-space: normal; min-width: 200px; }
+    .matrix td, .matrix th { padding: 0 8px; }
+    .matrix td { height: 54px; }
+    .scope-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+    .scope-card { border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; background: var(--surface); }
+    .scope-card b { font-size: 13.5px; display: flex; align-items: center; gap: 8px; }
+    .scope-card p { font-size: 12.5px; color: var(--text-2); margin-top: 4px; }
+
+    /* ---------- Config lists ---------- */
+    .cfg-row { display: flex; align-items: center; gap: 12px; padding: 10px var(--sp-5); border-bottom: 1px solid var(--border); min-height: 52px; }
+    .cfg-row:last-child { border-bottom: 0; }
+    .cfg-row .grip { color: var(--text-3); cursor: grab; }
+    .cfg-row .cfg-main { min-width: 0; flex: 1; }
+    .cfg-title { font-weight: 500; font-size: 13.5px; }
+    .cfg-sub { font-size: 12px; color: var(--text-3); line-height: 16px; margin-top: 1px; }
+    .field .segmented { align-self: flex-start; }
+    .cfg-row .cfg-right { margin-left: auto; display: flex; align-items: center; gap: 10px; color: var(--text-3); font-size: 12.5px; white-space: nowrap; }
+    .thr { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: var(--r-sm); height: 32px; background: var(--surface); overflow: hidden; }
+    .thr input { width: 52px; border: 0; background: transparent; text-align: right; padding: 0 6px; font-variant-numeric: tabular-nums; height: 100%; outline: none; }
+    .thr span { padding: 0 10px 0 4px; font-size: 12px; color: var(--text-3); }
+    .tag-x { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 10px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); font-size: 13px; font-weight: 500; color: var(--text); }
+    .tag-x button { width: 18px; height: 18px; border: 0; background: none; padding: 0; color: var(--text-3); display: grid; place-items: center; border-radius: 4px; }
+    .tag-x button:hover { background: var(--surface-3); color: var(--text); }
+    .tag-x .cnt { color: var(--text-3); font-weight: 500; font-size: 12px; }
+
+    /* ---------- Lead capture ---------- */
+    .lc-grid { display: grid; grid-template-columns: 284px minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+    .qr-tile { width: 196px; height: 196px; margin: 0 auto; border-radius: var(--r-lg); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .qr-tile svg { display: block; width: 100%; height: 100%; }
+    .qr-meta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin-top: var(--sp-4); }
+    .qr-meta div { border: 1px solid var(--border); border-radius: var(--r-md); padding: 8px 10px; }
+    .qr-meta b { display: block; font-size: 18px; line-height: 24px; font-variant-numeric: tabular-nums; }
+    .qr-meta span { font-size: 12px; color: var(--text-3); }
+    .step { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: 0; }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--primary-soft); color: var(--primary-text); font-size: 12px; font-weight: 600; display: grid; place-items: center; }
+    .step h3 { font-size: 14px; }
+    .step p { font-size: 12.5px; color: var(--text-2); margin-top: 2px; }
+    .file-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 8px 8px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); max-width: 520px; }
+    .file-row .card-icon { width: 30px; height: 30px; }
+    .file-row b { font-weight: 500; font-size: 13.5px; display: block; }
+    .file-row small { font-size: 12px; color: var(--text-3); }
+    .key-box { display: flex; align-items: center; gap: 8px; margin-top: 10px; max-width: 560px; }
+    .key-box .input { font-family: var(--mono); font-size: 13px; letter-spacing: .02em; background: var(--surface-2); }
+    .flow { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .flow-node { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); min-width: 0; flex: 1 1 140px; }
+    .flow-node b { font-size: 13px; font-weight: 600; display: block; line-height: 18px; white-space: nowrap; }
+    .flow-node small { font-size: 11.5px; color: var(--text-3); display: block; line-height: 15px; }
+    .flow-node .card-icon { width: 30px; height: 30px; }
+    .flow-arrow { color: var(--text-3); flex: none; }
+
+    /* ---------- Automations ---------- */
+    .rule { display: grid; grid-template-columns: auto minmax(0, 1fr) 136px; gap: var(--sp-4); align-items: start; padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border); }
+    .rule:last-child { border-bottom: 0; }
+    .rule .switch { margin-top: 2px; }
+    .rule-title { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .rule.is-off .rule-title, .rule.is-off .rchain { opacity: .6; }
+    .rchain { display: grid; grid-template-columns: minmax(0, 1fr) 14px minmax(0, .8fr) 14px minmax(0, 1.25fr); align-items: stretch; gap: 6px; margin-top: 8px; }
+    .rchain > .i { align-self: center; }
+    .rstep { display: flex; align-items: flex-start; gap: 8px; min-height: 32px; padding: 5px 10px 5px 5px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--surface); font-size: 12.5px; line-height: 18px; color: var(--text); min-width: 0; }
+    .rstep em { flex: none; margin-top: 1px; }
+    .rstep em { font-style: normal; font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
+    .rstep.when em { background: var(--primary-soft); color: var(--primary-text); }
+    .rstep.if em { background: var(--neutral-soft); color: var(--neutral); }
+    .rstep.then em { background: var(--success-soft); color: var(--success); }
+    .rchain > .i { color: var(--text-3); }
+    .rule-meta { text-align: right; font-size: 12px; color: var(--text-3); line-height: 18px; white-space: nowrap; }
+    .rule-meta b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .wrapcell { white-space: normal !important; min-width: 220px; line-height: 18px; }
+    .tpl-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; }
+
+    /* ---------- MF Box sync ---------- */
+    .sync-hero { display: flex; align-items: center; gap: var(--sp-4); padding: var(--sp-5); flex-wrap: wrap; }
+    .sync-logo { width: 44px; height: 44px; border-radius: var(--r-md); background: var(--primary); color: var(--on-primary); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+    .sync-kv { display: flex; gap: var(--sp-6); flex-wrap: wrap; }
+    .sync-kv div small { display: block; font-size: 12px; color: var(--text-3); }
+    .sync-kv div b { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .dir { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-2); }
+
+    /* ---------- Security ---------- */
+    .sec-row { display: flex; align-items: center; gap: var(--sp-4); padding: 14px var(--sp-5); border-bottom: 1px solid var(--border); }
+    .sec-row:last-child { border-bottom: 0; }
+    .sec-row .cfg-main { flex: 1; min-width: 0; }
+    .sec-row .select { width: 180px; }
+    .danger-card { border-color: var(--danger-soft); }
+    .danger-card .card-header { background: var(--danger-soft); border-bottom-color: var(--danger-soft); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .ks-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); margin-top: var(--sp-3); }
+    .ks-steps div { border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; font-size: 12.5px; color: var(--text-2); }
+    .ks-steps b { display: flex; align-items: center; gap: 6px; color: var(--text); font-size: 13px; margin-bottom: 2px; }
+
+    .logo-up { display: flex; align-items: center; gap: var(--sp-3); }
+    .logo-up .sb-logo { width: 48px; height: 48px; font-size: 16px; border-radius: 10px; }
+    .day-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .day-chips .choice { height: 30px; padding: 0 10px; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1280px) {
+      .set-layout { grid-template-columns: 212px minmax(0, 1fr); gap: var(--sp-4); }
+      .lc-grid { grid-template-columns: 264px minmax(0, 1fr); }
+      .org { padding: var(--sp-4); }
+      .ot-row .rl { display: none; }
+      .rule { grid-template-columns: auto minmax(0, 1fr); row-gap: 6px; }
+      .rule-meta { grid-column: 2; text-align: left; display: flex; gap: 12px; }
+      .hide-1280 { display: none; }
+      .ks-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 1024px) {
+      .set-layout { grid-template-columns: 1fr; }
+      .set-nav { position: static; display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-2); }
+      .set-nav-group { display: flex; gap: 2px; margin: 0 !important; }
+      .set-nav-label, .set-nav-foot, .set-nav .meta { display: none; }
+      .set-nav a { white-space: nowrap; }
+      .lc-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .rchain { grid-template-columns: 1fr; } .rchain > .i { display: none; }
+      .org-lanes { grid-template-columns: 1fr; }
+      .org-lanes::before, .org-lane::before, .org-root::after { display: none; }
+      .org-root { padding-bottom: var(--sp-3); }
+      .mini-stats, .scope-cards, .ks-steps { grid-template-columns: 1fr 1fr; }
+      .rule { grid-template-columns: auto minmax(0, 1fr); }
+      .rule-meta { grid-column: 2; text-align: left; }
+      .sec-row { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body data-page="settings" data-crumb="Settings|Team &amp; hierarchy">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Settings</h1>
+            <p class="page-sub">Sharma Wealth Partners · ARN-104512 · every change is written to the audit trail</p>
+          </div>
+          <div class="page-actions">
+            <span class="badge badge-dot badge-success">Synced from MF Box · 10:42</span>
+            <button class="btn btn-secondary" onclick="AK.toast('Audit log: 1,206 events in the last 30 days', {icon:'shield', undo:false})"><svg class="i"><use href="#i-shield"/></svg>Audit log</button>
+          </div>
+        </div>
+
+        <div class="set-layout">
+          <!-- ============ Settings nav ============ -->
+          <nav class="card set-nav" aria-label="Settings sections">
+            <div class="set-nav-group">
+              <div class="set-nav-label">Organisation</div>
+              <a href="#org" data-key="org"><svg class="i"><use href="#i-building"/></svg>Firm profile<span class="meta">3 branches</span></a>
+            </div>
+            <div class="set-nav-group">
+              <div class="set-nav-label">People</div>
+              <a href="#team" data-key="team"><svg class="i"><use href="#i-users"/></svg>Team &amp; hierarchy<span class="meta">14</span></a>
+              <a href="#roles" data-key="roles"><svg class="i"><use href="#i-key"/></svg>Roles &amp; permissions<span class="meta">5</span></a>
+            </div>
+            <div class="set-nav-group">
+              <div class="set-nav-label">Modules</div>
+              <a href="#config" data-key="config"><svg class="i"><use href="#i-sliders"/></svg>Module configurations</a>
+              <a href="#automations" data-key="automations"><svg class="i"><use href="#i-workflow"/></svg>Automations<span class="meta">6 on</span></a>
+            </div>
+            <div class="set-nav-group">
+              <div class="set-nav-label">Integrations</div>
+              <a href="#mfbox" data-key="mfbox"><svg class="i"><use href="#i-repeat"/></svg>MF Box sync<span class="meta"><span class="dot dot-success"></span>10:42</span></a>
+              <a href="#lead-capture" data-key="lead-capture"><svg class="i"><use href="#i-qr"/></svg>Lead capture</a>
+              <a href="15-inbox-whatsapp.html" title="WhatsApp Business connected · +91 22•• ••4410"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp Business<span class="meta"><span class="dot dot-success"></span>On</span></a>
+              <a href="#" data-soon="Email inbox is planned for a later phase"><svg class="i"><use href="#i-mail"/></svg>Email inbox<span class="meta">Later</span></a>
+            </div>
+            <div class="set-nav-group">
+              <div class="set-nav-label">Security</div>
+              <a href="#security" data-key="security"><svg class="i"><use href="#i-shield"/></svg>Security &amp; access<span class="meta" title="Owner only"><svg class="i i-sm"><use href="#i-lock"/></svg></span></a>
+            </div>
+            <div class="set-nav-foot"><svg class="i i-sm"><use href="#i-info"/></svg>Branch managers can edit their own branch only.</div>
+          </nav>
+
+          <div class="set-panels">
+
+            <!-- ============ 1. Team & hierarchy ============ -->
+            <section class="set-panel" data-panel="team" aria-label="Team and hierarchy">
+              <div class="set-head">
+                <div>
+                  <h2>Team &amp; hierarchy</h2>
+                  <p>Who reports to whom. This drives every “My Team” tab, approvals and escalations.</p>
+                </div>
+                <div class="page-actions">
+                  <button class="btn btn-secondary"><svg class="i"><use href="#i-download"/></svg>Export</button>
+                  <button class="btn btn-primary" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-user-plus"/></svg>Invite user</button>
+                </div>
+              </div>
+
+              <div class="set-stack">
+                <div class="banner banner-info">
+                  <svg class="i"><use href="#i-repeat"/></svg>
+                  <span><b>Imported from MF Box: 14 users</b> · 3 branches and reporting lines · last synced today 10:42</span>
+                  <div class="banner-actions"><button class="btn btn-sm btn-secondary" data-act="resync"><svg class="i"><use href="#i-refresh"/></svg>Re-sync</button></div>
+                </div>
+
+                <div class="mini-stats">
+                  <div class="stat stat-info"><div class="stat-label">Active users</div><div class="stat-value">14</div><div class="stat-meta">+1 invited · Nikhil Sawant</div></div>
+                  <div class="stat"><div class="stat-label">Branches</div><div class="stat-value">3</div><div class="stat-meta">Andheri · Thane · Pune</div></div>
+                  <div class="stat"><div class="stat-label">Sub-brokers</div><div class="stat-value">4</div><div class="stat-meta">See own clients only</div></div>
+                  <div class="stat stat-warning"><div class="stat-label"><svg class="i i-sm"><use href="#i-alert"/></svg>ARN / EUIN alerts</div><div class="stat-value">2</div><div class="stat-meta">1 ARN lapsed · 1 renewal due</div></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <div><div class="card-title">Organisation chart</div><div class="card-sub hide-1280">Drag a person onto a manager to change who they report to</div></div>
+                    <div class="card-actions">
+                      <label class="text-sm muted" for="depth" style="margin-right:4px">My Team depth</label>
+                      <select class="select" id="depth" style="width:132px;height:32px;font-size:13px"><option>1 level down</option><option>2 levels down</option><option>Whole branch</option></select>
+                      <div class="segmented" data-segmented style="margin-left:6px"><button aria-pressed="true"><svg class="i i-sm"><use href="#i-workflow"/></svg>Chart</button><button aria-pressed="false"><svg class="i i-sm"><use href="#i-list"/></svg>List</button></div>
+                    </div>
+                  </div>
+                  <div class="org">
+                    <div class="org-root">
+                      <div class="org-node is-root">
+                        <span class="avatar">RS</span>
+                        <div><b>Rajesh Sharma</b><small>Owner · Principal · ARN-104512</small></div>
+                        <span class="badge badge-info" style="margin-left:8px">Sees all branches</span>
+                      </div>
+                    </div>
+                    <div class="org-lanes">
+                      <div class="org-lane">
+                        <div class="org-branch"><span class="card-icon"><svg class="i"><use href="#i-building"/></svg></span><div><b>Andheri · Mumbai</b><small>8 people · ₹218 Cr AUM</small></div></div>
+                        <ul class="ot">
+                          <li><div class="ot-row is-you"><span class="avatar avatar-sm">NK</span><span class="nm">Neha Kapoor</span><span class="rl">Branch Mgr</span></div>
+                            <ul>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a2">RM</span><span class="nm">Rohan Mehta</span><span class="rl">RM</span></div>
+                                <ul>
+                                  <li><div class="ot-row"><span class="avatar avatar-sm a4">KM</span><span class="nm">Kavya Menon</span><span class="rl">Sub-broker</span></div></li>
+                                  <li><div class="ot-row"><span class="avatar avatar-sm a4">IS</span><span class="nm">Imran Sheikh</span><span class="rl text-danger">ARN lapsed</span></div></li>
+                                </ul>
+                              </li>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a2">SI</span><span class="nm">Sneha Iyer</span><span class="rl">RM</span></div>
+                                <ul>
+                                  <li><div class="ot-row"><span class="avatar avatar-sm a4">RP</span><span class="nm">Ravi Pillai</span><span class="rl">Sub-broker</span></div></li>
+                                </ul>
+                              </li>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a5">PN</span><span class="nm">Priya Nair</span><span class="rl">Ops</span></div></li>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a5">AD</span><span class="nm">Arjun Desai</span><span class="rl">Service desk</span></div></li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </div>
+                      <div class="org-lane">
+                        <div class="org-branch"><span class="card-icon"><svg class="i"><use href="#i-building"/></svg></span><div><b>Thane</b><small>1 person + 1 invited · ₹74 Cr AUM</small></div></div>
+                        <ul class="ot">
+                          <li><div class="ot-row is-empty"><svg class="i i-sm"><use href="#i-info"/></svg>No branch manager yet</div>
+                            <ul>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a2">AG</span><span class="nm">Aman Gupta</span><span class="rl">RM</span></div></li>
+                              <li><div class="ot-row is-invited"><span class="avatar avatar-sm a5">NS</span><span class="nm">Nikhil Sawant</span><span class="rl"><span class="badge badge-info" style="height:18px;font-size:11px">Invited</span></span></div></li>
+                            </ul>
+                          </li>
+                        </ul>
+                        <button class="kadd" style="width:100%;margin-top:8px" data-open-drawer="drawer-invite"><svg class="i i-sm"><use href="#i-plus"/></svg>Assign branch manager</button>
+                      </div>
+                      <div class="org-lane">
+                        <div class="org-branch"><span class="card-icon"><svg class="i"><use href="#i-building"/></svg></span><div><b>Pune</b><small>4 people · ₹120 Cr AUM</small></div></div>
+                        <ul class="ot">
+                          <li><div class="ot-row"><span class="avatar avatar-sm a3">VR</span><span class="nm">Vikram Rao</span><span class="rl">Branch Mgr</span></div>
+                            <ul>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a2">TD</span><span class="nm">Tanvi Deshpande</span><span class="rl">RM</span></div>
+                                <ul>
+                                  <li><div class="ot-row"><span class="avatar avatar-sm a4">GB</span><span class="nm">Gaurav Bhatt</span><span class="rl">Sub-broker</span></div></li>
+                                </ul>
+                              </li>
+                              <li><div class="ot-row"><span class="avatar avatar-sm a5">PR</span><span class="nm">Pallavi Rane</span><span class="rl">Ops</span></div></li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="org-foot">
+                    <span class="solo"><svg class="i"><use href="#i-user"/></svg><b class="fw-600" style="color:var(--text)">Solo MFD?</b> Skip branches: with one user the CRM hides teams, approvals and hierarchy.</span>
+                    <label class="row gap-2 ml-auto text-md"><span class="switch"><input type="checkbox" checked data-toast="Branches turned"><span></span></span>Use branches</label>
+                  </div>
+                </div>
+
+                <div class="table-card">
+                  <div class="card-header">
+                    <div class="card-title">Users <span class="badge">15</span></div>
+                    <div class="card-actions">
+                      <label class="input-group" style="width:220px"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search name, EUIN, ARN" style="height:32px"></label>
+                      <div class="segmented" data-segmented><button aria-pressed="true">All</button><button aria-pressed="false">Andheri</button><button aria-pressed="false">Thane</button><button aria-pressed="false">Pune</button></div>
+                    </div>
+                  </div>
+                  <div class="table-wrap">
+                    <table class="table users">
+                      <thead><tr>
+                        <th><span class="th-sort">Name</span></th><th>Role</th><th>Branch</th><th>Reports to</th><th>ARN / EUIN</th><th><span class="th-sort">Last active</span></th><th>Status</th><th></th>
+                      </tr></thead>
+                      <tbody>
+                        <tr><td><span class="person"><span class="avatar avatar-sm">RS</span><span class="cell-title">Rajesh Sharma</span></span></td><td>Owner</td><td>All</td><td class="faint">—</td><td><div class="id-code">E061284</div><span class="valid ok">Valid till Aug 2028</span></td><td>Yesterday</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr class="is-selected"><td><span class="person"><span class="avatar avatar-sm">NK</span><span class="cell-title">Neha Kapoor <span class="faint fw-500">(you)</span></span></span></td><td>Branch Mgr</td><td>Andheri</td><td>Rajesh Sharma</td><td><div class="id-code">E203117</div><span class="valid ok">Valid till Nov 2028</span></td><td>Now</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a2">RM</span><span class="cell-title">Rohan Mehta</span></span></td><td>RM</td><td>Andheri</td><td>Neha Kapoor</td><td><div class="id-code">E287431</div><span class="valid soon">Renew by Mar 2027</span></td><td>12 min ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a2">SI</span><span class="cell-title">Sneha Iyer</span></span></td><td>RM</td><td>Andheri</td><td>Neha Kapoor</td><td><div class="id-code">E311908</div><span class="valid ok">Valid till Jun 2029</span></td><td>1 h ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a5">PN</span><span class="cell-title">Priya Nair</span></span></td><td>Ops</td><td>Andheri</td><td>Neha Kapoor</td><td><span class="faint text-sm">Not required</span></td><td>25 min ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a5">AD</span><span class="cell-title">Arjun Desai</span></span></td><td>Service Desk</td><td>Andheri</td><td>Neha Kapoor</td><td><span class="faint text-sm">Not required</span></td><td>Yesterday</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a4">KM</span><span class="cell-title">Kavya Menon</span></span></td><td>Sub-broker</td><td>Andheri</td><td>Rohan Mehta</td><td><div class="id-code">ARN-218744</div><span class="valid ok">Valid till Feb 2028</span></td><td>2 days ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a4">IS</span><span class="cell-title">Imran Sheikh</span></span></td><td>Sub-broker</td><td>Andheri</td><td>Rohan Mehta</td><td><div class="id-code">ARN-187650</div><span class="valid bad">ARN lapsed 02 Nov 2026</span></td><td>Today 11:40</td><td><span class="badge badge-dot badge-warning" title="ARN lapsed: restricted from new MF transactions, can still log activity">Restricted</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td colspan="8" style="background:var(--warning-soft);color:var(--text-2);font-size:12.5px;padding-top:6px;padding-bottom:6px"><svg class="i i-sm" style="color:var(--warning);vertical-align:-2px;margin-right:6px"><use href="#i-alert"/></svg><b style="color:var(--text)">Imran Sheikh</b> · ARN lapsed: restricted from new MF transactions, can still log activity. Renewal reminder sent to the Owner.</td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a4">RP</span><span class="cell-title">Ravi Pillai</span></span></td><td>Sub-broker</td><td>Andheri</td><td>Sneha Iyer</td><td><div class="id-code">ARN-224019</div><span class="valid ok">Valid till Dec 2028</span></td><td>Today 08:15</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a2">AG</span><span class="cell-title">Aman Gupta</span></span></td><td>RM</td><td>Thane</td><td>Rajesh Sharma</td><td><div class="id-code">E296552</div><span class="valid ok">Valid till Sep 2027</span></td><td>Today 09:52</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a5">NS</span><span class="cell-title">Nikhil Sawant</span></span></td><td>RM</td><td>Thane</td><td>Aman Gupta</td><td><div class="id-code">E320991</div><span class="valid">EUIN check pending</span></td><td class="faint">Invited 12 Nov</td><td><span class="badge badge-dot badge-info">Invited</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Resend invite" data-toast-msg="Invite re-sent to Nikhil Sawant"><svg class="i"><use href="#i-send"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a3">VR</span><span class="cell-title">Vikram Rao</span></span></td><td>Branch Mgr</td><td>Pune</td><td>Rajesh Sharma</td><td><div class="id-code">E254870</div><span class="valid ok">Valid till Jan 2028</span></td><td>38 min ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a2">TD</span><span class="cell-title">Tanvi Deshpande</span></span></td><td>RM</td><td>Pune</td><td>Vikram Rao</td><td><div class="id-code">E318226</div><span class="valid ok">Valid till Jul 2029</span></td><td>3 h ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a4">GB</span><span class="cell-title">Gaurav Bhatt</span></span></td><td>Sub-broker</td><td>Pune</td><td>Tanvi Deshpande</td><td><div class="id-code">ARN-230415</div><span class="valid ok">Valid till May 2029</span></td><td>4 days ago</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                        <tr><td><span class="person"><span class="avatar avatar-sm a5">PR</span><span class="cell-title">Pallavi Rane</span></span></td><td>Ops</td><td>Pune</td><td>Vikram Rao</td><td><span class="faint text-sm">Not required</span></td><td>Today 10:05</td><td><span class="badge badge-dot badge-success">Active</span></td><td><button class="btn btn-ghost btn-icon btn-sm" title="Edit user" data-open-drawer="drawer-invite"><svg class="i"><use href="#i-more-h"/></svg></button></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="pagination"><span>15 users · 14 from MF Box · 1 invited</span>
+                    <span class="ml-auto row gap-2"><svg class="i i-sm"><use href="#i-info"/></svg>EUIN lasts 3 years; renewal opens 6 months early. Lapses go to the Owner.</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 2. Roles & permissions ============ -->
+            <section class="set-panel" data-panel="roles" aria-label="Roles and permissions">
+              <div class="set-head">
+                <div>
+                  <h2>Roles &amp; permissions</h2>
+                  <p>What each role can see and do. Record access is checked first, then PAN/AUM masking.</p>
+                </div>
+                <div class="page-actions">
+                  <button class="btn btn-secondary"><svg class="i"><use href="#i-plus"/></svg>Custom role</button>
+                  <button class="btn btn-primary" data-toast-msg="Permissions saved · applies at next sign-in">Save changes</button>
+                </div>
+              </div>
+              <div class="set-stack">
+                <div class="scope-cards">
+                  <div class="scope-card"><b><span class="badge badge-info">My</span>Owner</b><p>Records the person owns. Everyone has this tab.</p></div>
+                  <div class="scope-card"><b><span class="badge badge-neutral">Collaborations</span>Shared</b><p>Records someone shared with them, one at a time.</p></div>
+                  <div class="scope-card"><b><span class="badge badge-ai">My Team</span>Hierarchy</b><p>Records of people below them, up to the depth set per role.</p></div>
+                </div>
+                <div class="table-card">
+                  <div class="table-wrap">
+                    <table class="table matrix">
+                      <thead><tr>
+                        <th>Permission</th>
+                        <th class="role"><div class="role-h">Owner<small>1 user</small></div></th>
+                        <th class="role"><div class="role-h">Branch manager<small>2 users</small></div></th>
+                        <th class="role"><div class="role-h">RM<small>5 users</small></div></th>
+                        <th class="role"><div class="role-h">Sub-broker<small>4 users</small></div></th>
+                        <th class="role"><div class="role-h">Ops<small>3 users</small></div></th>
+                      </tr></thead>
+                      <tbody>
+                        <tr class="grp"><td colspan="6">Visibility</td></tr>
+                        <tr><td><div class="perm">Record scope</div><div class="perm-sub">Default reach before any sharing</div></td>
+                          <td class="c"><span class="tag"><svg class="i i-sm"><use href="#i-lock"/></svg>All branches</span></td>
+                          <td class="c"><span class="cell"><select class="select"><option>Own branch</option><option>All branches</option></select><small>+ firm totals</small></span></td>
+                          <td class="c"><select class="select"><option>Own + shared</option><option>Own branch</option></select></td>
+                          <td class="c"><select class="select"><option>Own only</option><option>Own + shared</option></select></td>
+                          <td class="c"><select class="select"><option>Assigned work</option><option>Own branch</option></select></td></tr>
+                        <tr><td><div class="perm">View team data</div><div class="perm-sub">“My Team” tab on every module</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>1 level</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr><td><div class="perm">See full PAN</div><div class="perm-sub">Otherwise masked as ABCPV••••K</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>own clients</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr><td><div class="perm">See exact AUM</div><div class="perm-sub">Otherwise a band, e.g. ₹25 L–1 Cr</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked></label></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox"></label><small>banded</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr><td><div class="perm">See commissions</div><div class="perm-sub">Brokerage and trail from MF Box MIS</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>firm totals · per person own branch</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>own payout</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr class="grp"><td colspan="6">Actions</td></tr>
+                        <tr><td><div class="perm">Export</div><div class="perm-sub">CSV/Excel; watermarked and logged</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>needs approval</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr><td><div class="perm">Delete</div><div class="perm-sub">Soft delete; restorable for 30 days</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr><td><div class="perm">Reassign</div><div class="perm-sub">Move clients, leads and tasks to another person</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>own branch</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>tasks only</small></span></td></tr>
+                        <tr><td><div class="perm">View as another user</div><div class="perm-sub">Read-only and logged</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                        <tr><td><div class="perm">Change settings</div><div class="perm-sub">Stages, categories, automations</div></td>
+                          <td class="c"><label class="check"><input type="checkbox" checked disabled></label></td>
+                          <td class="c"><span class="cell"><label class="check"><input type="checkbox" checked></label><small>branch only</small></span></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td>
+                          <td class="c"><label class="check"><input type="checkbox"></label></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="pagination"><svg class="i i-sm"><use href="#i-lock"/></svg>Owner permissions are fixed. Changes apply at each user’s next sign-in and are logged.</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 3. Module configurations ============ -->
+            <section class="set-panel" data-panel="config" aria-label="Module configurations">
+              <div class="set-head">
+                <div>
+                  <h2>Module configurations</h2>
+                  <p>Stages, products, categories and rules used across Leads, Tasks, Meetings and Opportunities.</p>
+                </div>
+                <div class="page-actions"><button class="btn btn-primary" data-toast-msg="Configuration saved">Save changes</button></div>
+              </div>
+              <div class="tabs" data-tabs="cfg">
+                <button class="tab is-active" data-tab="c-leads"><svg class="i"><use href="#i-user-plus"/></svg>Leads</button>
+                <button class="tab" data-tab="c-tasks"><svg class="i"><use href="#i-check-square"/></svg>Tasks <span class="count">7</span></button>
+                <button class="tab" data-tab="c-meet"><svg class="i"><use href="#i-video"/></svg>Meetings</button>
+                <button class="tab" data-tab="c-opps"><svg class="i"><use href="#i-sparkles"/></svg>Opportunity AI rules</button>
+              </div>
+
+              <div data-tab-panel="c-leads" data-tab-scope="cfg" class="is-active">
+                <div class="grid-2" style="align-items:start">
+                  <div class="card">
+                    <div class="card-header"><div><div class="card-title">Lead stages</div><div class="card-sub">Drag to reorder · shown as Kanban columns</div></div><div class="card-actions"><a class="btn btn-ghost btn-sm" href="06-leads-pipeline.html">Open pipeline<svg class="i i-sm"><use href="#i-arrow-right"/></svg></a></div></div>
+                    <div>
+                      <div class="cfg-row"><svg class="i grip"><use href="#i-grip"/></svg><span class="badge badge-dot badge-info">New</span><span class="cfg-right">18 leads<button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-edit"/></svg></button></span></div>
+                      <div class="cfg-row"><svg class="i grip"><use href="#i-grip"/></svg><span class="badge badge-dot badge-neutral">Contacted</span><span class="cfg-right">24 leads<button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-edit"/></svg></button></span></div>
+                      <div class="cfg-row"><svg class="i grip"><use href="#i-grip"/></svg><span class="badge badge-dot badge-warning">Follow-up</span><span class="cfg-right">31 leads<button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-edit"/></svg></button></span></div>
+                      <div class="cfg-row"><svg class="i grip"><use href="#i-grip"/></svg><span class="badge badge-dot badge-danger">Hot lead</span><span class="cfg-right">9 leads<button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-edit"/></svg></button></span></div>
+                      <div class="cfg-row"><svg class="i grip"><use href="#i-grip"/></svg><span class="badge badge-dot badge-success">Completed</span><span class="cfg-right">Final · won<button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-edit"/></svg></button></span></div>
+                      <div class="cfg-row"><svg class="i grip"><use href="#i-grip"/></svg><span class="badge badge-dot badge-neutral">Lost</span><span class="cfg-right">Final · asks for a reason<button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-edit"/></svg></button></span></div>
+                      <div class="cfg-row"><button class="kadd" style="width:100%"><svg class="i i-sm"><use href="#i-plus"/></svg>Add stage</button></div>
+                    </div>
+                  </div>
+                  <div class="set-stack">
+                    <div class="card">
+                      <div class="card-header"><div><div class="card-title">Products (“Interested in”)</div><div class="card-sub">Shown on the lead form and lead filters</div></div></div>
+                      <div class="card-body">
+                        <div class="row wrap gap-2">
+                          <span class="tag-x">MF-SIP <span class="cnt">42</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">MF-Lumpsum <span class="cnt">11</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">Health Insurance <span class="cnt">9</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">Term Insurance <span class="cnt">8</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">ITR e-filing <span class="cnt">6</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">NPS <span class="cnt">3</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">Fixed Deposit <span class="cnt">2</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                          <span class="tag-x">PMS <span class="cnt">1</span><button aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+                        </div>
+                        <div class="row gap-2 mt-4"><input class="input" placeholder="Add a product, e.g. Bonds" style="height:32px"><button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-plus"/></svg>Add</button></div>
+                      </div>
+                    </div>
+                    <div class="card">
+                      <div class="card-header"><div class="card-title">Lead defaults</div></div>
+                      <div class="card-body">
+                        <div class="form-grid">
+                          <div class="field"><label class="label">Follow-up reminder</label><select class="select"><option>1 day before</option><option>2 hours before</option></select></div>
+                          <div class="field"><label class="label">Nature</label><select class="select"><option>Hot · Warm · Cold</option></select></div>
+                          <div class="field span-2"><label class="label">Stale lead alert</label><select class="select"><option>No activity for 7 days → notify branch manager</option></select></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div data-tab-panel="c-tasks" data-tab-scope="cfg">
+                <div class="table-card">
+                  <div class="card-header"><div><div class="card-title">Task categories</div><div class="card-sub">The purpose of a task. Each category sets a default due time and owner role.</div></div><div class="card-actions"><button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-plus"/></svg>Add category</button></div></div>
+                  <div class="table-wrap"><table class="table">
+                    <thead><tr><th>Category</th><th>Default owner</th><th>Default due</th><th>Checklist</th><th class="num">Used (30 days)</th><th>Active</th></tr></thead>
+                    <tbody>
+                      <tr><td class="cell-title">Proposal: Investment Proposal</td><td>Primary RM</td><td>3 business days</td><td class="faint">—</td><td class="num">46</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td class="cell-title">Transaction Proposal: SIP / Redemption</td><td>Primary RM</td><td>1 business day</td><td>3 items</td><td class="num">71</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td class="cell-title">KYC update</td><td>Ops</td><td>2 business days</td><td>4 items</td><td class="num">28</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td class="cell-title">Nomination update</td><td>Ops</td><td>5 business days</td><td>2 items</td><td class="num">19</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td class="cell-title">Portfolio review</td><td>Primary RM</td><td>Per client tier</td><td>Review pack</td><td class="num">33</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td class="cell-title">Bank mandate</td><td>Ops</td><td>2 business days</td><td>3 items</td><td class="num">12</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td class="cell-title">Complaint follow-up</td><td>Service Desk</td><td>1 business day</td><td>SLA 21 days</td><td class="num">4</td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                    </tbody>
+                  </table></div>
+                </div>
+              </div>
+
+              <div data-tab-panel="c-meet" data-tab-scope="cfg">
+                <div class="card">
+                  <div class="card-header"><div><div class="card-title">Meeting types</div><div class="card-sub">Clients, team members or any outside company (AMC, insurer, vendor)</div></div><div class="card-actions"><button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-plus"/></svg>Add type</button></div></div>
+                  <div class="cfg-row"><span class="card-icon"><svg class="i"><use href="#i-pie"/></svg></span><div class="cfg-main"><div class="cfg-title">Portfolio review</div><div class="cfg-sub">Automatic review reminders to investors: Tier A every 3 months, Tier B every 6, Tier C yearly</div></div><span class="cfg-right">45 min<label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="cfg-row"><span class="card-icon"><svg class="i"><use href="#i-user"/></svg></span><div class="cfg-main"><div class="cfg-title">Client meeting</div><div class="cfg-sub">New investment, onboarding, family meeting</div></div><span class="cfg-right">30 min<label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="cfg-row"><span class="card-icon"><svg class="i"><use href="#i-users"/></svg></span><div class="cfg-main"><div class="cfg-title">Internal team meeting</div><div class="cfg-sub">Stand-ups and branch reviews; not visible to clients</div></div><span class="cfg-right">15 min<label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="cfg-row"><span class="card-icon"><svg class="i"><use href="#i-building"/></svg></span><div class="cfg-main"><div class="cfg-title">AMC / company meeting</div><div class="cfg-sub">Meetings with AMCs, insurers and vendors</div></div><span class="cfg-right">60 min<label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="cfg-row"><span class="card-icon"><svg class="i"><use href="#i-note"/></svg></span><div class="cfg-main"><div class="cfg-title">Ask for the outcome</div><div class="cfg-sub">Prompt the organiser to log the outcome 15 minutes after a meeting ends</div></div><span class="cfg-right"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                </div>
+              </div>
+
+              <div data-tab-panel="c-opps" data-tab-scope="cfg">
+                <div class="card">
+                  <div class="card-header"><span class="card-icon ci-ai"><svg class="i"><use href="#i-sparkles"/></svg></span><div><div class="card-title">AI-generated opportunities</div><div class="card-sub">Rules read MF Box data each night. AI writes the “why”; an RM decides.</div></div></div>
+                  <div class="cfg-row"><div class="cfg-main"><div class="cfg-title">Inactive client</div><div class="cfg-sub">No transaction or contact for this long · 14 created in the last 30 days</div></div><span class="thr"><input value="180"><span>days</span></span><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                  <div class="cfg-row"><div class="cfg-main"><div class="cfg-title">Insurance renewal</div><div class="cfg-sub">Life and general policies due for renewal · 9 created</div></div><span class="thr"><input value="30"><span>days before</span></span><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                  <div class="cfg-row"><div class="cfg-main"><div class="cfg-title">FD maturity</div><div class="cfg-sub">Reinvestment nudge before a client’s FD matures · 5 created</div></div><span class="thr"><input value="15"><span>days before</span></span><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                  <div class="cfg-row"><div class="cfg-main"><div class="cfg-title">SIP maturity</div><div class="cfg-sub">Nudge to start a new SIP before the current one ends · 7 created</div></div><span class="thr"><input value="1"><span>month</span></span><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                  <div class="cfg-row"><div class="cfg-main"><div class="cfg-title">SIP stopped or bounced <span class="badge badge-ai" style="margin-left:6px"><svg class="i"><use href="#i-sparkles"/></svg>New</span></div><div class="cfg-sub">Win-back opportunity after a cancelled or failed SIP · not in Investwell</div></div><span class="thr"><input value="1"><span>bounce</span></span><label class="switch"><input type="checkbox"><span></span></label></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 4. Lead capture ============ -->
+            <section class="set-panel" data-panel="lead-capture" aria-label="Lead capture">
+              <div class="set-head">
+                <div>
+                  <h2>Lead capture</h2>
+                  <p>Collect leads from a QR code and from your website straight into <b>New Leads</b>, with source tagged.</p>
+                </div>
+                <div class="page-actions"><a class="btn btn-secondary" href="04-leads-list.html"><svg class="i"><use href="#i-external"/></svg>View captured leads</a></div>
+              </div>
+              <div class="lc-grid">
+                <div class="card">
+                  <div class="card-header"><span class="card-icon"><svg class="i"><use href="#i-qr"/></svg></span><div><div class="card-title">Lead collection QR code</div><div class="card-sub">Opens your “Contact us” form</div></div></div>
+                  <div class="card-body">
+                    <div class="qr-tile" id="qr"></div>
+                    <div class="text-sm faint" style="text-align:center;margin-top:10px">sharmawealth.in/contact?src=qr</div>
+                    <div class="row gap-2 mt-4">
+                      <button class="btn btn-primary" style="flex:1" data-toast-msg="QR code downloaded (PNG, 1024 px)"><svg class="i"><use href="#i-download"/></svg>Download</button>
+                      <button class="btn btn-secondary" style="flex:1" data-toast-msg="Print poster (A5) downloaded"><svg class="i"><use href="#i-file"/></svg>A5 poster</button>
+                    </div>
+                    <div class="qr-meta">
+                      <div><b>126</b><span>Scans · 30 days</span></div>
+                      <div><b>23</b><span>Leads created</span></div>
+                    </div>
+                    <div class="field mt-4"><label class="label">Assign QR leads to</label><select class="select"><option>Round robin · Andheri RMs</option><option>Branch manager</option><option>Owner</option></select></div>
+                  </div>
+                  <div class="card-footer" style="flex-direction:column;align-items:stretch;gap:10px">
+                    <div class="form-section-title" style="margin:4px 0 0">Form fields</div>
+                    <div class="row wrap gap-2">
+                      <span class="tag"><svg class="i i-sm"><use href="#i-lock"/></svg>Name</span><span class="tag"><svg class="i i-sm"><use href="#i-lock"/></svg>Mobile</span><span class="tag">Email</span><span class="tag">Interested in</span><span class="tag">City</span><button class="chip chip-ghost"><svg class="i i-sm"><use href="#i-plus"/></svg>Field</button>
+                    </div>
+                    <label class="check"><input type="checkbox" checked>Show consent text (DPDP) and record it with the lead</label>
+                  </div>
+                </div>
+
+                <div class="set-stack">
+                  <div class="card">
+                    <div class="card-header"><span class="card-icon"><svg class="i"><use href="#i-globe"/></svg></span><div><div class="card-title">Website integration</div><div class="card-sub">Leads from your site’s contact form</div></div><div class="card-actions"><span class="badge badge-dot badge-success">Connected · sharmawealth.in</span></div></div>
+                    <div class="step">
+                      <span class="step-num">1</span>
+                      <div><h3>Share the developer guide</h3><p>Give this document to whoever built your website.</p>
+                        <div class="file-row"><span class="card-icon"><svg class="i"><use href="#i-file"/></svg></span><div style="min-width:0;flex:1"><b>Developer instructions for website integration.pdf</b><small>6 pages · form fields, API endpoint, sample code</small></div><button class="btn btn-secondary btn-sm" data-toast-msg="Developer guide downloaded"><svg class="i"><use href="#i-download"/></svg>Download</button></div>
+                      </div>
+                    </div>
+                    <div class="step">
+                      <span class="step-num">2</span>
+                      <div><h3>Share the secure key</h3><p>Shown only once. Regenerating creates a new key and switches off the old one.</p>
+                        <div class="key-box">
+                          <input class="input" id="seckey" value="ak_live_sw_••••••••••••••••7Q2f" readonly aria-label="Secure key (masked)">
+                          <button class="btn btn-secondary" data-act="copykey"><svg class="i"><use href="#i-copy"/></svg>Copy</button>
+                          <button class="btn btn-ghost" data-act="regen"><svg class="i"><use href="#i-refresh"/></svg>Regenerate</button>
+                        </div>
+                        <div class="help mt-2">Created 02 Sep 2026 by Rajesh Sharma · last used 13 Nov 2026, 18:22</div>
+                      </div>
+                    </div>
+                    <div class="step">
+                      <span class="step-num">3</span>
+                      <div><h3>How it works</h3><p>A visitor fills your website form; the lead appears in New Leads within seconds and the RM gets a notification.</p>
+                        <div class="flow">
+                          <div class="flow-node"><span class="card-icon ci-success"><svg class="i"><use href="#i-user"/></svg></span><div><b>Visitor</b><small>Site or QR scan</small></div></div>
+                          <svg class="i flow-arrow"><use href="#i-arrow-right"/></svg>
+                          <div class="flow-node"><span class="card-icon"><svg class="i"><use href="#i-globe"/></svg></span><div><b>Website form</b><small>Name, mobile</small></div></div>
+                          <svg class="i flow-arrow"><use href="#i-arrow-right"/></svg>
+                          <div class="flow-node"><span class="card-icon ci-warning"><svg class="i"><use href="#i-user-plus"/></svg></span><div><b>New Leads</b><small>RM assigned</small></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="table-card">
+                    <div class="card-header"><div class="card-title">Recently captured</div><div class="card-actions"><a class="btn btn-ghost btn-sm" href="04-leads-list.html">All leads<svg class="i i-sm"><use href="#i-arrow-right"/></svg></a></div></div>
+                    <div class="table-wrap"><table class="table">
+                      <thead><tr><th>Lead</th><th>Source</th><th>Interested in</th><th>Assigned to</th><th>Captured</th></tr></thead>
+                      <tbody>
+                        <tr><td><a class="cell-title" href="05-lead-create.html">Tanvi Deshmukh</a><div class="cell-sub">+91 98••• ••903</div></td><td><span class="badge"><svg class="i"><use href="#i-qr"/></svg>QR</span></td><td>MF-Lumpsum</td><td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td><td>13 Nov 2026</td></tr>
+                        <tr><td><a class="cell-title" href="05-lead-create.html">Varun Khanna</a><div class="cell-sub">+91 97••• ••905</div></td><td><span class="badge"><svg class="i"><use href="#i-qr"/></svg>QR</span></td><td>MF-SIP</td><td><span class="person"><span class="avatar avatar-sm a2">SI</span><span class="person-name">Sneha Iyer</span></span></td><td>13 Nov 2026</td></tr>
+                        <tr><td><a class="cell-title" href="05-lead-create.html">Pallavi Dutta</a><div class="cell-sub">+91 96••• ••584</div></td><td><span class="badge"><svg class="i"><use href="#i-globe"/></svg>Website</span></td><td>ITR e-filing</td><td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td><td>12 Nov 2026</td></tr>
+                      </tbody>
+                    </table></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 5. Automations ============ -->
+            <section class="set-panel" data-panel="automations" aria-label="Automations">
+              <div class="set-head">
+                <div>
+                  <h2>Automations</h2>
+                  <p>One builder for every rule: <b>when</b> something happens, <b>if</b> a condition is true, <b>then</b> do an action.</p>
+                </div>
+                <div class="page-actions">
+                  <button class="btn btn-secondary"><svg class="i"><use href="#i-layers"/></svg>Templates</button>
+                  <button class="btn btn-primary" data-open-drawer="drawer-auto"><svg class="i"><use href="#i-plus"/></svg>New automation</button>
+                </div>
+              </div>
+              <div class="set-stack">
+                <div class="mini-stats">
+                  <div class="stat stat-success"><div class="stat-label">Active rules</div><div class="stat-value">6</div><div class="stat-meta">1 paused</div></div>
+                  <div class="stat stat-info"><div class="stat-label">Runs · last 7 days</div><div class="stat-value">214</div><div class="stat-meta"><span class="delta-up">↑ 18%</span> vs previous week</div></div>
+                  <div class="stat"><div class="stat-label">Tasks created</div><div class="stat-value">61</div><div class="stat-meta">No one typed these</div></div>
+                  <div class="stat stat-danger"><div class="stat-label"><svg class="i i-sm"><use href="#i-alert"/></svg>Failed runs</div><div class="stat-value">1</div><div class="stat-meta">Needs attention</div></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Rules <span class="badge">7</span></div>
+                    <div class="card-actions">
+                      <div class="segmented" data-segmented><button aria-pressed="true">All</button><button aria-pressed="false">MF Box</button><button aria-pressed="false">Leads</button><button aria-pressed="false">Tasks</button><button aria-pressed="false">Compliance</button></div>
+                    </div>
+                  </div>
+                  <div class="rule">
+                    <label class="switch"><input type="checkbox" checked data-rule="SIP bounce follow-up"><span></span></label>
+                    <div><div class="rule-title">SIP bounce follow-up <span class="tag">MF Box</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>SIP bounces in MF Box</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>any client</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Create task for primary RM, due in 1 business day</span></div></div>
+                    <div class="rule-meta"><div><b>38</b> runs · 7 days</div><div>Last run today 10:42</div></div>
+                  </div>
+                  <div class="rule">
+                    <label class="switch"><input type="checkbox" checked data-rule="Website and QR leads"><span></span></label>
+                    <div><div class="rule-title">Website and QR leads <span class="tag">Leads</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>Lead arrives from Website or QR</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>Branch = Andheri</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Assign round robin to RMs · call within 2 h</span></div></div>
+                    <div class="rule-meta"><div><b>23</b> runs · 7 days</div><div>Last run yesterday 18:20</div></div>
+                  </div>
+                  <div class="rule">
+                    <label class="switch"><input type="checkbox" checked data-rule="Overdue escalation"><span></span></label>
+                    <div><div class="rule-title">Overdue escalation <span class="tag">Tasks</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>Task is overdue by 2 days</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>Priority is High</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Notify reporting manager</span></div></div>
+                    <div class="rule-meta"><div><b>12</b> runs · 7 days</div><div>Last run today 08:00</div></div>
+                  </div>
+                  <div class="rule">
+                    <label class="switch"><input type="checkbox" checked data-rule="KYC on hold"><span></span></label>
+                    <div><div class="rule-title">KYC on hold <span class="tag">MF Box</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>KYC status becomes “On hold”</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>client has an active SIP</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Create KYC update task for Ops, due in 2 business days</span></div></div>
+                    <div class="rule-meta"><div><b>9</b> runs · 7 days</div><div>Last run yesterday 22:10</div></div>
+                  </div>
+                  <div class="rule">
+                    <label class="switch"><input type="checkbox" checked data-rule="Meeting outcome reminder"><span></span></label>
+                    <div><div class="rule-title">Meeting outcome reminder <span class="tag">Meetings</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>Meeting ended 15 min ago</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>no outcome logged</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Remind organiser on Home and My Day</span></div></div>
+                    <div class="rule-meta"><div><b>17</b> runs · 7 days</div><div>Last run today 12:00</div></div>
+                  </div>
+                  <div class="rule">
+                    <label class="switch"><input type="checkbox" checked data-rule="EUIN / ARN renewal"><span></span></label>
+                    <div><div class="rule-title">EUIN / ARN renewal <span class="tag">Compliance</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>EUIN or ARN expires within 6 months</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>user is active</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Create renewal task · notify Owner</span></div></div>
+                    <div class="rule-meta"><div><b>2</b> runs · 7 days</div><div>Last run 10 Nov</div></div>
+                  </div>
+                  <div class="rule is-off">
+                    <label class="switch"><input type="checkbox" data-rule="Tier A coverage gap"><span></span></label>
+                    <div><div class="rule-title">Tier A coverage gap <span class="badge badge-dot badge-neutral">Paused</span></div>
+                      <div class="rchain"><span class="rstep when"><em>When</em>Tier A client not contacted for 90 days</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep if"><em>If</em>AUM above ₹50 L</span><svg class="i i-sm"><use href="#i-arrow-right"/></svg><span class="rstep then"><em>Then</em>Create portfolio review task for primary RM</span></div></div>
+                    <div class="rule-meta"><div>Paused by Rajesh Sharma</div><div>06 Nov 2026</div></div>
+                  </div>
+                </div>
+
+                <div class="table-card">
+                  <div class="card-header"><div><div class="card-title">Run log</div><div class="card-sub">Every run is kept, so you can see why something happened</div></div><div class="card-actions"><button class="btn btn-ghost btn-sm"><svg class="i"><use href="#i-filter"/></svg>Failed only</button></div></div>
+                  <div class="table-wrap"><table class="table">
+                    <thead><tr><th>Time</th><th>Automation</th><th>Record</th><th>Result</th><th>What happened</th></tr></thead>
+                    <tbody>
+                      <tr><td class="tnum">Today 12:00</td><td>Meeting outcome reminder</td><td><a href="14-meeting-detail.html">Portfolio review – Verma Family</a></td><td><span class="badge badge-dot badge-success">Done</span></td><td class="wrapcell">Reminder sent to Neha Kapoor · outcome still pending</td></tr>
+                      <tr><td class="tnum">Today 10:42</td><td>SIP bounce follow-up</td><td><a href="08-client-360.html">Deepak Agarwal</a></td><td><span class="badge badge-dot badge-success">Done</span></td><td class="wrapcell"><a href="11-task-detail.html">Task created</a> for Rohan Mehta, due Mon 16 Nov</td></tr>
+                      <tr><td class="tnum">Today 10:42</td><td>SIP bounce follow-up</td><td><a href="08-client-360.html">Pooja Bansal</a></td><td><span class="badge badge-dot badge-success">Done</span></td><td class="wrapcell">Sneha Iyer on leave from 16 Nov → given to cover, Rohan Mehta</td></tr>
+                      <tr><td class="tnum">Today 08:00</td><td>Overdue escalation</td><td><a href="11-task-detail.html">KYC update – Suresh Iyer</a></td><td><span class="badge badge-dot badge-success">Done</span></td><td class="wrapcell">Neha Kapoor notified · 2 days overdue</td></tr>
+                      <tr><td class="tnum">Yesterday 22:10</td><td>KYC on hold</td><td><a href="08-client-360.html">Meera Joshi</a></td><td><span class="badge badge-dot badge-danger">Failed</span></td><td class="wrapcell"><span class="text-danger">No Ops user in Thane.</span> <a href="#team">Fix in Team</a></td></tr>
+                      <tr><td class="tnum">Thu 15:25</td><td>Meeting outcome reminder</td><td><a href="05-lead-create.html">Goal planning – Karan Malhotra</a></td><td><span class="badge badge-dot badge-neutral">Skipped</span></td><td class="wrapcell">Outcome already logged by Neha Kapoor</td></tr>
+                    </tbody>
+                  </table></div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 6. MF Box sync ============ -->
+            <section class="set-panel" data-panel="mfbox" aria-label="MF Box sync">
+              <div class="set-head">
+                <div>
+                  <h2>MF Box sync</h2>
+                  <p>Clients, AUM, SIPs and commissions are read from MF Box Back Office. Staff never re-type them.</p>
+                </div>
+                <div class="page-actions"><button class="btn btn-primary" data-act="resync"><svg class="i"><use href="#i-refresh"/></svg>Sync now</button></div>
+              </div>
+              <div class="set-stack">
+                <div class="card">
+                  <div class="sync-hero">
+                    <span class="sync-logo">MF</span>
+                    <div><div class="row gap-2"><b class="text-lg">MF Box Back Office</b><span class="badge badge-dot badge-success">Connected</span></div><div class="text-sm faint mt-1">Tenant: Sharma Wealth Partners · ARN-104512 · read-only connection</div></div>
+                    <div class="sync-kv ml-auto">
+                      <div><small>Last sync</small><b>Today 10:42</b></div>
+                      <div><small>Next sync</small><b>11:42</b></div>
+                      <div><small>Duration</small><b>48 s</b></div>
+                      <div class="field" style="gap:2px"><small class="faint text-sm">Frequency</small><select class="select" style="height:32px;width:150px"><option>Every hour</option><option>Every 15 minutes</option><option>Nightly (02:00)</option></select></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="table-card">
+                  <div class="card-header"><div><div class="card-title">What is synced</div><div class="card-sub">MF Box is the source of truth; fixes are made in MF Box</div></div></div>
+                  <div class="table-wrap"><table class="table">
+                    <thead><tr><th>Data</th><th class="num">Records</th><th>Direction</th><th>Last change</th><th>Status</th><th>Sync</th></tr></thead>
+                    <tbody>
+                      <tr><td><div class="cell-title">Clients</div><div class="cell-sub">Name, PAN (masked), mobile, tier, primary RM</div></td><td class="num">1,284</td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-arrow-right"/></svg>CRM</span></td><td>+3 today</td><td><span class="badge badge-dot badge-success">Synced</span></td><td><label class="switch"><input type="checkbox" checked disabled><span></span></label></td></tr>
+                      <tr><td><div class="cell-title">Families</div><div class="cell-sub">Family head and members</div></td><td class="num">412</td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-arrow-right"/></svg>CRM</span></td><td>No change</td><td><span class="badge badge-dot badge-success">Synced</span></td><td><label class="switch"><input type="checkbox" checked disabled><span></span></label></td></tr>
+                      <tr><td><div class="cell-title">AUM &amp; valuation</div><div class="cell-sub">Daily NAV-based valuation per client and family</div></td><td class="num">₹412 Cr</td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-arrow-right"/></svg>CRM</span></td><td>NAV 13 Nov</td><td><span class="badge badge-dot badge-success">Synced</span></td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td><div class="cell-title">SIPs &amp; mandates</div><div class="cell-sub">Active, paused, bounced, ending soon</div></td><td class="num">3,906</td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-arrow-right"/></svg>CRM</span></td><td>2 bounces today</td><td><span class="badge badge-dot badge-success">Synced</span></td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td><div class="cell-title">Transactions</div><div class="cell-sub">Logged as activity on the client timeline</div></td><td class="num">186 <span class="faint">/ 24 h</span></td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-arrow-right"/></svg>CRM</span></td><td>Today 10:41</td><td><span class="badge badge-dot badge-success">Synced</span></td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td><div class="cell-title">Commissions</div><div class="cell-sub">Brokerage and trail from MIS · role-restricted</div></td><td class="num">Oct 2026</td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-arrow-right"/></svg>CRM</span></td><td>Statement 08 Nov</td><td><span class="badge badge-dot badge-warning">Monthly</span></td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                      <tr><td><div class="cell-title">Users &amp; hierarchy</div><div class="cell-sub">Branches, RMs, sub-brokers, reporting lines</div></td><td class="num">14</td><td><span class="dir">MF Box<svg class="i i-sm"><use href="#i-repeat"/></svg>CRM</span></td><td>No change</td><td><span class="badge badge-dot badge-success">Synced</span></td><td><label class="switch"><input type="checkbox" checked><span></span></label></td></tr>
+                    </tbody>
+                  </table></div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header"><div class="card-title">Sync history</div></div>
+                  <div class="card-body tight">
+                    <div class="list-row"><span class="dot dot-success"></span><span class="tnum">Today 10:42</span><span class="muted">Clients +3 · SIP bounces 2 · transactions 186 · 48 s</span><span class="ml-auto badge badge-dot badge-success">Success</span></div>
+                    <div class="list-row"><span class="dot dot-success"></span><span class="tnum">Today 09:42</span><span class="muted">Transactions 64 · 41 s</span><span class="ml-auto badge badge-dot badge-success">Success</span></div>
+                    <div class="list-row"><span class="dot dot-warning"></span><span class="tnum">Today 08:42</span><span class="muted">2 clients skipped: PAN missing in MF Box (Harish Patel Family)</span><span class="ml-auto badge badge-dot badge-warning">Partial</span></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 7. Security ============ -->
+            <section class="set-panel" data-panel="security" aria-label="Security and access">
+              <div class="set-head">
+                <div>
+                  <h2>Security &amp; access <span class="badge badge-neutral"><svg class="i"><use href="#i-lock"/></svg>Owner only</span></h2>
+                  <p>Protect client PAN and AUM data. Data is hosted in India; logs are kept for at least 1 year.</p>
+                </div>
+                <div class="page-actions"><button class="btn btn-primary" data-toast-msg="Security settings saved">Save changes</button></div>
+              </div>
+              <div class="set-stack">
+                <div class="grid-2" style="align-items:start">
+                  <div class="card">
+                    <div class="card-header"><span class="card-icon"><svg class="i"><use href="#i-key"/></svg></span><div class="card-title">Sign-in</div></div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Single sign-on</div><div class="cfg-sub">Google Workspace · sharmawealth.in</div></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Two-factor authentication</div><div class="cfg-sub">Required for everyone · 13 of 14 enrolled</div></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Session timeout</div><div class="cfg-sub">Sign out after inactivity</div></div><select class="select"><option>30 minutes</option><option>15 minutes</option><option>2 hours</option></select></div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Ask OTP again before</div><div class="cfg-sub">Viewing full PAN, exports, “view as”</div></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                  </div>
+                  <div class="card">
+                    <div class="card-header"><span class="card-icon ci-warning"><svg class="i"><use href="#i-download"/></svg></span><div class="card-title">Export approvals</div><span class="badge badge-dot badge-warning ml-auto">1 waiting</span></div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Exports need approval</div><div class="cfg-sub">Approver: Rajesh Sharma · files are watermarked</div></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+                    <div class="sec-row" style="background:var(--warning-soft)">
+                      <span class="avatar avatar-sm a2">SI</span>
+                      <div class="cfg-main"><div class="cfg-title">Sneha Iyer · 214 clients</div><div class="cfg-sub">Includes mobile and AUM · 10:15</div></div>
+                      <button class="btn btn-ghost btn-sm" data-toast-msg="Export request rejected">Reject</button><button class="btn btn-secondary btn-sm" data-toast-msg="Export approved · link valid for 1 hour">Approve</button>
+                    </div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Max rows per export</div><div class="cfg-sub">Larger exports need the Owner</div></div><select class="select"><option>500 rows</option><option>100 rows</option><option>No limit</option></select></div>
+                    <div class="sec-row"><div class="cfg-main"><div class="cfg-title">Masking</div><div class="cfg-sub">PAN masked for Sub-brokers and Ops · AUM banded for Sub-brokers</div></div><a class="btn btn-ghost btn-sm" href="#roles">Edit in roles</a></div>
+                  </div>
+                </div>
+
+                <div class="card danger-card">
+                  <div class="card-header"><span class="card-icon ci-danger"><svg class="i"><use href="#i-log-out"/></svg></span><div><div class="card-title">Offboarding kill switch</div><div class="card-sub">When someone leaves, cut access in one step so the client list leaves with no one</div></div></div>
+                  <div class="card-body">
+                    <div class="row gap-3 wrap">
+                      <div class="field" style="width:280px"><label class="label">Person leaving</label><select class="select"><option>Choose a user…</option><option>Imran Sheikh · Sub-broker · Andheri</option><option>Gaurav Bhatt · Sub-broker · Pune</option></select></div>
+                      <div class="field" style="width:240px"><label class="label">Hand over book to</label><select class="select"><option>Their manager (default)</option><option>Neha Kapoor</option><option>Rohan Mehta</option></select></div>
+                      <button class="btn btn-danger" style="align-self:flex-end" data-toast-msg="Access revoked · 3 sessions ended · book moved to manager"><svg class="i"><use href="#i-lock"/></svg>Revoke access now</button>
+                    </div>
+                    <div class="ks-steps">
+                      <div><b><svg class="i i-sm"><use href="#i-log-out"/></svg>Ends sessions</b>Web and mobile, on every device, at once</div>
+                      <div><b><svg class="i i-sm"><use href="#i-repeat"/></svg>Moves the book</b>Clients, leads and open tasks go to the new owner</div>
+                      <div><b><svg class="i i-sm"><use href="#i-eye"/></svg>90-day watch</b>Flags redemptions and transfers from that book</div>
+                      <div><b><svg class="i i-sm"><use href="#i-file"/></svg>Keeps the trail</b>History stays; the EUIN stays with the person</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ 0. Firm profile ============ -->
+            <section class="set-panel" data-panel="org" aria-label="Firm profile">
+              <div class="set-head">
+                <div>
+                  <h2>Firm profile</h2>
+                  <p>Your firm’s name and logo appear in the sidebar, on reports and on client messages.</p>
+                </div>
+                <div class="page-actions"><button class="btn btn-primary" data-toast-msg="Firm profile saved">Save changes</button></div>
+              </div>
+              <div class="set-stack">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="form-grid">
+                      <div class="field span-2"><label class="label">Logo</label><div class="logo-up"><span class="sb-logo">SW</span><button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-upload"/></svg>Upload logo</button><span class="help">PNG or SVG, square, at least 256 px</span></div></div>
+                      <div class="field"><label class="label">Firm name <span class="req">*</span></label><input class="input" value="Sharma Wealth Partners"></div>
+                      <div class="field"><label class="label">ARN <span class="req">*</span></label><input class="input" value="ARN-104512" readonly><span class="help">From MF Box · valid till 18 Aug 2028</span></div>
+                      <div class="field"><label class="label">Owner / principal</label><input class="input" value="Rajesh Sharma"></div>
+                      <div class="field"><label class="label">Support email shown to clients</label><input class="input" value="care@sharmawealth.in"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-card">
+                  <div class="card-header"><div class="card-title">Branches <span class="badge">3</span></div><div class="card-actions"><button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-plus"/></svg>Add branch</button></div></div>
+                  <div class="table-wrap"><table class="table">
+                    <thead><tr><th>Branch</th><th>City</th><th>Head</th><th class="num">People</th><th class="num">Clients</th><th class="num">AUM</th></tr></thead>
+                    <tbody>
+                      <tr><td class="cell-title">Andheri</td><td>Mumbai</td><td>Neha Kapoor</td><td class="num">8</td><td class="num">712</td><td class="num">₹218 Cr</td></tr>
+                      <tr><td class="cell-title">Thane</td><td>Thane</td><td class="faint">Owner (no branch manager)</td><td class="num">1 + 1 invited</td><td class="num">231</td><td class="num">₹74 Cr</td></tr>
+                      <tr><td class="cell-title">Pune</td><td>Pune</td><td>Vikram Rao</td><td class="num">4</td><td class="num">341</td><td class="num">₹120 Cr</td></tr>
+                    </tbody>
+                  </table></div>
+                </div>
+                <div class="card">
+                  <div class="card-header"><div><div class="card-title">Working calendar</div><div class="card-sub">Used for “business day” due dates and SLAs</div></div></div>
+                  <div class="card-body">
+                    <div class="form-grid">
+                      <div class="field"><label class="label">Working days</label><div class="day-chips choice-group"><button class="choice is-active">Mon</button><button class="choice is-active">Tue</button><button class="choice is-active">Wed</button><button class="choice is-active">Thu</button><button class="choice is-active">Fri</button><button class="choice is-active">Sat</button><button class="choice">Sun</button></div></div>
+                      <div class="field"><label class="label">Holiday calendars</label><div class="row gap-2 wrap"><span class="tag"><svg class="i i-sm"><use href="#i-calendar"/></svg>NSE/BSE market holidays 2026</span><span class="tag"><svg class="i i-sm"><use href="#i-calendar"/></svg>Bank holidays · Maharashtra</span></div></div>
+                      <div class="field"><label class="label">Language</label><div class="segmented" data-segmented><button aria-pressed="true">English</button><button aria-pressed="false">हिन्दी</button></div></div>
+                      <div class="field"><label class="label">Office hours</label><select class="select"><option>09:30 – 18:30</option></select></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Invite user drawer -->
+  <aside class="drawer" id="drawer-invite" aria-label="Invite user">
+    <div class="drawer-header"><div><div class="drawer-title">Invite user</div><div class="drawer-sub">They get an email and WhatsApp invite; access starts after 2FA setup</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="banner banner-info mb-4"><svg class="i"><use href="#i-info"/></svg><span>Already in MF Box? Use <b>Re-sync</b> instead, so they keep their client mapping.</span></div>
+      <div class="form-grid">
+        <div class="field"><label class="label">Full name <span class="req">*</span></label><input class="input" placeholder="e.g. Nikhil Sawant"></div>
+        <div class="field"><label class="label">Work email <span class="req">*</span></label><input class="input" placeholder="name@sharmawealth.in"></div>
+        <div class="field"><label class="label">Mobile <span class="req">*</span></label><input class="input" placeholder="+91"></div>
+        <div class="field"><label class="label">Role <span class="req">*</span></label><select class="select"><option>Relationship Manager</option><option>Branch Manager</option><option>Sub-broker</option><option>Ops Executive</option><option>Service Desk</option></select></div>
+        <div class="field"><label class="label">Branch <span class="req">*</span></label><select class="select"><option>Andheri</option><option>Thane</option><option>Pune</option></select></div>
+        <div class="field"><label class="label">Reports to <span class="req">*</span></label><select class="select"><option>Neha Kapoor</option><option>Rohan Mehta</option><option>Rajesh Sharma</option></select></div>
+        <div class="field"><label class="label">EUIN</label><input class="input" placeholder="E123456"><span class="help">Required for sales roles. We check validity with AMFI.</span></div>
+        <div class="field"><label class="label">EUIN valid till</label><input class="input" placeholder="MMM YYYY"></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to send</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" data-close-drawer data-toast-msg="Invite sent">Send invite</button></div>
+  </aside>
+
+  <!-- New automation drawer -->
+  <aside class="drawer" id="drawer-auto" aria-label="New automation">
+    <div class="drawer-header"><div><div class="drawer-title">New automation</div><div class="drawer-sub">When → If → Then. Test it on last week’s data before switching it on.</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Name <span class="req">*</span></label><input class="input" value="Mandate failure follow-up"></div>
+        <div class="field span-2"><label class="label"><span class="badge badge-info">When</span>Trigger</label><select class="select"><option>Bank mandate fails in MF Box</option><option>SIP bounces in MF Box</option><option>Lead arrives from Website or QR</option><option>Task becomes overdue</option></select></div>
+        <div class="field span-2"><label class="label"><span class="badge badge-neutral">If</span>Condition (optional)</label><div class="row gap-2"><select class="select"><option>Client tier</option></select><select class="select" style="width:90px"><option>is</option></select><select class="select"><option>A or B</option></select></div></div>
+        <div class="field span-2"><label class="label"><span class="badge badge-success">Then</span>Action</label><select class="select"><option>Create task for primary RM</option><option>Notify reporting manager</option><option>Assign round robin</option></select></div>
+        <div class="field"><label class="label">Task category</label><select class="select"><option>Bank mandate</option></select></div>
+        <div class="field"><label class="label">Due</label><select class="select"><option>1 business day</option><option>2 business days</option></select></div>
+      </div>
+      <div class="banner banner-ai mt-5"><svg class="i"><use href="#i-sparkles"/></svg><span>Dry run on last 7 days: this would have created <b>4 tasks</b> (Rohan 2, Sneha 1, Aman 1).</span></div>
+    </div>
+    <div class="drawer-footer"><button class="btn btn-ghost">Test on last 7 days</button><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" data-close-drawer data-toast-msg="Automation created and switched on">Create</button></div>
+  </aside>
+
+  <script>
+  (function () {
+    var PANELS = { team: 'Team & hierarchy', roles: 'Roles & permissions', config: 'Module configurations', automations: 'Automations', 'lead-capture': 'Lead capture', mfbox: 'MF Box sync', security: 'Security & access', org: 'Firm profile' };
+
+    function currentKey() {
+      var h = location.hash.replace('#', '');
+      if (!h) h = new URLSearchParams(location.search).get('panel') || '';
+      return PANELS[h] ? h : '';
+    }
+
+    function apply(scroll) {
+      var key = currentKey();
+      var panel = key || 'team';
+      document.querySelectorAll('.set-panel').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-panel') === panel); });
+      document.querySelectorAll('.set-nav a[data-key]').forEach(function (a) {
+        var on = a.getAttribute('data-key') === panel;
+        a.classList.toggle('is-active', on);
+        if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      });
+      // Sidebar: Team & Hierarchy / Automations / Settings
+      var target = key === 'team' ? '20-settings.html#team' : key === 'automations' ? '20-settings.html#automations' : '20-settings.html';
+      document.querySelectorAll('.sb-item').forEach(function (a) {
+        var on = a.getAttribute('href') === target;
+        a.classList.toggle('is-active', on);
+        if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      });
+      var cur = document.querySelector('.crumbs .crumb-current');
+      if (cur) cur.textContent = PANELS[panel];
+      if (scroll) window.scrollTo(0, 0);
+    }
+
+    /* QR-like pattern (deterministic), drawn as SVG */
+    function drawQR(el) {
+      var n = 29, seed = 104512;
+      function rnd() { seed = (seed + 0x6D2B79F5) | 0; var t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+      var m = [], x, y;
+      for (y = 0; y < n; y++) { m[y] = []; for (x = 0; x < n; x++) m[y][x] = rnd() > 0.52; }
+      function finder(ox, oy) {
+        for (y = -1; y <= 7; y++) for (x = -1; x <= 7; x++) {
+          var X = ox + x, Y = oy + y; if (X < 0 || Y < 0 || X >= n || Y >= n) continue;
+          var ring = (x === 0 || x === 6 || y === 0 || y === 6) && x >= 0 && x <= 6 && y >= 0 && y <= 6;
+          var core = x >= 2 && x <= 4 && y >= 2 && y <= 4;
+          m[Y][X] = ring || core;
+        }
+      }
+      finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
+      for (var i = 8; i < n - 8; i++) { m[6][i] = i % 2 === 0; m[i][6] = i % 2 === 0; }
+      // small alignment pattern
+      for (y = -2; y <= 2; y++) for (x = -2; x <= 2; x++) m[n - 7 + y][n - 7 + x] = Math.max(Math.abs(x), Math.abs(y)) !== 1;
+      // clear centre for logo
+      var c0 = Math.floor(n / 2) - 4, c1 = Math.floor(n / 2) + 4;
+      for (y = c0; y <= c1; y++) for (x = c0; x <= c1; x++) m[y][x] = false;
+      var q = 3, size = n + q * 2, d = '';
+      for (y = 0; y < n; y++) for (x = 0; x < n; x++) if (m[y][x]) d += 'M' + (x + q) + ' ' + (y + q) + 'h1v1h-1z';
+      var cx = q + c0 + 1, cw = c1 - c0 - 1;
+      el.innerHTML = '<svg viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="Lead collection QR code" shape-rendering="crispEdges">' +
+        '<rect width="' + size + '" height="' + size + '" fill="#FFFFFF"/>' +
+        '<path d="' + d + '" fill="#0E1A2B"/>' +
+        '<rect x="' + cx + '" y="' + cx + '" width="' + cw + '" height="' + cw + '" rx="1.4" fill="#2563EB" shape-rendering="geometricPrecision"/>' +
+        '<text x="' + (cx + cw / 2) + '" y="' + (cx + cw / 2 + 1.25) + '" text-anchor="middle" font-family="Inter, sans-serif" font-weight="700" font-size="3.4" fill="#FFFFFF">SW</text></svg>';
+    }
+
+    function init() {
+      apply(false);
+      var qr = document.getElementById('qr'); if (qr) drawQR(qr);
+    }
+    window.addEventListener('hashchange', function () { apply(true); });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(init, 0); });
+    else setTimeout(init, 0);
+
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-toast-msg]');
+      if (t) { AK.toast(t.getAttribute('data-toast-msg'), { undo: false }); }
+      var soon = e.target.closest('[data-soon]');
+      if (soon) { e.preventDefault(); AK.toast(soon.getAttribute('data-soon'), { icon: 'info', undo: false }); }
+      var act = e.target.closest('[data-act]');
+      if (act) {
+        var a = act.getAttribute('data-act');
+        if (a === 'resync') AK.toast('Syncing with MF Box… 14 users, no changes found', { icon: 'refresh', undo: false });
+        if (a === 'copykey') AK.toast('Secure key copied. It will not be shown again.', { icon: 'copy', undo: false });
+        if (a === 'regen') { document.getElementById('seckey').value = 'ak_live_sw_••••••••••••••••' + 'K9d4'; AK.toast('New key created · old key switched off'); }
+      }
+    });
+    document.addEventListener('change', function (e) {
+      var r = e.target.closest('input[data-rule]');
+      if (r) {
+        var row = r.closest('.rule'); if (row) row.classList.toggle('is-off', !r.checked);
+        AK.toast('“' + r.getAttribute('data-rule') + '” ' + (r.checked ? 'switched on' : 'paused'));
+      }
+      var b = e.target.closest('input[data-toast]');
+      if (b) AK.toast(b.getAttribute('data-toast') + (b.checked ? ' on' : ' off: one-person mode'));
+    });
+  })();
+  </script>
+</body>
+</html>

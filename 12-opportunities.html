@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opportunities · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- page-specific: Opportunities (tokens only) ---- */
+    .opp-banner { margin-bottom: var(--sp-4); }
+    .opp-banner .btn-ghost { color: var(--ai); }
+    .opp-banner .btn-ghost:hover { background: var(--surface); color: var(--ai); }
+    .opp-banner .btn-secondary { border-color: transparent; color: var(--ai); font-weight: 600; }
+    .opp-banner .banner-text { min-width: 0; }
+
+    .tabs-row { display: flex; align-items: flex-end; gap: var(--sp-4); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-4); }
+    .tabs-row .tabs { border-bottom: 0; margin-bottom: 0; min-width: 0; }
+    .opp-board, #panel-table { min-width: 0; max-width: 100%; }
+    .tabs-row .tabs-meta { margin-left: auto; padding-bottom: 12px; font-size: 12px; color: var(--text-3); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+    .pop-left { left: 0; right: auto; }
+    .pop-card { width: 300px; padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+    .menu .check { width: 100%; height: 32px; padding: 0 8px; border-radius: 6px; color: var(--text); }
+    .menu .check:hover { background: var(--surface-2); }
+
+    /* Kanban: four columns share the width instead of a fixed 288px */
+    .opp-board .kanban { padding-bottom: 0; }
+    .opp-board .kcol { flex: 1 1 0; width: auto; min-width: 248px; max-height: max(420px, calc(100vh - 414px)); }
+    .kcol-head .kcol-dot.d-new, .kcol-head .kcol-dot.d-prog { background: var(--info); }
+    .kcol-head .kcol-dot.d-req { background: var(--neutral); }
+    .kcol-head .kcol-dot.d-docs { background: var(--warning); }
+    .kcol-sum { display: flex; align-items: center; gap: 6px; }
+    .kcol-sum b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .kcol-body { min-height: 80px; border-radius: var(--r-md); transition: background .12s; }
+    .kcol-body.is-over { background: var(--primary-soft); }
+    .kcol-empty { border: 1px dashed var(--border-strong); border-radius: var(--r-md); color: var(--text-3); font-size: 12px; padding: 16px; text-align: center; }
+
+    .kcard { gap: 6px; position: relative; }
+    .kcard.is-dragging { opacity: .45; }
+    .kcard.is-new { border-color: var(--ai); box-shadow: 0 0 0 3px var(--ai-soft); }
+    .kc-top { display: flex; align-items: center; gap: 6px; }
+    .kc-top .kc-more { margin-left: auto; margin-right: -6px; width: 26px; height: 24px; color: var(--text-3); }
+    .kc-top .kc-more:hover { color: var(--text); }
+    .kcard .kcard-title { color: var(--text); display: block; }
+    .kcard .kcard-title:hover { color: var(--primary-text); text-decoration: none; }
+    .kcard-meta { gap: 6px; }
+    .kcard-meta .nw { white-space: nowrap; }
+    .kc-val { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .kc-why { display: flex; gap: 6px; font-size: 12px; line-height: 16px; color: var(--text-2); background: var(--ai-soft); border-radius: var(--r-sm); padding: 6px 8px; }
+    .kc-why .i { color: var(--ai); width: 13px; height: 13px; flex: none; margin-top: 1.5px; }
+    .kc-why > span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .kc-why b { color: var(--text); font-weight: 600; }
+    .kc-why .why-l { color: var(--ai); font-weight: 600; }
+    .kcard-foot { padding-top: 8px; margin-top: 2px; }
+    .kcard-foot .fu { display: inline-flex; align-items: center; gap: 5px; color: var(--text-2); }
+    .kcard-foot .fu .i { width: 13px; height: 13px; }
+    .kcard-foot .avatar-group { margin-left: auto; }
+    .kcard-foot .avatar-group .avatar + .avatar { margin-left: -5px; }
+    .kcard .tag { height: 20px; font-size: 11.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+    .kdrops { position: static; }
+    .kdrop { height: 48px; gap: 10px; transition: transform .12s, box-shadow .12s; }
+    .kdrop small { font-weight: 500; opacity: .85; }
+    .kdrop.is-over { transform: scale(1.01); box-shadow: var(--shadow-md); }
+
+    .move-menu { position: fixed; z-index: 70; display: none; min-width: 230px; }
+    .move-menu.is-open { display: block; }
+    .menu-item .kcol-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+    .menu-item[disabled] { opacity: .45; pointer-events: none; }
+
+    /* Table */
+    .score-cell { display: inline-flex; align-items: center; gap: 8px; }
+    .score-cell .progress { width: 52px; height: 5px; }
+    .score-cell b { font-weight: 600; color: var(--ai); font-variant-numeric: tabular-nums; min-width: 18px; }
+    .table .tag { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+    .table a.cell-title { color: var(--text); }
+    .table a.cell-title:hover { color: var(--primary-text); }
+
+    /* AI review drawer */
+    .not-advice { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: var(--r-sm); background: var(--neutral-soft); color: var(--neutral); font-size: 11.5px; font-weight: 600; }
+    .guard { display: flex; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); font-size: 12.5px; color: var(--text-2); margin-bottom: var(--sp-4); }
+    .guard .i { color: var(--ai); flex: none; margin-top: 1px; }
+    .sugg { border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); background: var(--surface); transition: opacity .2s; }
+    .sugg + .sugg { margin-top: var(--sp-3); }
+    .sugg-head { display: flex; align-items: flex-start; gap: var(--sp-3); }
+    .sugg-title { font-weight: 600; font-size: 14px; }
+    .sugg-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .sugg-score { margin-left: auto; text-align: right; flex: none; }
+    .sugg-score b { display: block; font-size: 22px; line-height: 26px; font-weight: 700; color: var(--ai); font-variant-numeric: tabular-nums; }
+    .sugg-score span { font-size: 11px; color: var(--text-3); }
+    .factors { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .factors li { display: grid; grid-template-columns: 38px 1fr; gap: 8px; font-size: 12.5px; color: var(--text-2); align-items: baseline; }
+    .factors .pts { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+    .factors .pts.up { color: var(--success); }
+    .factors .pts.down { color: var(--danger); }
+    .sugg-next { margin-top: var(--sp-3); padding: 8px 10px; border-radius: var(--r-sm); background: var(--ai-soft); color: var(--text-2); font-size: 12.5px; display: flex; gap: 8px; }
+    .sugg-next .i { color: var(--ai); flex: none; margin-top: 2px; width: 13px; height: 13px; }
+    .sugg-foot { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .sugg-foot .select { width: 200px; height: 30px; font-size: 13px; }
+    .sugg-done { text-align: center; padding: var(--sp-8) var(--sp-4); color: var(--text-2); }
+
+    @media (max-width: 1280px) {
+      .toolbar .input-group { width: 220px; }
+      .opp-board .kcol { min-width: 230px; }
+      .kcol-head { font-size: 12.5px; }
+      .tabs-row .tabs-meta { display: none; }
+    }
+    @media (max-width: 768px) {
+      .opp-banner { flex-wrap: wrap; }
+      .opp-banner .banner-actions { margin-left: 0; }
+      .opp-board .kcol { max-height: none; }
+      .kdrops { grid-template-columns: 1fr 1fr; }
+      .kdrop { font-size: 12px; } .kdrop small { display: none; }
+      .toolbar-right { margin-left: 0; }
+    }
+  </style>
+</head>
+<body data-page="opportunities" data-crumb="Opportunities">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Opportunities</h1>
+            <p class="page-sub" id="opp-sub">Pipeline of revenue opportunities for your clients</p>
+          </div>
+          <div class="page-actions">
+            <a class="btn btn-secondary" href="20-settings.html"><svg class="i"><use href="#i-sliders"/></svg>Configurations</a>
+            <button class="btn btn-primary" data-open-drawer="drawer-create"><svg class="i"><use href="#i-plus"/></svg>Create opportunity</button>
+          </div>
+        </div>
+
+        <div class="banner banner-ai opp-banner" id="ai-banner" role="status">
+          <svg class="i"><use href="#i-sparkles"/></svg>
+          <span class="banner-text" id="ai-banner-text"><b>AI found 3 new opportunities today.</b> You can configure AI-generated opportunities in Settings.</span>
+          <div class="banner-actions">
+            <button class="btn btn-secondary btn-sm" data-open-drawer="drawer-ai" id="ai-review-btn"><svg class="i"><use href="#i-eye"/></svg>Review 3</button>
+            <a class="btn btn-ghost btn-sm" href="20-settings.html"><svg class="i"><use href="#i-settings"/></svg>Settings</a>
+            <button class="btn btn-ghost btn-icon btn-sm" title="Dismiss" onclick="this.closest('.banner').remove()"><svg class="i"><use href="#i-x"/></svg></button>
+          </div>
+        </div>
+
+        <div class="tabs-row">
+          <div class="tabs" data-tabs="vis" id="vis-tabs">
+            <button class="tab is-active" data-vis="my">My Opportunities <span class="count" data-count="my">10</span></button>
+            <button class="tab" data-vis="collab">Collaborations <span class="count" data-count="collab">3</span></button>
+            <button class="tab" data-vis="team">Team Opportunities <span class="count" data-count="team">15</span></button>
+          </div>
+          <span class="tabs-meta"><svg class="i i-sm"><use href="#i-refresh"/></svg>AUM &amp; last purchase synced from MF Box · 10:42</span>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" id="opp-search" placeholder="Search opportunity, client or PAN"></label>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-filters"><svg class="i"><use href="#i-filter"/></svg>Filters</button>
+              <div class="popover pop-left" id="pop-filters">
+                <div class="menu pop-card">
+                  <div class="field"><label class="label">Category</label><select class="select"><option>All categories</option><option>MF · Inactive client</option><option>MF · SIP maturity</option><option>FD maturity</option><option>Insurance · Life renewal</option><option>Insurance · GI renewal</option></select></div>
+                  <div class="field"><label class="label">Follow-up</label><select class="select"><option>Any time</option><option>Overdue</option><option>Today</option><option>Next 7 days</option></select></div>
+                  <div class="field"><label class="label">AI score</label><select class="select"><option>Any score</option><option>70 and above</option><option>50–69</option><option>Below 50</option></select></div>
+                  <div class="row gap-2"><button class="btn btn-ghost btn-sm">Reset</button><button class="btn btn-secondary btn-sm ml-auto" onclick="document.getElementById('pop-filters').classList.remove('is-open');AK.toast('Filters applied',{undo:false})">Apply</button></div>
+                </div>
+              </div>
+            </div>
+            <div class="segmented" data-segmented id="src-seg" aria-label="Source">
+              <button aria-pressed="true" data-src="all">All</button>
+              <button aria-pressed="false" data-src="ai"><svg class="i i-sm"><use href="#i-sparkles"/></svg>AI</button>
+              <button aria-pressed="false" data-src="manual">Manual</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <div class="segmented" data-segmented id="view-seg" aria-label="View">
+              <button aria-pressed="true" data-view="kanban"><svg class="i i-sm"><use href="#i-kanban"/></svg>Kanban</button>
+              <button aria-pressed="false" data-view="table"><svg class="i i-sm"><use href="#i-list"/></svg>Table</button>
+            </div>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-cols"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+              <div class="popover" id="pop-cols">
+                <div class="menu">
+                  <div class="menu-label">Show columns</div>
+                  <label class="check"><input type="checkbox" checked disabled>Opportunity title</label>
+                  <label class="check"><input type="checkbox" checked>Follow-up date</label>
+                  <label class="check"><input type="checkbox" checked>Status</label>
+                  <label class="check"><input type="checkbox" checked>Expected value (₹)</label>
+                  <label class="check"><input type="checkbox" checked>AI score</label>
+                  <label class="check"><input type="checkbox" checked>Source</label>
+                  <label class="check"><input type="checkbox" checked>Created by</label>
+                  <label class="check"><input type="checkbox" checked>Created at</label>
+                  <label class="check"><input type="checkbox" checked>AUM (₹)</label>
+                  <label class="check"><input type="checkbox" checked>Category</label>
+                  <label class="check"><input type="checkbox" checked>Last purchase</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kanban panel (default) -->
+        <section class="opp-board is-active" data-tab-panel="kanban" data-tab-scope="view" id="panel-kanban">
+          <div class="kanban" id="board">
+            <section class="kcol" data-stage="new">
+              <div class="kcol-head"><span class="kcol-dot d-new"></span>New <span class="kcol-count" data-col-count></span>
+                <div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-create" title="Add opportunity to New"><svg class="i"><use href="#i-plus"/></svg></button></div></div>
+              <div class="kcol-sum" data-col-sum></div>
+              <div class="kcol-body" data-drop="new"></div>
+            </section>
+            <section class="kcol" data-stage="prog">
+              <div class="kcol-head"><span class="kcol-dot d-prog"></span>In progress <span class="kcol-count" data-col-count></span>
+                <div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-create" title="Add opportunity to In progress"><svg class="i"><use href="#i-plus"/></svg></button></div></div>
+              <div class="kcol-sum" data-col-sum></div>
+              <div class="kcol-body" data-drop="prog"></div>
+            </section>
+            <section class="kcol" data-stage="req">
+              <div class="kcol-head"><span class="kcol-dot d-req"></span>Requirements gathered <span class="kcol-count" data-col-count></span>
+                <div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-create" title="Add opportunity to Requirements gathered"><svg class="i"><use href="#i-plus"/></svg></button></div></div>
+              <div class="kcol-sum" data-col-sum></div>
+              <div class="kcol-body" data-drop="req"></div>
+            </section>
+            <section class="kcol" data-stage="docs">
+              <div class="kcol-head"><span class="kcol-dot d-docs"></span>Documents collected <span class="kcol-count" data-col-count></span>
+                <div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-create" title="Add opportunity to Documents collected"><svg class="i"><use href="#i-plus"/></svg></button></div></div>
+              <div class="kcol-sum" data-col-sum></div>
+              <div class="kcol-body" data-drop="docs"></div>
+            </section>
+          </div>
+          <div class="kdrops">
+            <div class="kdrop kdrop-won" data-drop="won"><svg class="i"><use href="#i-check"/></svg>Drop here to mark Won <small id="won-meta">· 6 this month · ₹38.4 L</small></div>
+            <div class="kdrop kdrop-lost" data-drop="lost"><svg class="i"><use href="#i-x"/></svg>Drop here to mark Lost <small id="lost-meta">· 2 this month</small></div>
+          </div>
+        </section>
+
+        <!-- Table panel -->
+        <section data-tab-panel="table" data-tab-scope="view" id="panel-table">
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr>
+                  <th class="col-check"><label class="check"><input type="checkbox" aria-label="Select all"></label></th>
+                  <th><span class="th-sort">Opportunity title</span></th>
+                  <th><span class="th-sort is-asc">Follow-up date</span></th>
+                  <th>Status</th>
+                  <th class="num"><span class="th-sort">Expected value (₹)</span></th>
+                  <th><span class="th-sort"><svg class="i i-sm" style="color:var(--ai)"><use href="#i-sparkles"/></svg>AI score</span></th>
+                  <th>Source</th>
+                  <th>Created by</th>
+                  <th><span class="th-sort">Created at</span></th>
+                  <th class="num"><span class="th-sort">AUM (₹)</span></th>
+                  <th>Category</th>
+                  <th>Last purchase</th>
+                  <th></th>
+                </tr></thead>
+                <tbody id="opp-tbody"></tbody>
+              </table>
+            </div>
+            <div class="pagination"><select class="select" aria-label="Rows per page"><option>20</option><option>50</option></select> rows · <span id="tbl-range">1–10 of 10</span>
+              <div class="pg-btns"><button class="pg-btn" aria-label="Previous page"><svg class="i"><use href="#i-chevron-left"/></svg></button><button class="pg-btn is-active">1</button><button class="pg-btn" aria-label="Next page"><svg class="i"><use href="#i-chevron-right"/></svg></button></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Shared "Move to…" menu, positioned next to the card's ⋯ button -->
+  <div class="menu move-menu" id="move-menu" role="menu">
+    <div class="menu-label">Move to…</div>
+    <button class="menu-item" data-move="new"><span class="kcol-dot" style="background:var(--info)"></span>New</button>
+    <button class="menu-item" data-move="prog"><span class="kcol-dot" style="background:var(--info)"></span>In progress</button>
+    <button class="menu-item" data-move="req"><span class="kcol-dot" style="background:var(--neutral)"></span>Requirements gathered</button>
+    <button class="menu-item" data-move="docs"><span class="kcol-dot" style="background:var(--warning)"></span>Documents collected</button>
+    <div class="menu-sep"></div>
+    <button class="menu-item" data-move="won"><svg class="i" style="color:var(--success)"><use href="#i-check"/></svg>Mark as Won</button>
+    <button class="menu-item is-danger" data-move="lost"><svg class="i"><use href="#i-x"/></svg>Mark as Lost</button>
+    <div class="menu-sep"></div>
+    <a class="menu-item" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg>Open client 360</a>
+    <button class="menu-item" data-move="task"><svg class="i"><use href="#i-check-square"/></svg>Create follow-up task</button>
+  </div>
+
+  <!-- AI suggestions to review -->
+  <aside class="drawer" id="drawer-ai" aria-label="AI suggestions to review">
+    <div class="drawer-header">
+      <span class="card-icon ci-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>
+      <div><div class="drawer-title">AI suggestions to review <span class="badge badge-ai" id="ai-pending-badge" style="margin-left:4px">3 pending</span></div>
+        <div class="drawer-sub">Generated 14 Nov 2026, 06:00 from MF Box data · rules set in Settings</div></div>
+      <button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="drawer-body" id="ai-list">
+      <div class="guard">
+        <svg class="i"><use href="#i-shield"/></svg>
+        <div><span class="not-advice"><svg class="i i-sm"><use href="#i-lock"/></svg>Internal — not advice</span>
+          <div class="mt-2">AI drafts, a human approves. Nothing reaches the board, a task or the client until you accept it. Scores are rule-based and every point is shown below.</div></div>
+      </div>
+      <!-- suggestions rendered by script -->
+    </div>
+    <div class="drawer-footer">
+      <a class="btn btn-ghost" href="20-settings.html"><svg class="i"><use href="#i-settings"/></svg>Configure AI rules</a>
+      <span class="spacer"></span>
+      <button class="btn btn-secondary" data-close-drawer>Done</button>
+    </div>
+  </aside>
+
+  <!-- Create opportunity -->
+  <aside class="drawer" id="drawer-create" aria-label="Create opportunity">
+    <div class="drawer-header"><div><div class="drawer-title">Create opportunity</div><div class="drawer-sub">Fields marked * are required</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Opportunity title <span class="req">*</span></label><input class="input" placeholder="e.g. SIP top-up – Suresh Iyer"></div>
+        <div class="field span-2"><label class="label">Client <span class="req">*</span></label>
+          <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by name, PAN, mobile or folio"></label>
+          <span class="help">AUM, SIPs and last purchase are pulled from MF Box.</span></div>
+        <div class="field"><label class="label">Category <span class="req">*</span></label><select class="select"><option>MF · SIP top-up</option><option>MF · Lumpsum</option><option>MF · Inactive client</option><option>FD maturity</option><option>Insurance · Term</option><option>Insurance · Health</option><option>NPS</option><option>PMS</option></select></div>
+        <div class="field"><label class="label">Status</label><select class="select"><option>New</option><option>In progress</option><option>Requirements gathered</option><option>Documents collected</option></select></div>
+        <div class="field"><label class="label">Expected value (₹)</label><input class="input tnum" placeholder="e.g. 5,00,000"></div>
+        <div class="field"><label class="label">Follow-up date <span class="req">*</span></label><input class="input" type="date" value="2026-11-18"></div>
+        <div class="field"><label class="label">Owner</label><select class="select"><option>Neha Kapoor (me)</option><option>Rohan Mehta</option><option>Sneha Iyer</option><option>Aman Gupta</option></select></div>
+        <div class="field"><label class="label">Collaborators</label><select class="select"><option>Add people…</option><option>Rohan Mehta</option><option>Priya Nair</option></select></div>
+        <div class="field span-2"><label class="label">Notes</label><textarea class="textarea" placeholder="What does the client need? Any amounts or dates discussed?"></textarea></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-create');AK.toast('Opportunity created in New')">Create opportunity</button></div>
+  </aside>
+
+  <script>
+  (function () {
+    var TODAY = '2026-11-14';
+    var PEOPLE = {
+      NK: ['Neha Kapoor', ''], RM: ['Rohan Mehta', 'a2'], SI: ['Sneha Iyer', 'a3'], AG: ['Aman Gupta', 'a5'], AI: ['AI engine', 'a4']
+    };
+    var STAGES = { new: ['New', 'info'], prog: ['In progress', 'info'], req: ['Requirements gathered', 'neutral'], docs: ['Documents collected', 'warning'] };
+    var C360 = '08-client-360.html';
+
+    // All fictional (DESIGN.md §8). aum/value in rupees.
+    var OPPS = [
+      { id: 1, title: 'Inactive client – Deepak Agarwal', src: 'ai', score: 82, aum: 1520000, value: 300000, fu: '2026-11-16', stage: 'new', owner: 'NK', collab: [], cat: 'MF · Inactive client', why: 'No transaction for <b>14 months</b>; SIP of ₹5,000 stopped Sep 2025', by: 'AI', at: '13 Nov 2026', last: '08 Sep 2025' },
+      { id: 2, title: 'Life insurance renewal – Meera Joshi', src: 'ai', score: 74, aum: 4230000, value: 48500, fu: '2026-11-20', stage: 'new', owner: 'NK', collab: [], cat: 'Insurance · Life renewal', why: 'Term plan premium of ₹48,500 due <b>12 Dec 2026</b> (in 28 days)', by: 'AI', at: '13 Nov 2026', last: '02 Oct 2026' },
+      { id: 3, title: 'SIP maturity – Pooja Bansal', src: 'ai', score: 68, aum: 980000, value: 120000, fu: '2026-11-18', stage: 'new', owner: 'NK', collab: [], cat: 'MF · SIP maturity', why: '3-year SIP of ₹5,000 ends <b>05 Dec 2026</b>; no new SIP registered', by: 'AI', at: '12 Nov 2026', last: '05 Nov 2026' },
+      { id: 4, title: 'NPS account opening – Lakshmi Narayanan', src: 'manual', aum: 6780000, value: 150000, fu: '2026-11-19', stage: 'new', owner: 'NK', collab: [], cat: 'NPS', by: 'NK', at: '12 Nov 2026', last: '21 Oct 2026' },
+      { id: 14, title: 'SIP restart – Pooja Bansal', src: 'ai', score: 64, aum: 980000, value: 60000, fu: '2026-11-19', stage: 'new', owner: 'AG', collab: [], cat: 'MF · Inactive client', why: 'Two SIP instalments <b>bounced</b> (Sep, Oct 2026)', by: 'AI', at: '12 Nov 2026', last: '05 Nov 2026' },
+      { id: 5, title: 'SIP top-up – Suresh Iyer', src: 'manual', aum: 8650000, value: 180000, fu: '2026-11-13', stage: 'prog', owner: 'NK', collab: ['RM'], cat: 'MF · SIP top-up', by: 'NK', at: '05 Nov 2026', last: '05 Nov 2026' },
+      { id: 6, title: 'Lumpsum from FD maturity – Farhan Qureshi', src: 'ai', score: 88, aum: 21000000, value: 2500000, fu: '2026-11-17', stage: 'prog', owner: 'NK', collab: [], cat: 'FD maturity', why: '₹25 L bank FD matures <b>30 Nov 2026</b>; reinvested last maturity with us', by: 'AI', at: '10 Nov 2026', last: '14 Aug 2026' },
+      { id: 7, title: 'Portfolio rebalancing – Harish Patel Family', src: 'manual', aum: 34000000, value: 4000000, fu: '2026-11-21', stage: 'prog', owner: 'RM', collab: ['NK'], cat: 'Portfolio review', by: 'RM', at: '06 Nov 2026', last: '30 Oct 2026' },
+      { id: 8, title: 'Term insurance – Rahul Verma', src: 'manual', aum: 12400000, value: 32000, fu: '2026-11-15', stage: 'req', owner: 'NK', collab: [], cat: 'Insurance · Term', by: 'NK', at: '03 Nov 2026', last: '01 Nov 2026' },
+      { id: 9, title: 'Life insurance maturity – Suresh Iyer', src: 'ai', score: 57, aum: 8650000, value: 650000, fu: '2026-11-24', stage: 'req', owner: 'NK', collab: [], cat: 'Insurance · Maturity', why: 'Endowment policy matures <b>05 Jan 2027</b>; ₹6.5 L to reinvest', by: 'AI', at: '09 Nov 2026', last: '05 Nov 2026' },
+      { id: 10, title: 'General insurance renewal – Anjali Verma', src: 'ai', score: 61, aum: 1850000, value: 18400, fu: '2026-11-22', stage: 'req', owner: 'SI', collab: ['NK'], cat: 'Insurance · GI renewal', why: 'Motor policy renews <b>29 Nov 2026</b> (in 15 days)', by: 'AI', at: '11 Nov 2026', last: '18 Jul 2026' },
+      { id: 11, title: 'Tax-saving ELSS – Rahul Verma', src: 'manual', aum: 12400000, value: 150000, fu: '2026-11-25', stage: 'docs', owner: 'NK', collab: [], cat: 'MF · Lumpsum', by: 'NK', at: '28 Oct 2026', last: '01 Nov 2026' },
+      { id: 12, title: 'STP from liquid fund – Lakshmi Narayanan', src: 'manual', aum: 6780000, value: 800000, fu: '2026-11-14', stage: 'docs', owner: 'NK', collab: [], cat: 'MF · STP', by: 'NK', at: '30 Oct 2026', last: '21 Oct 2026' },
+      { id: 13, title: 'Health insurance top-up – Suresh Iyer', src: 'manual', aum: 8650000, value: 22000, fu: '2026-11-18', stage: 'docs', owner: 'SI', collab: [], cat: 'Insurance · Health', by: 'SI', at: '02 Nov 2026', last: '05 Nov 2026' },
+      { id: 15, title: 'PMS proposal – Farhan Qureshi', src: 'manual', aum: 21000000, value: 5000000, fu: '2026-11-27', stage: 'docs', owner: 'RM', collab: ['NK'], cat: 'PMS', by: 'RM', at: '29 Oct 2026', last: '14 Aug 2026' }
+    ];
+
+    var PENDING = [
+      { id: 101, title: 'FD maturity – Lakshmi Narayanan', score: 79, aum: 6780000, value: 1200000, fu: '2026-11-20', cat: 'FD maturity', rule: 'FD maturity · 15 days ahead',
+        why: '₹12 L FD matures <b>29 Nov 2026</b> (in 15 days)', last: '21 Oct 2026',
+        factors: [['+50', 'up', '₹12,00,000 bank FD matures 29 Nov 2026 (in 15 days)'], ['+34', 'up', 'Reinvested the last FD maturity through us (Dec 2025)'], ['−5', 'down', 'Already has an open opportunity (NPS account opening)']],
+        next: 'Call before 20 Nov to discuss reinvestment options' },
+      { id: 102, title: 'SIP maturity – Anjali Verma', score: 71, aum: 1850000, value: 120000, fu: '2026-11-21', cat: 'MF · SIP maturity', rule: 'SIP maturity · 1 month ahead',
+        why: 'SIP of ₹10,000 ends <b>05 Dec 2026</b>; no renewal set up', last: '18 Jul 2026',
+        factors: [['+45', 'up', 'SIP of ₹10,000/month ends 05 Dec 2026, no renewal registered'], ['+32', 'up', 'Family head Rahul Verma active: 3 transactions this quarter'], ['−6', 'down', 'Contacted on 02 Nov 2026 (WhatsApp, no reply yet)']],
+        next: 'Share SIP renewal options on the next family review' },
+      { id: 103, title: 'General insurance renewal – Pooja Bansal', score: 58, aum: 980000, value: 14200, fu: '2026-11-23', cat: 'Insurance · GI renewal', rule: 'General insurance renewal · 15 days ahead',
+        why: 'Health policy renews <b>29 Nov 2026</b>', last: '05 Nov 2026',
+        factors: [['+40', 'up', 'Health policy renews 29 Nov 2026 (in 15 days)'], ['+26', 'up', 'Renewed through us last year'], ['−8', 'down', 'Low engagement: no reply to the last 2 WhatsApps']],
+        next: 'Send renewal quote and confirm nominee details' }
+    ];
+
+    var vis = 'my', src = 'all', q = '';
+    var params = new URLSearchParams(location.search);
+
+    /* ---- formatting ---- */
+    function inr(n) {
+      var s = String(Math.round(n)), last3 = s.slice(-3), rest = s.slice(0, -3);
+      if (rest) last3 = ',' + last3;
+      return rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + last3;
+    }
+    function short(n) {
+      if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2).replace(/\.?0+$/, '') + ' Cr';
+      if (n >= 100000) return '₹' + (n / 100000).toFixed(1).replace(/\.0$/, '') + ' L';
+      return '₹' + inr(n);
+    }
+    var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    function dshort(iso) { var p = iso.split('-'); return p[2] + ' ' + MON[+p[1] - 1]; }
+    function dlong(iso) { return dshort(iso) + ' ' + iso.split('-')[0]; }
+    function daysFrom(iso) { return Math.round((new Date(iso) - new Date(TODAY)) / 864e5); }
+    function ic(n, c) { return '<svg class="i' + (c ? ' ' + c : '') + '"><use href="#i-' + n + '"/></svg>'; }
+    function av(code, size) { var p = PEOPLE[code]; return '<span class="avatar ' + (size || 'avatar-xs') + ' ' + p[1] + '" title="' + p[0] + '">' + code + '</span>'; }
+
+    function fuHtml(o, long) {
+      var d = daysFrom(o.fu), txt = long ? dlong(o.fu) : dshort(o.fu);
+      if (d < 0) return '<span class="overdue">' + ic('clock', 'i-sm') + txt + (long ? '' : ' · ' + (-d) + 'd overdue') + '</span>';
+      if (d === 0) return '<span class="due-today">' + ic('clock', 'i-sm') + (long ? txt : 'Follow-up today') + '</span>';
+      if (d === 1 && !long) return '<span class="fu">' + ic('calendar') + 'Follow-up tomorrow</span>';
+      return long ? '<span class="tnum">' + txt + '</span>' : '<span class="fu">' + ic('calendar') + 'Follow-up ' + txt + '</span>';
+    }
+    function srcBadge(o, table) {
+      if (o.src === 'ai') return table ? '<span class="badge badge-ai">' + ic('sparkles') + 'AI generated</span>' : '<span class="badge badge-ai" title="AI score ' + o.score + ' / 100">' + ic('sparkles') + 'AI · ' + o.score + '</span>';
+      return '<span class="badge badge-neutral">Manual</span>';
+    }
+    function visible(o) {
+      if (vis === 'my' && o.owner !== 'NK') return false;
+      if (vis === 'collab' && !(o.owner !== 'NK' && o.collab.indexOf('NK') > -1)) return false;
+      if (src !== 'all' && o.src !== src) return false;
+      if (q && (o.title + ' ' + o.cat).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    }
+
+    /* ---- kanban ---- */
+    function card(o) {
+      var people = [o.owner].concat(o.collab.filter(function (c) { return c !== o.owner; }));
+      return '<article class="kcard' + (o.fresh ? ' is-new' : '') + '" draggable="true" data-id="' + o.id + '">' +
+        '<div class="kc-top">' + srcBadge(o) + '<span class="tag">' + o.cat + '</span>' +
+          '<button class="btn btn-ghost btn-icon btn-sm kc-more" aria-label="Move to…" title="Move to…">' + ic('more-h') + '</button></div>' +
+        '<a class="kcard-title" href="' + C360 + '">' + o.title + '</a>' +
+        '<div class="kcard-meta"><span class="nw"><span class="kc-val">' + short(o.value) + '</span> expected</span><span class="nw">· ' + short(o.aum) + ' AUM</span></div>' +
+        (o.src === 'ai' ? '<div class="kc-why" title="Why AI suggests this">' + ic('sparkles') + '<span><span class="why-l">Why:</span> ' + o.why + '</span></div>' : '') +
+        '<div class="kcard-foot">' + fuHtml(o) + '<span class="avatar-group">' + people.map(function (p) { return av(p, 'avatar-sm'); }).join('') + '</span></div>' +
+      '</article>';
+    }
+    function renderBoard() {
+      document.querySelectorAll('#board .kcol').forEach(function (col) {
+        var st = col.getAttribute('data-stage');
+        var items = OPPS.filter(function (o) { return o.stage === st && visible(o); });
+        items.sort(function (a, b) { return a.fu < b.fu ? -1 : 1; });
+        var total = items.reduce(function (s, o) { return s + o.value; }, 0);
+        col.querySelector('[data-col-count]').textContent = items.length;
+        col.querySelector('[data-col-sum]').innerHTML = ic('rupee', 'i-sm') + '<b>' + short(total) + '</b> expected value';
+        col.querySelector('.kcol-body').innerHTML = items.length ? items.map(card).join('') : '<div class="kcol-empty">No opportunities here. Drag a card in or use “Move to…”.</div>';
+      });
+    }
+
+    /* ---- table ---- */
+    function row(o) {
+      var by = o.by === 'AI'
+        ? '<span class="person">' + av('AI', 'avatar-sm') + '<span><span class="person-name">AI engine</span><div class="person-sub">Accepted by ' + PEOPLE[o.owner][0] + '</div></span></span>'
+        : '<span class="person">' + av(o.by, 'avatar-sm') + '<span class="person-name">' + PEOPLE[o.by][0] + '</span></span>';
+      var score = o.src === 'ai' ? '<span class="score-cell"><span class="progress p-ai"><span style="width:' + o.score + '%"></span></span><b>' + o.score + '</b></span>' : '<span class="faint">—</span>';
+      return '<tr><td><label class="check"><input type="checkbox" aria-label="Select"></label></td>' +
+        '<td><a class="cell-title" href="' + C360 + '">' + o.title + '</a><div class="cell-sub">Owner: ' + PEOPLE[o.owner][0] + (o.collab.length ? ' · +' + o.collab.length + ' collaborator' : '') + '</div></td>' +
+        '<td>' + fuHtml(o, true) + '</td>' +
+        '<td><span class="badge badge-dot badge-' + STAGES[o.stage][1] + '">' + STAGES[o.stage][0] + '</span></td>' +
+        '<td class="num">' + inr(o.value) + '</td>' +
+        '<td>' + score + '</td>' +
+        '<td>' + srcBadge(o, true) + '</td>' +
+        '<td>' + by + '</td>' +
+        '<td class="tnum">' + o.at + '</td>' +
+        '<td class="num">' + inr(o.aum) + '</td>' +
+        '<td><span class="tag">' + o.cat + '</span></td>' +
+        '<td class="tnum">' + o.last + '</td>' +
+        '<td><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="' + C360 + '" title="View">' + ic('eye') + '</a><button class="btn btn-ghost btn-icon btn-sm" title="Edit" data-open-drawer="drawer-create">' + ic('edit') + '</button><button class="btn btn-ghost btn-icon btn-sm kc-more" data-id="' + o.id + '" title="Move to…">' + ic('more-h') + '</button></span></td></tr>';
+    }
+    function renderTable() {
+      var items = OPPS.filter(visible).sort(function (a, b) { return a.fu < b.fu ? -1 : 1; });
+      document.getElementById('opp-tbody').innerHTML = items.map(row).join('');
+      document.getElementById('tbl-range').textContent = (items.length ? '1–' + items.length : '0') + ' of ' + items.length;
+    }
+
+    function renderCounts() {
+      var save = vis;
+      ['my', 'collab', 'team'].forEach(function (v) {
+        vis = v; var n = OPPS.filter(function (o) { var s0 = src, q0 = q; src = 'all'; q = ''; var r = visible(o); src = s0; q = q0; return r; }).length;
+        document.querySelector('[data-count="' + v + '"]').textContent = n;
+      });
+      vis = save;
+      var mine = OPPS.filter(visible);
+      var total = mine.reduce(function (s, o) { return s + o.value; }, 0);
+      var label = vis === 'my' ? 'Your' : vis === 'collab' ? 'Shared' : 'Andheri team';
+      document.getElementById('opp-sub').textContent = label + ' pipeline: ' + mine.length + ' open · ' + short(total) + ' expected value · ' + mine.filter(function (o) { return daysFrom(o.fu) < 0; }).length + ' follow-up overdue';
+    }
+    function renderAll() { renderBoard(); renderTable(); renderCounts(); }
+
+    /* ---- AI review drawer ---- */
+    function sugg(p) {
+      return '<div class="sugg" data-pid="' + p.id + '">' +
+        '<div class="sugg-head"><div style="min-width:0"><div class="row gap-2 wrap"><span class="badge badge-ai">' + ic('sparkles') + 'AI generated</span><span class="tag">' + p.rule + '</span></div>' +
+          '<div class="sugg-title mt-2"><a href="' + C360 + '" style="color:inherit">' + p.title + '</a></div>' +
+          '<div class="sugg-sub">AUM ' + short(p.aum) + ' · expected ' + short(p.value) + ' · last purchase ' + p.last + '</div></div>' +
+          '<div class="sugg-score"><b>' + p.score + '</b><span>AI score</span></div></div>' +
+        '<div class="text-sm faint mt-3" style="font-weight:600">Why AI suggests this</div>' +
+        '<ul class="factors">' + p.factors.map(function (f) { return '<li><span class="pts ' + f[1] + '">' + f[0] + '</span><span>' + f[2] + '</span></li>'; }).join('') + '</ul>' +
+        '<div class="sugg-next">' + ic('note') + '<span><b style="color:var(--ai)">Draft next step:</b> ' + p.next + ' · follow-up ' + dlong(p.fu) + '</span></div>' +
+        '<div class="sugg-foot"><select class="select" aria-label="Assign to"><option>Assign: Neha Kapoor</option><option>Rohan Mehta</option><option>Sneha Iyer</option></select>' +
+          '<span class="spacer"></span>' +
+          '<button class="btn btn-ghost btn-sm" data-dismiss="' + p.id + '">' + ic('x') + 'Dismiss</button>' +
+          '<button class="btn btn-soft btn-sm" data-accept="' + p.id + '">' + ic('check') + 'Accept</button></div>' +
+      '</div>';
+    }
+    function renderPending() {
+      var list = document.getElementById('ai-list');
+      list.querySelectorAll('.sugg, .sugg-done').forEach(function (n) { n.remove(); });
+      list.insertAdjacentHTML('beforeend', PENDING.length ? PENDING.map(sugg).join('') :
+        '<div class="sugg-done"><div class="empty-icon" style="margin:0 auto 8px;background:var(--success-soft);color:var(--success)">' + ic('check') + '</div><b>All caught up</b><div class="text-sm faint mt-1">New suggestions arrive every morning at 06:00.</div></div>');
+      var n = PENDING.length;
+      document.getElementById('ai-pending-badge').textContent = n + ' pending';
+      var bt = document.getElementById('ai-banner-text'), rb = document.getElementById('ai-review-btn');
+      if (bt) bt.innerHTML = n ? '<b>AI found ' + n + ' new opportunit' + (n === 1 ? 'y' : 'ies') + ' today.</b> You can configure AI-generated opportunities in Settings.' : '<b>All AI suggestions reviewed for today.</b> You can configure AI-generated opportunities in Settings.';
+      if (rb) rb.innerHTML = ic('eye') + (n ? 'Review ' + n : 'View');
+    }
+
+    /* ---- move ---- */
+    function move(id, to) {
+      var o = OPPS.filter(function (x) { return x.id === id; })[0]; if (!o) return;
+      if (to === 'won' || to === 'lost') {
+        OPPS.splice(OPPS.indexOf(o), 1);
+        AK.toast((to === 'won' ? 'Marked as Won: ' : 'Marked as Lost: ') + o.title, { icon: to === 'won' ? 'check' : 'x' });
+      } else if (to === 'task') {
+        AK.toast('Follow-up task drafted for ' + o.title.split('– ')[1], { undo: false });
+        return;
+      } else {
+        if (o.stage === to) return;
+        o.stage = to; o.fresh = false;
+        AK.toast('Moved to ' + STAGES[to][0]);
+      }
+      renderAll();
+    }
+
+    var menu = document.getElementById('move-menu'), menuFor = null;
+    function closeMenu() { menu.classList.remove('is-open'); menuFor = null; }
+
+    document.addEventListener('click', function (e) {
+      var more = e.target.closest('.kc-more');
+      if (more) {
+        e.preventDefault(); e.stopPropagation();
+        var id = +(more.getAttribute('data-id') || more.closest('.kcard').getAttribute('data-id'));
+        if (menuFor === id && menu.classList.contains('is-open')) { closeMenu(); return; }
+        menuFor = id;
+        var o = OPPS.filter(function (x) { return x.id === id; })[0];
+        menu.querySelectorAll('[data-move]').forEach(function (b) { if (b.getAttribute('data-move') === o.stage) b.setAttribute('disabled', ''); else b.removeAttribute('disabled'); });
+        menu.classList.add('is-open');
+        var r = more.getBoundingClientRect(), mw = menu.offsetWidth, mh = menu.offsetHeight;
+        var left = Math.min(r.right - mw, window.innerWidth - mw - 8), top = r.bottom + 4;
+        if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 4);
+        menu.style.left = Math.max(8, left) + 'px'; menu.style.top = top + 'px';
+        return;
+      }
+      var mv = e.target.closest('[data-move]');
+      if (mv && menuFor != null) { var fid = menuFor; closeMenu(); move(fid, mv.getAttribute('data-move')); return; }
+      if (!e.target.closest('#move-menu')) closeMenu();
+
+      var vt = e.target.closest('#vis-tabs .tab');
+      if (vt) { vis = vt.getAttribute('data-vis'); renderAll(); }
+      var sb = e.target.closest('#src-seg button');
+      if (sb) { src = sb.getAttribute('data-src'); renderAll(); }
+      var vb = e.target.closest('#view-seg button');
+      if (vb) setView(vb.getAttribute('data-view'));
+
+      var acc = e.target.closest('[data-accept]'), dis = e.target.closest('[data-dismiss]');
+      if (acc || dis) {
+        var pid = +(acc || dis).getAttribute(acc ? 'data-accept' : 'data-dismiss');
+        var p = PENDING.filter(function (x) { return x.id === pid; })[0];
+        PENDING.splice(PENDING.indexOf(p), 1);
+        if (acc) {
+          OPPS.push({ id: p.id, title: p.title, src: 'ai', score: p.score, aum: p.aum, value: p.value, fu: p.fu, stage: 'new', owner: 'NK', collab: [], cat: p.cat, why: p.why, by: 'AI', at: '14 Nov 2026', last: p.last, fresh: true });
+          AK.toast('Accepted and added to New: ' + p.title, { icon: 'sparkles' });
+        } else {
+          AK.toast('Dismissed. AI will not suggest this again for 30 days', { icon: 'x' });
+        }
+        renderPending(); renderAll();
+      }
+    });
+    window.addEventListener('scroll', closeMenu, true);
+    window.addEventListener('resize', closeMenu);
+
+    document.getElementById('opp-search').addEventListener('input', function (e) { q = e.target.value.trim().toLowerCase(); renderAll(); });
+
+    function setView(v) {
+      document.querySelectorAll('[data-tab-scope="view"]').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-tab-panel') === v); });
+      document.querySelectorAll('#view-seg button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-view') === v ? 'true' : 'false'); });
+    }
+
+    /* ---- drag & drop (with "Move to…" as the keyboard alternative) ---- */
+    var dragId = null;
+    document.addEventListener('dragstart', function (e) {
+      var c = e.target.closest && e.target.closest('.kcard'); if (!c) return;
+      dragId = +c.getAttribute('data-id'); c.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (err) {}
+    });
+    document.addEventListener('dragend', function () { dragId = null; document.querySelectorAll('.is-dragging, .is-over').forEach(function (n) { n.classList.remove('is-dragging', 'is-over'); }); });
+    document.querySelectorAll('[data-drop]').forEach(function (z) {
+      z.addEventListener('dragover', function (e) { if (dragId == null) return; e.preventDefault(); z.classList.add('is-over'); });
+      z.addEventListener('dragleave', function (e) { if (!z.contains(e.relatedTarget)) z.classList.remove('is-over'); });
+      z.addEventListener('drop', function (e) { e.preventDefault(); z.classList.remove('is-over'); if (dragId != null) move(dragId, z.getAttribute('data-drop')); });
+    });
+
+    renderPending();
+    renderAll();
+    if (params.get('view') === 'table') setView('table');
+  })();
+  </script>
+</body>
+</html>

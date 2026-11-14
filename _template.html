@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Template · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* page-specific styles: tokens only */
+  </style>
+</head>
+<body data-page="tasks" data-crumb="Tasks">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Tasks</h1>
+            <p class="page-sub">Everything assigned to you and your team</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-sliders"/></svg>Configurations</button>
+            <button class="btn btn-primary" data-open-drawer="drawer-create"><svg class="i"><use href="#i-plus"/></svg>Create task</button>
+          </div>
+        </div>
+
+        <div class="tabs" data-tabs="vis">
+          <button class="tab is-active">My Tasks <span class="count">12</span></button>
+          <button class="tab">Collaborations <span class="count">3</span></button>
+          <button class="tab">My Team Tasks <span class="count">48</span></button>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by title, client, PAN or mobile"></label>
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-filter"/></svg>Filters <span class="filter-count">2</span></button>
+            <button class="btn btn-ghost">Reset</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost"><svg class="i"><use href="#i-star"/></svg>Saved views</button>
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr>
+                <th class="col-check"><label class="check"><input type="checkbox"></label></th>
+                <th><span class="th-sort">Title</span></th><th>Status</th><th>Priority</th><th><span class="th-sort is-asc">Due date</span></th><th class="num">Age (days)</th><th>Assignee</th><th></th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><div class="cell-title">KYC update – Suresh Iyer</div><div class="cell-sub">KYC update · Client</div></td>
+                  <td><span class="badge badge-dot badge-warning">Pending</span></td>
+                  <td><span class="prio prio-high">High</span></td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>12 Nov 2026</span></td>
+                  <td class="num"><span class="age-hot">9</span></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                  <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination"><select class="select"><option>20</option></select> rows · 1–12 of 12
+            <div class="pg-btns"><button class="pg-btn"><svg class="i"><use href="#i-chevron-left"/></svg></button><button class="pg-btn is-active">1</button><button class="pg-btn"><svg class="i"><use href="#i-chevron-right"/></svg></button></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <aside class="drawer" id="drawer-create" aria-label="Create task">
+    <div class="drawer-header"><div><div class="drawer-title">Create task</div><div class="drawer-sub">Fields marked * are required</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body"><div class="form-grid"><div class="field span-2"><label class="label">Title <span class="req">*</span></label><input class="input" placeholder="e.g. Asset allocation meeting"></div></div></div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary">Create task</button></div>
+  </aside>
+</body>
+</html>

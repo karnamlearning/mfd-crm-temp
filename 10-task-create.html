@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create task · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- 10-task-create: page-specific styles (tokens only) ---- */
+    #drawer-task { width: min(640px, 100vw); }
+    #drawer-task .drawer-body { padding: var(--sp-5) var(--sp-6); }
+    #drawer-task .drawer-header, #drawer-task .drawer-footer { padding-left: var(--sp-6); padding-right: var(--sp-6); }
+    .dh-icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; flex: none; }
+
+    /* Natural-language "Describe it" box */
+    .nl-box { border: 1px solid var(--border); background: var(--surface-2); border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+    .nl-head { display: flex; align-items: center; gap: 8px; margin-bottom: var(--sp-2); }
+    .nl-head .nl-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .nl-head .i { color: var(--ai); }
+    .nl-row { display: flex; gap: var(--sp-2); }
+    .nl-row .input-group { flex: 1; min-width: 0; }
+    .nl-row .input { background: var(--surface); }
+    .nl-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--sp-3); align-items: center; }
+    .pchip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: var(--r-full); background: var(--surface); border: 1px solid var(--border); font-size: 12px; color: var(--text); white-space: nowrap; }
+    .pchip .k { color: var(--text-3); }
+    .pchip.is-high { border-color: var(--danger-soft); background: var(--danger-soft); color: var(--danger); }
+    .pchip.is-high .k { color: var(--danger); }
+
+    /* Sections */
+    #drawer-task .form-section { padding: var(--sp-5) 0; }
+    #drawer-task .form-section:first-of-type { padding-top: var(--sp-5); }
+    .sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: var(--sp-3); }
+    .sec-head .form-section-title { margin: 0; }
+    .sec-head .sec-meta { margin-left: auto; font-size: 12px; color: var(--text-3); }
+
+    /* Selected entity under "Created for" */
+    .entity { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 8px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); }
+    .entity-main { min-width: 0; flex: 1; }
+    .entity-name { font-weight: 600; font-size: 13.5px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .entity-meta { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sync-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: var(--success); }
+    .sync-pill .i { width: 12px; height: 12px; }
+
+    /* Picker that looks like an input but holds a person */
+    .input.picker { display: flex; align-items: center; gap: 8px; text-align: left; cursor: pointer; }
+    .picker .picker-text { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .picker .picker-sub { color: var(--text-3); font-size: 12px; }
+    .picker > .i:last-child { color: var(--text-3); }
+
+    /* Collaborators */
+    .collab-row { display: flex; align-items: center; gap: 8px; min-height: 36px; }
+    .collab-names { font-size: 13px; color: var(--text-2); min-width: 0; }
+
+    /* Status custom select */
+    .csel { position: relative; }
+    .csel-trigger { display: flex; align-items: center; gap: 8px; text-align: left; cursor: pointer; }
+    .csel-trigger .csel-text { flex: 1; }
+    .csel-trigger > .i { color: var(--text-3); }
+    .csel.is-open .csel-trigger { border-color: var(--primary); box-shadow: var(--focus-ring); }
+    .csel-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30; display: none; }
+    .csel.is-open .csel-menu { display: block; }
+    .csel-menu .menu-item .check-mark { margin-left: auto; color: var(--primary-text); visibility: hidden; }
+    .csel-menu .menu-item[aria-selected="true"] { background: var(--primary-soft); color: var(--primary-text); font-weight: 500; }
+    .csel-menu .menu-item[aria-selected="true"] .check-mark { visibility: visible; }
+    .dot-info { background: var(--primary); }
+
+    /* Due date quick picks */
+    .quick-dates { display: flex; gap: 6px; flex-wrap: wrap; }
+    .qd { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px; border-radius: var(--r-full); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-2); font-size: 12px; font-weight: 500; }
+    .qd:hover { border-color: var(--primary); color: var(--primary-text); background: var(--primary-soft); }
+    .qd.is-suggested { border-style: dashed; border-color: var(--primary); color: var(--primary-text); }
+    .help.is-error { display: flex; align-items: flex-start; gap: 6px; }
+    .help.is-error .i { width: 13px; height: 13px; margin-top: 1px; }
+
+    /* Priority choices with signal icon */
+    .choice .prio { font-size: 13px; color: inherit; }
+    .choice[aria-pressed="true"] .prio { color: inherit; }
+
+    /* Category + gear */
+    .with-btn { display: flex; gap: var(--sp-2); }
+    .with-btn > :first-child { flex: 1; min-width: 0; }
+
+    /* Checklist */
+    .cl { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+    .cl-item { display: flex; align-items: center; gap: 10px; padding: 0 10px; height: 40px; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .cl-item:last-child { border-bottom: 0; }
+    .cl-item .grip { color: var(--text-3); cursor: grab; }
+    .cl-item .cl-text { flex: 1; min-width: 0; font-size: 13.5px; color: var(--text); }
+    .cl-item.is-done .cl-text { color: var(--text-3); text-decoration: line-through; }
+    .cl-item .cl-meta { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+    .cl-add { display: flex; align-items: center; gap: 10px; padding: 0 10px; height: 40px; background: var(--surface-2); color: var(--text-3); font-size: 13px; }
+    .cl-add input { flex: 1; border: 0; background: transparent; outline: none; font-size: 13.5px; color: var(--text); }
+    .cl-add input::placeholder { color: var(--text-3); }
+
+    /* Attachments */
+    .dropzone { border: 1.5px dashed var(--border-strong); border-radius: var(--r-lg); padding: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); background: var(--surface); }
+    .dropzone:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .dz-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; flex: none; }
+    .dz-title { font-size: 13.5px; font-weight: 500; color: var(--text); }
+    .dz-title a { font-weight: 600; }
+    .dz-sub { font-size: 12px; color: var(--text-3); }
+    .file-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r-md); margin-top: var(--sp-2); }
+    .file-ic { width: 30px; height: 30px; border-radius: var(--r-sm); background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; flex: none; }
+    .file-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .file-meta { font-size: 12px; color: var(--text-3); }
+
+    /* Footer */
+    #drawer-task .drawer-footer { gap: var(--sp-2); }
+    .foot-hint { display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Background list (behind the drawer) */
+    .bg-title-link { color: var(--text); font-weight: 500; }
+    @media (max-width: 768px) {
+      .nl-row { flex-direction: column; }
+      .nl-row .btn { width: 100%; }
+      .foot-hint { display: none; }
+      .nl-head { flex-wrap: wrap; }
+    }
+    @media (max-width: 480px) { #btn-another { display: none; } }
+  </style>
+</head>
+<body data-page="tasks" data-crumb="Tasks|Create task" data-open="drawer-task">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- Simplified Tasks list behind the drawer (context) -->
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Tasks</h1>
+            <p class="page-sub">Everything assigned to you and your Andheri team</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-sliders"/></svg>Configurations</button>
+            <button class="btn btn-primary" data-open-drawer="drawer-task"><svg class="i"><use href="#i-plus"/></svg>Create task</button>
+          </div>
+        </div>
+
+        <div class="tabs" data-tabs="vis">
+          <button class="tab is-active">My Tasks <span class="count">12</span></button>
+          <button class="tab">Collaborations <span class="count">3</span></button>
+          <button class="tab">My Team Tasks <span class="count">48</span></button>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by title, client, PAN or mobile"></label>
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-filter"/></svg>Filters</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost"><svg class="i"><use href="#i-star"/></svg>Saved views</button>
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr>
+                <th class="col-check"><label class="check"><input type="checkbox"></label></th>
+                <th><span class="th-sort">Title</span></th><th>Status</th><th>Priority</th><th><span class="th-sort is-asc">Due date</span></th><th class="num">Age (days)</th><th>Created for</th><th>Assignee</th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><a class="bg-title-link" href="11-task-detail.html">Nomination update – Meera Joshi</a><div class="cell-sub">Nomination update</div></td>
+                  <td><span class="badge badge-dot badge-warning">Pending</span></td>
+                  <td><span class="prio prio-med">Medium</span></td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>11 Nov 2026</span></td>
+                  <td class="num"><span class="age-hot">12</span></td>
+                  <td><a href="08-client-360.html">Meera Joshi</a></td>
+                  <td><span class="person"><span class="avatar avatar-sm a3">SI</span><span class="person-name">Sneha Iyer</span></span></td>
+                </tr>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><a class="bg-title-link" href="11-task-detail.html">KYC update – Suresh Iyer</a><div class="cell-sub">KYC update</div></td>
+                  <td><span class="badge badge-dot badge-warning">Pending</span></td>
+                  <td><span class="prio prio-high">High</span></td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>12 Nov 2026</span></td>
+                  <td class="num"><span class="age-hot">9</span></td>
+                  <td><a href="08-client-360.html">Suresh Iyer</a></td>
+                  <td><span class="person"><span class="avatar avatar-sm a5">PN</span><span class="person-name">Priya Nair</span></span></td>
+                </tr>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><a class="bg-title-link" href="11-task-detail.html">Quarterly portfolio review – Verma Family</a><div class="cell-sub">Portfolio review</div></td>
+                  <td><span class="badge badge-dot badge-info">In progress</span></td>
+                  <td><span class="prio prio-high">High</span></td>
+                  <td><span class="due-today"><svg class="i i-sm"><use href="#i-clock"/></svg>Today</span></td>
+                  <td class="num">4</td>
+                  <td><a href="08-client-360.html">Rahul Verma</a></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                </tr>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><a class="bg-title-link" href="11-task-detail.html">Call back – Karan Malhotra (₹5,00,000 SIP)</a><div class="cell-sub">Transaction Proposal: SIP</div></td>
+                  <td><span class="badge badge-dot badge-warning">Pending</span></td>
+                  <td><span class="prio prio-high">High</span></td>
+                  <td><span class="due-today"><svg class="i i-sm"><use href="#i-clock"/></svg>Today</span></td>
+                  <td class="num">2</td>
+                  <td><a href="05-lead-create.html">Karan Malhotra</a></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                </tr>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><a class="bg-title-link" href="11-task-detail.html">SIP top-up proposal – Suresh Iyer</a><div class="cell-sub">Transaction Proposal: SIP</div></td>
+                  <td><span class="badge badge-dot badge-info">In progress</span></td>
+                  <td><span class="prio prio-high">High</span></td>
+                  <td>16 Nov 2026</td>
+                  <td class="num">5</td>
+                  <td><a href="08-client-360.html">Suresh Iyer</a></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                </tr>
+                <tr>
+                  <td><label class="check"><input type="checkbox"></label></td>
+                  <td><a class="bg-title-link" href="11-task-detail.html">Nomination update – Rahul Verma</a><div class="cell-sub">Nomination update</div></td>
+                  <td><span class="badge badge-dot badge-success">Done</span></td>
+                  <td><span class="prio prio-low">Low</span></td>
+                  <td>12 Nov 2026</td>
+                  <td class="num">5</td>
+                  <td><a href="08-client-360.html">Rahul Verma</a></td>
+                  <td><span class="person"><span class="avatar avatar-sm a3">SI</span><span class="person-name">Sneha Iyer</span></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination"><select class="select"><option>20</option></select> rows · 1–6 of 12
+            <div class="pg-btns ml-auto"><button class="pg-btn"><svg class="i"><use href="#i-chevron-left"/></svg></button><button class="pg-btn is-active">1</button><button class="pg-btn">2</button><button class="pg-btn"><svg class="i"><use href="#i-chevron-right"/></svg></button></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= Create task drawer ================= -->
+  <aside class="drawer" id="drawer-task" aria-label="Create task" role="dialog">
+    <div class="drawer-header">
+      <span class="dh-icon"><svg class="i"><use href="#i-check-square"/></svg></span>
+      <div>
+        <div class="drawer-title">Create task</div>
+        <div class="drawer-sub">Fields marked <span class="text-primary">*</span> are required · Saves to My Tasks</div>
+      </div>
+      <a class="btn btn-ghost btn-icon btn-sm ml-auto" href="11-task-detail.html" title="Open as full page"><svg class="i"><use href="#i-external"/></svg></a>
+      <button class="btn btn-ghost btn-icon btn-sm" data-close-drawer title="Close (Esc)"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+
+    <div class="drawer-body">
+      <form id="task-form" onsubmit="return false" novalidate>
+
+        <!-- Describe it (natural language) -->
+        <div class="nl-box">
+          <div class="nl-head">
+            <svg class="i"><use href="#i-sparkles"/></svg><span class="nl-title">Describe it</span>
+            <span class="faint text-sm">Type in plain English or Hinglish (“kal 4pm”); we fill the form</span>
+          </div>
+          <div class="nl-row">
+            <label class="input-group"><svg class="i"><use href="#i-zap"/></svg><input class="input" id="nl-input" value="Send SIP top-up proposal to Suresh by Monday high priority" aria-label="Describe the task"></label>
+            <button type="button" class="btn btn-soft" id="nl-apply"><svg class="i"><use href="#i-check"/></svg>Apply</button>
+          </div>
+          <div class="nl-chips" id="nl-chips">
+            <span class="pchip"><span class="k">Title</span>SIP top-up proposal</span>
+            <span class="pchip"><span class="k">Client</span>Suresh Iyer</span>
+            <span class="pchip"><span class="k">Due</span>Mon 16 Nov</span>
+            <span class="pchip is-high"><span class="k">Priority</span>High</span>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="form-section" style="border-top:0">
+          <div class="sec-head"><div class="form-section-title">Details</div></div>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label class="label" for="f-title">Title <span class="req">*</span></label>
+              <input class="input" id="f-title" value="SIP top-up proposal – Suresh Iyer" placeholder="e.g. Asset allocation meeting">
+            </div>
+            <div class="field span-2">
+              <label class="label" for="f-desc">Description <span class="label-action faint text-sm">Type @ to mention · / for templates</span></label>
+              <textarea class="textarea" id="f-desc" rows="2" style="min-height:64px" placeholder="e.g. Prepare portfolio review report…">Suggest raising the monthly SIP from ₹25,000 to ₹40,000 after his bonus. Share the proposal PDF on WhatsApp and confirm the bank mandate limit.</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="form-section">
+          <div class="sec-head"><div class="form-section-title">Schedule &amp; status</div><span class="sec-meta">Today: Sat 14 Nov 2026</span></div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="label" for="f-due">Due date <span class="req">*</span></label>
+              <div class="row gap-2">
+                <label class="input-group" style="flex:1;min-width:0"><svg class="i"><use href="#i-calendar"/></svg><input class="input is-error" id="f-due" placeholder="DD MMM YYYY" aria-invalid="true" aria-describedby="f-due-err"></label>
+                <label class="input-group" style="width:116px;flex:none"><svg class="i"><use href="#i-clock"/></svg><input class="input" id="f-time" value="11:00 AM" aria-label="Due time"></label>
+              </div>
+              <div class="help is-error" id="f-due-err"><svg class="i"><use href="#i-alert"/></svg><span>Due date is required.</span></div>
+              <div class="quick-dates">
+                <button type="button" class="qd is-suggested" data-date="Mon 16 Nov 2026" title="From your description"><svg class="i i-sm"><use href="#i-sparkles"/></svg>Mon 16 Nov</button>
+                <button type="button" class="qd" data-date="Sun 15 Nov 2026">Tomorrow</button>
+                <button type="button" class="qd" data-date="Mon 23 Nov 2026">Next week</button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" id="lbl-status">Status</label>
+              <div class="csel is-open" id="csel-status">
+                <button type="button" class="input csel-trigger" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="lbl-status">
+                  <span class="dot dot-warning" id="csel-dot"></span><span class="csel-text" id="csel-text">Pending</span><svg class="i"><use href="#i-chevron-down"/></svg>
+                </button>
+                <div class="menu csel-menu" role="listbox">
+                  <div class="menu-item" role="option" aria-selected="true" data-dot="dot-warning"><span class="dot dot-warning"></span>Pending<svg class="i check-mark"><use href="#i-check"/></svg></div>
+                  <div class="menu-item" role="option" aria-selected="false" data-dot="dot-info"><span class="dot dot-info"></span>In progress<svg class="i check-mark"><use href="#i-check"/></svg></div>
+                  <div class="menu-item" role="option" aria-selected="false" data-dot="dot-neutral"><span class="dot dot-neutral"></span>On hold<svg class="i check-mark"><use href="#i-check"/></svg></div>
+                  <div class="menu-item" role="option" aria-selected="false" data-dot="dot-success"><span class="dot dot-success"></span>Done<svg class="i check-mark"><use href="#i-check"/></svg></div>
+                </div>
+              </div>
+            </div>
+            <div class="field span-2">
+              <label class="check"><input type="checkbox" checked> Send a reminder 1 day before due date</label>
+              <div class="help" style="padding-left:24px">In-app + WhatsApp to the assignee</div>
+            </div>
+            <div class="field">
+              <label class="label">Priority</label>
+              <div class="choice-group" data-single id="f-prio">
+                <button type="button" class="choice" aria-pressed="false" data-v="low"><span class="prio prio-low">Low</span></button>
+                <button type="button" class="choice" aria-pressed="true" data-v="med"><span class="prio prio-med">Medium</span></button>
+                <button type="button" class="choice" aria-pressed="false" data-v="high"><span class="prio prio-high">High</span></button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label" for="f-repeat">Repeat</label>
+              <label class="input-group"><svg class="i"><use href="#i-repeat"/></svg>
+                <select class="select" id="f-repeat" style="padding-left:34px">
+                  <option>Does not repeat</option><option>Weekly</option><option>Monthly</option><option>Quarterly</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- People -->
+        <div class="form-section">
+          <div class="sec-head"><div class="form-section-title">People</div></div>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label class="label">Created for</label>
+              <div class="input-combo">
+                <select class="select" id="f-for-type" style="width:150px" aria-label="Created for type">
+                  <option>Client</option><option>Family head</option><option>Lead</option>
+                </select>
+                <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" id="f-for" value="Suresh Iyer" placeholder="Search by client name or PAN"></label>
+              </div>
+              <div class="entity" id="f-for-card">
+                <span class="avatar avatar-sm a3" style="width:32px;height:32px;font-size:12px">SI</span>
+                <div class="entity-main">
+                  <div class="entity-name"><a href="08-client-360.html">Suresh Iyer</a><span class="badge badge-neutral badge-square">Client</span></div>
+                  <div class="entity-meta">BDKPI••••R · AUM ₹86.5 L · 4 active SIPs · Family head: Iyer Family · RM: Rohan Mehta</div>
+                </div>
+                <span class="sync-pill" title="Client data is read from MF Box"><svg class="i"><use href="#i-refresh"/></svg>MF Box</span>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" title="Clear"><svg class="i"><use href="#i-x"/></svg></button>
+              </div>
+            </div>
+            <div class="field">
+              <label class="label">Assigned to</label>
+              <button type="button" class="input picker" title="Search team members">
+                <span class="avatar avatar-sm">NK</span>
+                <span class="picker-text">Neha Kapoor <span class="picker-sub">(you)</span></span>
+                <svg class="i"><use href="#i-search"/></svg>
+              </button>
+              <div class="help">Suggested: <a href="#" id="sugg-rm">Rohan Mehta</a> (Suresh's RM)</div>
+            </div>
+            <div class="field">
+              <label class="label">Collaborators <span class="label-action faint text-sm">Can view &amp; comment</span></label>
+              <div class="collab-row">
+                <span class="avatar-group"><span class="avatar a2" style="width:30px;height:30px;font-size:11px" title="Rohan Mehta">RM</span><span class="avatar a5" style="width:30px;height:30px;font-size:11px" title="Priya Nair">PN</span></span>
+                <span class="collab-names truncate">Rohan Mehta, Priya Nair</span>
+                <button type="button" class="btn btn-secondary btn-sm ml-auto" title="Add collaborators"><svg class="i"><use href="#i-plus"/></svg>Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Classify -->
+        <div class="form-section">
+          <div class="sec-head"><div class="form-section-title">Classify &amp; link</div></div>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label class="label" for="f-cat">Category</label>
+              <div class="with-btn">
+                <select class="select" id="f-cat">
+                  <option>Select a category</option>
+                  <option>Proposal: Investment Proposal</option>
+                  <option selected>Transaction Proposal: SIP</option>
+                  <option>Transaction Proposal: Redemption</option>
+                  <option>KYC update</option>
+                  <option>Nomination update</option>
+                  <option>Portfolio review</option>
+                  <option>Bank mandate</option>
+                  <option>Complaint follow-up</option>
+                </select>
+                <a class="btn btn-secondary btn-icon" href="20-settings.html" title="Configure categories"><svg class="i"><use href="#i-settings"/></svg></a>
+              </div>
+            </div>
+            <div class="field span-2">
+              <label class="label">Link to <span class="label-action faint text-sm">Optional</span></label>
+              <div class="input-combo">
+                <select class="select" style="width:150px" aria-label="Link type">
+                  <option>Opportunity</option><option>Meeting</option><option>Service request</option>
+                </select>
+                <label class="input-group"><svg class="i"><use href="#i-target"/></svg><input class="input" value="SIP top-up – Suresh Iyer" aria-label="Linked record"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Checklist & files -->
+        <div class="form-section">
+          <div class="sec-head"><div class="form-section-title">Checklist</div><span class="sec-meta">1 of 2 done</span></div>
+          <div class="cl">
+            <div class="cl-item is-done">
+              <svg class="i grip"><use href="#i-grip"/></svg>
+              <label class="check"><input type="checkbox" checked aria-label="Done"></label>
+              <span class="cl-text">Pull current SIP book from MF Box</span>
+              <span class="cl-meta">Neha</span>
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" title="Remove"><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="cl-item">
+              <svg class="i grip"><use href="#i-grip"/></svg>
+              <label class="check"><input type="checkbox" aria-label="Done"></label>
+              <span class="cl-text">Share proposal PDF with Suresh on WhatsApp</span>
+              <span class="cl-meta">Rohan</span>
+              <button type="button" class="btn btn-ghost btn-icon btn-sm" title="Remove"><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="cl-add">
+              <svg class="i"><use href="#i-plus"/></svg>
+              <input id="cl-new" placeholder="Add a checklist item and press Enter">
+            </div>
+          </div>
+
+          <div class="sec-head" style="margin-top:var(--sp-5)"><div class="form-section-title">Attachments</div><span class="sec-meta">Stored in client's Documents</span></div>
+          <label class="dropzone">
+            <span class="dz-icon"><svg class="i"><use href="#i-upload"/></svg></span>
+            <span>
+              <span class="dz-title" style="display:block">Drop files here or <a href="#">browse</a></span>
+              <span class="dz-sub">PDF, JPG, PNG, XLSX · up to 10 MB each</span>
+            </span>
+            <input type="file" hidden multiple>
+          </label>
+          <div class="file-row">
+            <span class="file-ic"><svg class="i"><use href="#i-file"/></svg></span>
+            <div style="flex:1;min-width:0"><div class="file-name truncate">SIP_topup_proposal_Iyer_Nov26.pdf</div><div class="file-meta">182 KB · uploaded just now</div></div>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" title="Remove"><svg class="i"><use href="#i-trash"/></svg></button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="drawer-footer">
+      <span class="faint text-sm foot-hint"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-secondary" data-close-drawer>Cancel</button>
+      <button type="button" class="btn btn-secondary" id="btn-another">Create &amp; add another</button>
+      <button type="button" class="btn btn-primary" id="btn-create"><svg class="i"><use href="#i-check"/></svg>Create task</button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      var $ = function (s) { return document.querySelector(s); };
+      var due = $('#f-due'), dueErr = $('#f-due-err');
+
+      function setDue(v) {
+        due.value = v;
+        var ok = !!v.trim();
+        due.classList.toggle('is-error', !ok);
+        due.setAttribute('aria-invalid', ok ? 'false' : 'true');
+        dueErr.classList.toggle('hidden', ok);
+      }
+      function validate() { setDue(due.value); if (!due.value.trim()) { due.focus(); return false; } return true; }
+
+      // Status custom select
+      var csel = $('#csel-status');
+      csel.querySelector('.csel-trigger').addEventListener('click', function (e) {
+        e.stopPropagation(); csel.classList.toggle('is-open');
+        this.setAttribute('aria-expanded', csel.classList.contains('is-open'));
+      });
+      csel.querySelectorAll('.menu-item').forEach(function (it) {
+        it.addEventListener('click', function (e) {
+          e.stopPropagation();
+          csel.querySelectorAll('.menu-item').forEach(function (x) { x.setAttribute('aria-selected', x === it ? 'true' : 'false'); });
+          $('#csel-text').textContent = it.textContent.trim();
+          $('#csel-dot').className = 'dot ' + it.getAttribute('data-dot');
+          csel.classList.remove('is-open');
+        });
+      });
+      document.addEventListener('click', function (e) { if (!e.target.closest('#csel-status')) csel.classList.remove('is-open'); });
+
+      // Quick dates
+      document.querySelectorAll('.qd').forEach(function (b) { b.addEventListener('click', function () { setDue(b.getAttribute('data-date')); }); });
+      due.addEventListener('input', function () { if (due.value.trim()) setDue(due.value); });
+
+      // Apply natural-language parse
+      $('#nl-apply').addEventListener('click', function () {
+        $('#f-title').value = 'Send SIP top-up proposal – Suresh Iyer';
+        $('#f-for').value = 'Suresh Iyer';
+        setDue('Mon 16 Nov 2026');
+        document.querySelectorAll('#f-prio .choice').forEach(function (c) { c.setAttribute('aria-pressed', c.getAttribute('data-v') === 'high' ? 'true' : 'false'); });
+        AK.toast('Applied 4 fields from your description', { icon: 'sparkles' });
+      });
+
+      // Suggested assignee
+      $('#sugg-rm').addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector('.picker').innerHTML = '<span class="avatar avatar-sm a2">RM</span><span class="picker-text">Rohan Mehta <span class="picker-sub">RM · Andheri</span></span><svg class="i"><use href="#i-search"/></svg>';
+      });
+
+      // Created-for type changes the search hint
+      $('#f-for-type').addEventListener('change', function () {
+        var m = { 'Client': 'Search by client name or PAN', 'Family head': 'Search by family head name or PAN', 'Lead': 'Search by lead name or mobile' };
+        var f = $('#f-for'); f.value = ''; f.placeholder = m[this.value]; $('#f-for-card').classList.add('hidden');
+      });
+
+      // Checklist add
+      $('#cl-new').addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || !this.value.trim()) return;
+        e.preventDefault();
+        var row = document.createElement('div'); row.className = 'cl-item';
+        row.innerHTML = '<svg class="i grip"><use href="#i-grip"/></svg><label class="check"><input type="checkbox" aria-label="Done"></label><span class="cl-text"></span><span class="cl-meta">Neha</span><button type="button" class="btn btn-ghost btn-icon btn-sm" title="Remove"><svg class="i"><use href="#i-x"/></svg></button>';
+        row.querySelector('.cl-text').textContent = this.value.trim();
+        this.closest('.cl-add').before(row); this.value = '';
+      });
+      document.querySelector('.cl').addEventListener('click', function (e) {
+        var x = e.target.closest('.cl-item .btn'); if (x) x.closest('.cl-item').remove();
+        var c = e.target.closest('.cl-item input'); if (c) c.closest('.cl-item').classList.toggle('is-done', c.checked);
+      });
+
+      // Save actions
+      function save(another) {
+        if (!validate()) { AK.toast('Add a due date to create this task', { icon: 'alert', undo: false }); return; }
+        if (another) { AK.toast('Task created · form cleared for the next one', { undo: true }); $('#f-title').value = ''; $('#f-title').focus(); }
+        else { AK.closeDrawer('drawer-task'); AK.toast('Task “' + $('#f-title').value + '” created'); }
+      }
+      $('#btn-create').addEventListener('click', function () { save(false); });
+      $('#btn-another').addEventListener('click', function () { save(true); });
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && document.getElementById('drawer-task').classList.contains('is-open')) { e.preventDefault(); save(false); }
+      });
+    })();
+  </script>
+</body>
+</html>

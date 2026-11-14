@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Service Requests · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Service requests: page-specific styles (tokens only) ---- */
+    .sync-pill { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--text-3); }
+    .sync-pill .dot { width: 6px; height: 6px; }
+    .page-head > div:first-child { flex: 1 1 420px; min-width: 0; }
+    .page-head .page-actions { flex: none; }
+
+    .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-3); margin-bottom: var(--sp-5); }
+    .kpis .stat { text-align: left; font: inherit; color: inherit; cursor: pointer; padding: 14px var(--sp-4); }
+    .kpis .stat:hover { border-color: var(--border-strong); background: var(--surface-2); }
+    .kpis .stat.is-on { border-color: var(--primary); box-shadow: var(--focus-ring); }
+    .kpis .stat-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .kpis .stat-label .i { margin-right: 4px; vertical-align: -3px; }
+    .kpis .stat-value { margin-top: 4px; }
+    .kpis .stat-value small { font-size: 14px; font-weight: 600; color: var(--text-2); margin-left: 2px; letter-spacing: 0; }
+    .kpis .stat-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .stat-warning .stat-value, .stat-warning .stat-label { color: var(--warning); }
+    .stat-neutral::before { background: var(--neutral); }
+
+    .tabs-row { display: flex; align-items: flex-end; gap: var(--sp-4); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-4); }
+    .tabs-row .tabs { border-bottom: 0; margin-bottom: 0; }
+    .duty { margin-left: auto; padding-bottom: 10px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+    .duty b { color: var(--text); font-weight: 600; }
+
+    .menu .check { width: 100%; height: 32px; padding: 0 10px; border-radius: 6px; color: var(--text); }
+    .menu .check:hover { background: var(--surface-2); }
+    .menu .check .menu-hint { margin-left: auto; color: var(--text-3); font-size: 12px; }
+    .popover-left { left: 0; right: auto; }
+
+    .table td.ref-cell a { font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: var(--primary-text); }
+    .type-cell { display: flex; align-items: center; gap: 10px; }
+    .cx { color: var(--danger); margin-right: 6px; display: inline-flex; vertical-align: -2px; }
+    .type-sub { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+    #sr-table td, #sr-table th { padding-left: 8px; padding-right: 8px; }
+    #sr-table td:first-child, #sr-table th:first-child { padding-left: var(--sp-4); }
+    #sr-table td.act { padding-right: var(--sp-2); width: 40px; }
+    .upd.truncate { max-width: 112px; }
+    .client-cell { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+    .type-ic { width: 28px; height: 28px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); display: grid; place-items: center; flex: none; }
+    .type-ic.is-complaint { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+    .ch { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); }
+    .ch .i { color: var(--text-3); }
+    .ch .i.is-wa { color: var(--success); }
+    .sla { min-width: 136px; }
+    .sla-line { display: flex; align-items: center; gap: 5px; font-weight: 500; font-size: 13px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .sla-line.is-warn { color: var(--warning); }
+    .sla-line.is-ok .i { color: var(--text-3); }
+    .sla .progress { height: 4px; width: 120px; margin-top: 5px; }
+    .sla .progress.p-neutral > span { background: var(--neutral); }
+    .sla-sub { font-size: 11.5px; color: var(--text-3); line-height: 15px; margin-top: 3px; }
+    .upd { font-size: 13px; color: var(--text-2); }
+    .upd small { display: block; font-size: 12px; color: var(--text-3); }
+    .table tbody tr { cursor: pointer; }
+    .assign-btn { height: 28px; }
+    .ai-mini { display: inline-flex; align-items: center; gap: 4px; color: var(--ai); font-size: 12px; font-weight: 500; }
+    .ai-mini .i { width: 12px; height: 12px; }
+    .empty-row td { height: 160px; text-align: center; color: var(--text-3); }
+
+    /* ---- Drawer ---- */
+    #drawer-sr .drawer-header { align-items: flex-start; }
+    .dh-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .dh-top .mono { color: var(--text-2); font-weight: 600; }
+    .dh-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12.5px; color: var(--text-2); }
+    .dh-meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .dh-meta .i { color: var(--text-3); width: 14px; height: 14px; }
+    .dsec { margin-top: var(--sp-6); }
+    .dsec-head { display: flex; align-items: center; gap: 8px; margin-bottom: var(--sp-3); }
+    .dsec-title { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .dsec-head .btn { margin-left: auto; }
+
+    .sla-card { border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4) var(--sp-5); background: var(--surface); }
+    .sla-card.is-paused { background: var(--surface-2); }
+    .sla-top { display: flex; align-items: flex-start; gap: var(--sp-4); }
+    .sla-big { font-size: 26px; line-height: 32px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .sla-big small { font-size: 14px; font-weight: 500; color: var(--text-2); letter-spacing: 0; }
+    .sla-due { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+    .sla-actions { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .sla-track { position: relative; height: 8px; border-radius: 8px; background: var(--surface-3); margin: var(--sp-4) 0 6px; }
+    .sla-track > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 8px; background: var(--primary); }
+    .sla-card.is-paused .sla-track > span { background: var(--neutral); }
+    .sla-tick { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--surface); border-left: 1px solid var(--border-strong); }
+    .sla-scale { position: relative; display: flex; justify-content: space-between; font-size: 11.5px; color: var(--text-3); font-variant-numeric: tabular-nums; height: 16px; }
+    .sla-scale-mid { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+    .ladder { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); margin-top: var(--sp-4); padding-top: var(--sp-4); border-top: 1px solid var(--border); }
+    .rung { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--text-2); line-height: 17px; }
+    .rung b { display: block; color: var(--text); font-weight: 600; font-size: 12px; }
+    .rung-n { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border-strong); display: grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--text-2); flex: none; }
+
+    .dep { margin-top: var(--sp-4); }
+    .dep { color: var(--text); }
+    .dep > .i { color: var(--primary-text); }
+    .dep b { color: var(--primary-text); }
+    .dep a { font-weight: 600; }
+
+    .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); }
+    .box { border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
+    .box-head { display: flex; align-items: center; gap: 8px; padding: 12px var(--sp-4); border-bottom: 1px solid var(--border); font-weight: 600; font-size: 13.5px; }
+    .box-head .faint { font-weight: 500; font-size: 12px; }
+    .box-body { padding: 4px var(--sp-4); }
+
+    .cl { list-style: none; margin: 0; padding: 0; }
+    .cl li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .cl li:last-child { border-bottom: 0; }
+    .cl-box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border-strong); display: grid; place-items: center; flex: none; margin-top: 1px; color: transparent; }
+    .cl-box .i { width: 12px; height: 12px; stroke-width: 3; }
+    .cl li.is-done .cl-box { background: var(--success); border-color: var(--success); color: var(--surface); }
+    .cl li.is-done .cl-text { color: var(--text-2); }
+    .cl-text { font-size: 13.5px; font-weight: 500; }
+    .cl-meta { font-size: 12px; color: var(--text-3); }
+    .cl-progress { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2); font-weight: 500; }
+    .cl-progress .progress { width: 64px; height: 4px; }
+
+    .kv.kv-tight { grid-template-columns: 112px 1fr; gap: 8px 10px; font-size: 13px; padding: 12px 0; }
+    .kv .arrow { color: var(--text-3); margin: 0 4px; }
+
+    .task-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+    .task-row:last-child { border-bottom: 0; }
+    .task-row .t-title { font-weight: 500; color: var(--text); }
+    .task-row .t-title:hover { color: var(--primary-text); }
+    .task-row .t-meta { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 12.5px; color: var(--text-2); white-space: nowrap; }
+
+    .doc { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .doc:last-child { border-bottom: 0; }
+    .doc-ic { width: 32px; height: 32px; border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; flex: none; }
+    .doc-name { font-size: 13px; font-weight: 500; color: var(--text); }
+    .doc-meta { font-size: 12px; color: var(--text-3); }
+
+    .client-note { padding: 12px var(--sp-4); }
+    .client-note .bubble { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; font-size: 13px; color: var(--text); line-height: 19px; }
+    .client-note .bubble .mono { font-weight: 600; }
+    .client-note .row { margin-top: 10px; }
+
+    .drawer-body .timeline .tl-item { padding-bottom: var(--sp-4); }
+    .drawer-body .composer { margin-bottom: var(--sp-4); }
+
+    @media (max-width: 1320px) {
+      .kpis { gap: var(--sp-2); }
+      .kpis .stat { padding: 12px; }
+      .kpis .stat-label { font-size: 12px; }
+      .kpis .stat-value { font-size: 24px; line-height: 30px; }
+    }
+    @media (max-width: 1100px) {
+      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 900px) {
+      .duty { display: none; }
+    }
+    @media (max-width: 768px) {
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two, .ladder { grid-template-columns: 1fr; }
+      .sla-top { flex-direction: column; }
+      .sla-actions { margin-left: 0; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body data-page="service" data-crumb="Service Requests" data-open="drawer-sr">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Service Requests</h1>
+            <p class="page-sub">Client requests and complaints with SLA clocks that pause while you wait on the RTA, bank or client
+              &nbsp; <span class="sync-pill"><span class="dot dot-success"></span>Synced from MF Box · 10:42</span></p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" onclick="AK.toast('SLA policies open in Settings › Automations', {icon:'sliders', undo:false})"><svg class="i"><use href="#i-sliders"/></svg>SLA policies</button>
+            <button class="btn btn-primary" id="btn-new"><svg class="i"><use href="#i-plus"/></svg>New request</button>
+          </div>
+        </div>
+
+        <!-- KPI tiles (click to filter the table) -->
+        <div class="kpis" id="kpis">
+          <button class="stat stat-info" data-kpi="open">
+            <span class="stat-label">Open</span>
+            <div class="stat-value">23</div>
+            <span class="stat-meta">Across 3 branches</span>
+          </button>
+          <button class="stat stat-warning" data-kpi="warn">
+            <span class="stat-label">Breaching in &lt; 24 h</span>
+            <div class="stat-value">4</div>
+            <span class="stat-meta">Next: SR-0144 in 9 h</span>
+          </button>
+          <button class="stat stat-danger" data-kpi="breach">
+            <span class="stat-label">Breached</span>
+            <div class="stat-value">2</div>
+            <span class="stat-meta">Escalated to you</span>
+          </button>
+          <button class="stat stat-neutral" data-kpi="pause">
+            <span class="stat-label">Waiting on RTA/client</span>
+            <div class="stat-value">6</div>
+            <span class="stat-meta">SLA clock paused</span>
+          </button>
+          <button class="stat stat-success" data-kpi="done">
+            <span class="stat-label">Resolved this week</span>
+            <div class="stat-value">31</div>
+            <span class="stat-meta"><span class="delta-up">94%</span> within SLA</span>
+          </button>
+          <button class="stat" data-kpi="median">
+            <span class="stat-label">Median resolution</span>
+            <div class="stat-value">2.4<small>days</small></div>
+            <span class="stat-meta"><span class="delta-up">↓ 0.4 d</span> vs last week</span>
+          </button>
+        </div>
+
+        <div class="tabs-row">
+          <div class="tabs" data-tabs="sr" id="sr-tabs" role="tablist">
+            <button class="tab" data-q="mine">My queue <span class="count" data-count="mine">3</span></button>
+            <button class="tab is-active" data-q="team">Team queue <span class="count" data-count="team">23</span></button>
+            <button class="tab" data-q="triage">Unassigned (triage) <span class="count" data-count="triage" style="background:var(--warning-soft);color:var(--warning)">3</span></button>
+            <button class="tab" data-q="resolved">Resolved <span class="count" data-count="resolved">31</span></button>
+          </div>
+          <div class="duty"><svg class="i"><use href="#i-shield"/></svg>Triage duty today: <span class="person"><span class="avatar avatar-xs a3">AD</span><b>Arjun Desai</b></span></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" id="sr-search" placeholder="Ref no, client, PAN"></label>
+            <button class="btn btn-secondary" onclick="AK.toast('Filters: branch, assignee, priority, platform, date opened', {icon:'filter', undo:false})"><svg class="i"><use href="#i-filter"/></svg>Filters <span class="filter-count">1</span></button>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-type">Type <svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+              <div class="popover popover-left" id="pop-type">
+                <div class="menu" style="min-width:250px">
+                  <div class="menu-label">Request type</div>
+                  <label class="check"><input type="checkbox" checked data-type="Bank mandate change">Bank mandate change<span class="menu-hint">5 BD</span></label>
+                  <label class="check"><input type="checkbox" checked data-type="Nomination update">Nomination update<span class="menu-hint">3 BD</span></label>
+                  <label class="check"><input type="checkbox" checked data-type="KYC modification">KYC modification<span class="menu-hint">5 BD</span></label>
+                  <label class="check"><input type="checkbox" checked data-type="Redemption not credited">Redemption not credited<span class="menu-hint">3 WD</span></label>
+                  <label class="check"><input type="checkbox" checked data-type="Address change">Address change<span class="menu-hint">2 BD</span></label>
+                  <label class="check"><input type="checkbox" checked data-type="SIP cancellation">SIP cancellation<span class="menu-hint">2 WD</span></label>
+                  <label class="check"><input type="checkbox" checked data-type="Complaint">Complaint<span class="menu-hint">21 CD</span></label>
+                </div>
+              </div>
+            </div>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-channel">Channel <svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+              <div class="popover popover-left" id="pop-channel">
+                <div class="menu" style="min-width:200px">
+                  <div class="menu-label">Came in via</div>
+                  <label class="check"><input type="checkbox" checked data-channel="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</label>
+                  <label class="check"><input type="checkbox" checked data-channel="Email"><svg class="i"><use href="#i-mail"/></svg>Email</label>
+                  <label class="check"><input type="checkbox" checked data-channel="Walk-in"><svg class="i"><use href="#i-building"/></svg>Walk-in</label>
+                  <label class="check"><input type="checkbox" checked data-channel="Phone"><svg class="i"><use href="#i-phone"/></svg>Phone</label>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-ghost" id="sr-reset">Reset</button>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-ghost" onclick="AK.toast('Saved views: Breaching today · Complaints (calendar clock) · Waiting on CAMS', {icon:'star', undo:false})"><svg class="i"><use href="#i-star"/></svg>Saved views</button>
+            <button class="btn btn-secondary" onclick="AK.toast('Choose columns: Platform, Folio, Priority, Due date, Branch', {icon:'columns', undo:false})"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+          </div>
+        </div>
+
+        <div class="chips" id="sr-chips">
+          <span class="chip">Branch: <b>All branches</b><button class="chip-remove" aria-label="Remove filter" onclick="this.parentNode.remove()"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+          <span class="chip hidden" id="kpi-chip">Showing: <b id="kpi-chip-text"></b><button class="chip-remove" aria-label="Clear" id="kpi-chip-x"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+          <span class="faint text-sm" style="align-self:center">Sorted by SLA, most urgent first</span>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table class="table" id="sr-table">
+              <thead><tr>
+                <th class="col-check"><label class="check"><input type="checkbox" aria-label="Select all"></label></th>
+                <th><span class="th-sort">Ref</span></th>
+                <th>Type</th>
+                <th><span class="th-sort">Client</span></th>
+                <th>Channel</th>
+                <th>Assignee</th>
+                <th><span class="th-sort is-asc">SLA</span></th>
+                <th>Status</th>
+                <th class="num" title="Age in days"><span class="th-sort">Age</span></th>
+                <th>Last update</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="sr-body"></tbody>
+            </table>
+          </div>
+          <div class="pagination"><select class="select" aria-label="Rows per page"><option>15</option><option>25</option><option>50</option></select> <span id="sr-count">rows · 1–14 of 23</span>
+            <div class="pg-btns"><button class="pg-btn" aria-label="Previous"><svg class="i"><use href="#i-chevron-left"/></svg></button><button class="pg-btn is-active">1</button><button class="pg-btn">2</button><button class="pg-btn" aria-label="Next"><svg class="i"><use href="#i-chevron-right"/></svg></button></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ Detail drawer: SR-2026-0142 ============ -->
+  <aside class="drawer drawer-wide" id="drawer-sr" aria-label="Service request detail">
+    <div class="drawer-header">
+      <div style="min-width:0;flex:1">
+        <div class="dh-top">
+          <span class="mono" id="dr-ref">SR-2026-0142</span>
+          <span class="badge badge-dot badge-info" id="dr-status">In progress</span>
+          <span class="badge badge-neutral"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</span>
+          <span class="wire-note hidden" id="dr-note">Wireframe: body shows the SR-2026-0142 sample</span>
+        </div>
+        <div class="drawer-title" id="dr-title">Bank mandate change – Pooja Bansal</div>
+        <div class="dh-meta">
+          <span><svg class="i"><use href="#i-user"/></svg><a href="08-client-360.html">Pooja Bansal</a> · Bansal Family · ₹9.8 L</span>
+          <span><svg class="i"><use href="#i-check-square"/></svg>Assignee <span class="person"><span class="avatar avatar-xs a2">PN</span>Priya Nair</span></span>
+          <span><svg class="i"><use href="#i-calendar"/></svg>Opened 11 Nov 2026, 10:15 AM</span>
+          <span class="prio prio-med">Medium</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-icon btn-sm" title="Copy link" onclick="AK.toast('Link to SR-2026-0142 copied', {icon:'link', undo:false})"><svg class="i"><use href="#i-link"/></svg></button>
+      <button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button>
+      <button class="btn btn-ghost btn-icon btn-sm" data-close-drawer title="Close (Esc)"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- SLA clock -->
+      <div class="sla-card" id="sla-card">
+        <div class="sla-top">
+          <div>
+            <div class="dsec-title" style="display:flex;align-items:center;gap:6px"><svg class="i i-sm"><use href="#i-clock"/></svg><span id="sla-label">SLA clock · running</span><span style="font-weight:500">· BSE/NSE business days</span></div>
+            <div class="sla-big" id="sla-big">2 days <small>left of 5 business days</small></div>
+            <div class="sla-due" id="sla-due">Due <b>Tue 17 Nov 2026, 6:00 PM</b> · 3 of 5 days used · 0 h paused</div>
+          </div>
+          <div class="sla-actions">
+            <button class="btn btn-secondary btn-sm" id="sla-toggle"><svg class="i"><use href="#i-pause"/></svg><span>Pause clock</span></button>
+            <select class="select" id="sla-reason" style="height:30px;font-size:12.5px;width:190px" aria-label="Pause reason">
+              <option>Waiting on RTA (CAMS)</option><option>Waiting on bank (NPCI)</option><option>Waiting on client</option><option>Waiting on exchange (BSE)</option>
+            </select>
+          </div>
+        </div>
+        <div class="sla-track"><span id="sla-fill" style="width:60%"></span><i class="sla-tick" style="left:75%"></i></div>
+        <div class="sla-scale"><span>Opened Wed 11 Nov</span><span class="sla-scale-mid" style="left:75%">75% reminder</span><span>Due Tue 17 Nov</span></div>
+        <div class="ladder">
+          <div class="rung"><span class="rung-n">1</span><div><b>75% used</b>Reminder to Priya Nair on WhatsApp + app</div></div>
+          <div class="rung"><span class="rung-n">2</span><div><b>Breach</b>Escalate to Neha Kapoor (Branch Manager)</div></div>
+          <div class="rung"><span class="rung-n">3</span><div><b>Breach + 1 business day</b>Notify Rajesh Sharma (Principal)</div></div>
+        </div>
+      </div>
+
+      <div class="banner banner-info dep">
+        <svg class="i"><use href="#i-link"/></svg>
+        <div><b>Dependent:</b> SIP top-up waits for mandate to be active. <a href="11-task-detail.html">SIP top-up – Pooja Bansal</a> (₹5,000 → ₹8,000 per month) stays on hold until the new UMRN is registered.</div>
+        <span class="badge badge-dot badge-neutral" style="margin-left:auto">On hold</span>
+      </div>
+
+      <!-- Checklist + details -->
+      <div class="two dsec">
+        <div class="box">
+          <div class="box-head">Checklist <span class="faint">· template v2</span>
+            <span class="cl-progress"><span id="cl-count">2/4</span><span class="progress p-success"><span id="cl-bar" style="width:50%"></span></span></span>
+          </div>
+          <div class="box-body">
+            <ul class="cl" id="checklist">
+              <li class="is-done"><span class="cl-box"><svg class="i"><use href="#i-check"/></svg></span><div><div class="cl-text">Collect cancelled cheque</div><div class="cl-meta">ICICI ••7788 · penny-drop verified · 11 Nov</div></div></li>
+              <li class="is-done"><span class="cl-box"><svg class="i"><use href="#i-check"/></svg></span><div><div class="cl-text">Signed mandate form</div><div class="cl-meta">e-NACH, ₹1,00,000 limit · today 9:32 AM</div></div></li>
+              <li><span class="cl-box"><svg class="i"><use href="#i-check"/></svg></span><div><div class="cl-text">Submit to BSE StAR MF</div><div class="cl-meta">Due Mon 16 Nov · <a href="#" onclick="event.stopPropagation();AK.toast('Opens BSE StAR MF in a new tab (read-only deep link)',{icon:'external',undo:false});return false">Open BSE StAR MF</a></div></div></li>
+              <li><span class="cl-box"><svg class="i"><use href="#i-check"/></svg></span><div><div class="cl-text">Confirm registration</div><div class="cl-meta">Record UMRN · due Tue 17 Nov</div></div></li>
+            </ul>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-head">Request details <span class="badge badge-neutral" style="margin-left:auto"><svg class="i"><use href="#i-refresh"/></svg>MF Box</span></div>
+          <div class="box-body">
+            <dl class="kv kv-tight" style="margin:0">
+              <dt>Client</dt><dd><a href="08-client-360.html">Pooja Bansal</a> <span class="faint fw-500">· Family Head</span></dd>
+              <dt>PAN</dt><dd class="mono">ABCPB••••K</dd><dt>Mobile</dt><dd class="mono">+91 99••• ••318</dd>
+              <dt>Bank</dt><dd>HDFC ••4521<span class="arrow">→</span>ICICI ••7788</dd>
+              <dt>Mandate</dt><dd>e-NACH · ₹1,00,000</dd>
+              <dt>Platform</dt><dd>BSE StAR MF · UCC SWP10482</dd>
+              <dt>SIPs affected</dt><dd>2 SIPs · ₹5,000/month</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- Child tasks -->
+      <div class="dsec">
+        <div class="dsec-head"><span class="dsec-title">Child tasks · 3</span><button class="btn btn-ghost btn-sm" onclick="AK.toast('Child task added', {icon:'check-square'})"><svg class="i"><use href="#i-plus"/></svg>Add task</button></div>
+        <div class="box"><div class="box-body">
+          <div class="task-row"><span class="badge badge-dot badge-success">Done</span><a class="t-title" href="11-task-detail.html">Collect cancelled cheque – Pooja Bansal</a><span class="t-meta"><span class="person"><span class="avatar avatar-xs a2">PN</span>Priya Nair</span><span>11 Nov 2026</span></span></div>
+          <div class="task-row"><span class="badge badge-dot badge-warning">Pending</span><a class="t-title" href="11-task-detail.html">Upload mandate on BSE StAR MF</a><span class="t-meta"><span class="person"><span class="avatar avatar-xs a2">PN</span>Priya Nair</span><span>Due 16 Nov 2026</span></span></div>
+          <div class="task-row"><span class="badge badge-dot badge-warning">Pending</span><a class="t-title" href="11-task-detail.html">Confirm UMRN and inform client</a><span class="t-meta"><span class="person"><span class="avatar avatar-xs">RM</span>Rohan Mehta</span><span>Due 17 Nov 2026</span></span></div>
+        </div></div>
+      </div>
+
+      <!-- Documents + client note -->
+      <div class="two dsec">
+        <div class="box">
+          <div class="box-head">Documents <span class="faint">2</span><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="AK.toast('Upload: drag a file or forward it from WhatsApp', {icon:'upload', undo:false})"><svg class="i"><use href="#i-upload"/></svg>Upload</button></div>
+          <div class="box-body">
+            <div class="doc"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><div style="min-width:0"><a class="doc-name" href="17-documents.html">Cancelled_cheque_ICICI.pdf</a><div class="doc-meta">212 KB · from WhatsApp · 11 Nov</div></div><span class="badge badge-dot badge-success" style="margin-left:auto">Verified</span></div>
+            <div class="doc"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><div style="min-width:0"><a class="doc-name" href="17-documents.html">NACH_mandate_signed.pdf</a><div class="doc-meta">1.1 MB · scanned at branch · today</div></div><span class="badge badge-dot badge-warning" style="margin-left:auto">To check</span></div>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-head">Client-visible note <span class="badge badge-info" style="margin-left:auto"><svg class="i"><use href="#i-eye"/></svg>Client sees this</span></div>
+          <div class="client-note">
+            <div class="bubble">Your request <span class="mono">SR-2026-0142</span> to move your SIP mandate to ICICI Bank is in progress. We expect it to be active by <b>17 Nov 2026</b>.</div>
+            <div class="row gap-2"><span class="faint text-sm">Last sent 12 Nov on WhatsApp</span><button class="btn btn-secondary btn-sm ml-auto" onclick="AK.toast('Update sent to Pooja Bansal on WhatsApp', {icon:'send'})"><svg class="i"><use href="#i-whatsapp"/></svg>Send update</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="dsec">
+        <div class="dsec-head"><span class="dsec-title">Comments &amp; activities</span>
+          <div class="segmented ml-auto" data-segmented><button aria-pressed="true">All</button><button aria-pressed="false">Comments</button><button aria-pressed="false">SLA</button></div>
+        </div>
+        <div class="composer">
+          <textarea placeholder="Add an internal note… use @ to mention (not visible to the client)"></textarea>
+          <div class="composer-bar"><button class="btn btn-ghost btn-icon btn-sm" title="Mention"><svg class="i"><use href="#i-at"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Attach"><svg class="i"><use href="#i-paperclip"/></svg></button><span class="faint text-sm" style="margin-left:6px">Internal only</span><button class="btn btn-secondary btn-sm ml-auto" onclick="AK.toast('Note added to SR-2026-0142')">Comment</button></div>
+        </div>
+        <div class="timeline">
+          <div class="tl-item"><span class="tl-dot is-primary"><svg class="i"><use href="#i-message"/></svg></span><div class="tl-body"><div class="tl-text"><b>Priya Nair</b> commented</div><div class="tl-meta">Today, 9:40 AM</div><div class="tl-comment"><span class="text-primary fw-600">@Neha Kapoor</span> signed form received at the branch. I'll upload it on BSE StAR MF first thing Monday.</div></div></div>
+          <div class="tl-item"><span class="tl-dot is-success"><svg class="i"><use href="#i-check"/></svg></span><div class="tl-body"><div class="tl-text"><b>Priya Nair</b> completed checklist item <b>Signed mandate form</b></div><div class="tl-meta">Today, 9:32 AM</div></div></div>
+          <div class="tl-item"><span class="tl-dot is-warning"><svg class="i"><use href="#i-clock"/></svg></span><div class="tl-body"><div class="tl-text">SLA <b>50% used</b>. Priya Nair was notified.</div><div class="tl-meta">Thu 12 Nov, 6:00 PM · automatic</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><svg class="i"><use href="#i-send"/></svg></span><div class="tl-body"><div class="tl-text">Client-visible update sent to <b>Pooja Bansal</b> on WhatsApp</div><div class="tl-meta">Thu 12 Nov, 11:20 AM · Priya Nair</div></div></div>
+          <div class="tl-item"><span class="tl-dot is-success"><svg class="i"><use href="#i-paperclip"/></svg></span><div class="tl-body"><div class="tl-text"><b>Cancelled_cheque_ICICI.pdf</b> attached and bank verified by penny-drop</div><div class="tl-meta">Wed 11 Nov, 3:48 PM · Priya Nair</div></div></div>
+          <div class="tl-item"><span class="tl-dot is-ai"><svg class="i"><use href="#i-sparkles"/></svg></span><div class="tl-body"><div class="tl-text">Classified as <b>Bank mandate change</b> (94% confident) and assigned to <b>Priya Nair</b> by the triage rota <span class="badge badge-ai" style="margin-left:4px"><svg class="i"><use href="#i-sparkles"/></svg>AI · approved by Arjun</span></div><div class="tl-meta">Wed 11 Nov, 10:16 AM</div></div></div>
+          <div class="tl-item"><span class="tl-dot"><svg class="i"><use href="#i-whatsapp"/></svg></span><div class="tl-body"><div class="tl-text">Request created from a WhatsApp message by <b>Pooja Bansal</b></div><div class="tl-meta">Wed 11 Nov, 10:15 AM</div><div class="tl-comment">“Hi, I've moved my salary account to ICICI. Please change the bank for my SIPs.”</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" onclick="AK.toast('Reassign to: Priya Nair · Arjun Desai · Rohan Mehta…', {icon:'users', undo:false})"><svg class="i"><use href="#i-users"/></svg>Reassign</button>
+      <button class="btn btn-secondary" onclick="AK.toast('Status menu: Open · In progress · Waiting on RTA/client · Resolved', {icon:'list', undo:false})">Change status <svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+      <span class="spacer"></span>
+      <span class="faint text-sm" id="resolve-hint">2 checklist items left</span>
+      <button class="btn btn-primary" id="btn-resolve"><svg class="i"><use href="#i-check"/></svg>Mark resolved</button>
+    </div>
+  </aside>
+
+  <!-- ============ New request drawer ============ -->
+  <aside class="drawer" id="drawer-new" aria-label="New service request">
+    <div class="drawer-header"><div><div class="drawer-title">New service request</div><div class="drawer-sub">The SLA and checklist come from the request type</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Client <span class="req">*</span></label><label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Name, PAN, mobile or folio"></label></div>
+        <div class="field"><label class="label">Request type <span class="req">*</span></label><select class="select"><option>Bank mandate change</option><option>Nomination update</option><option>KYC modification</option><option>Redemption not credited</option><option>Address change</option><option>SIP cancellation</option><option>Complaint</option></select><span class="help">SLA 5 business days · 4-step checklist</span></div>
+        <div class="field"><label class="label">Channel <span class="req">*</span></label><select class="select"><option>WhatsApp</option><option>Email</option><option>Walk-in</option><option>Phone</option></select></div>
+        <div class="field"><label class="label">Assignee</label><select class="select"><option>Auto (triage rota)</option><option>Priya Nair</option><option>Arjun Desai</option><option>Rohan Mehta</option></select></div>
+        <div class="field"><label class="label">Priority</label><div class="segmented" data-segmented><button aria-pressed="false">Low</button><button aria-pressed="true">Med</button><button aria-pressed="false">High</button></div></div>
+        <div class="field span-2"><label class="label">Description</label><textarea class="textarea" placeholder="What did the client ask for?"></textarea></div>
+        <div class="field span-2"><label class="check"><input type="checkbox" checked>Send the client a reference number on the same channel</label></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-new');AK.toast('SR-2026-0151 created · reference sent to client')">Create request</button></div>
+  </aside>
+
+  <script>
+  (function () {
+    // ---------- Data ----------
+    var TYPE_IC = { 'Bank mandate change': 'building', 'Nomination update': 'users', 'KYC modification': 'shield', 'Redemption not credited': 'rupee', 'Address change': 'map-pin', 'SIP cancellation': 'repeat', 'Complaint': 'alert' };
+    var CH_IC = { WhatsApp: 'whatsapp', Email: 'mail', 'Walk-in': 'building', Phone: 'phone' };
+    var P = {
+      NK: ['NK', 'Neha Kapoor', ''], PN: ['PN', 'Priya Nair', 'a2'], AD: ['AD', 'Arjun Desai', 'a3'], RM: ['RM', 'Rohan Mehta', ''],
+      SI: ['SI', 'Sneha Iyer', 'a4'], AG: ['AG', 'Aman Gupta', 'a5'], KM: ['KM', 'Kavya Menon', 'a4']
+    };
+    // sla: [kind, line, sub, pct]   kind: ok | warn | breach | pause | met | missed | new
+    var ROWS = [
+      { ref: '0147', type: 'Redemption not credited', d: '₹4,80,000 · HDFC Flexi Cap', c: 'Farhan Qureshi', f: 'Qureshi Family', ch: 'Phone', a: 'AD', sla: ['breach', 'Breached 6 h', '3 working days (SEBI)', 100], st: ['danger', 'Breached'], age: 4, u: ['Escalated to Neha', '8:10 AM'] },
+      { ref: '0131', type: 'KYC modification', d: 'Mobile + email on KRA', c: 'Meera Joshi', f: 'Joshi Family', ch: 'Walk-in', a: 'RM', sla: ['breach', 'Breached 1 d 2 h', '5 business days', 100], st: ['danger', 'Breached'], age: 7, u: ['Reminder sent', 'Yesterday'] },
+      { ref: '0144', type: 'SIP cancellation', d: '₹5,000 SIP · Axis Bluechip', c: 'Sunita Rao', f: 'Rao Family', ch: 'WhatsApp', a: 'PN', sla: ['warn', '9 h left', 'of 2 working days (SEBI)', 82], st: ['warning', 'Breaching'], age: 1, u: ['Cancel request sent', '11:20 AM'] },
+      { ref: '0136', type: 'Bank mandate change', d: 'NACH · ₹2,00,000 limit', c: 'Harish Patel', f: 'Harish Patel Family', ch: 'Phone', a: 'AG', sla: ['warn', '14 h left', 'of 5 business days', 88], st: ['warning', 'Breaching'], age: 5, u: ['Form pending signature', 'Yesterday'] },
+      { ref: '0138', type: 'Address change', d: 'Proof: Aadhaar OVD', c: 'Lakshmi Narayanan', f: 'Narayanan Family', ch: 'Email', a: 'SI', sla: ['warn', '18 h left', 'of 2 business days', 76], st: ['warning', 'Breaching'], age: 2, u: ['Proof received', '10:05 AM'] },
+      { ref: '0145', type: 'Nomination update', d: '2 nominees · 60/40', c: 'Arvind Menon', f: 'Menon Family', ch: 'Walk-in', a: 'RM', sla: ['warn', '21 h left', 'of 3 business days', 70], st: ['warning', 'Breaching'], age: 1, u: ['Form filled at branch', 'Yesterday'] },
+      { ref: '0142', type: 'Bank mandate change', d: 'HDFC → ICICI · e-NACH', c: 'Pooja Bansal', f: 'Bansal Family', ch: 'WhatsApp', a: 'PN', sla: ['ok', '2 days left', 'of 5 business days', 60], st: ['info', 'In progress'], age: 3, u: ['Mandate form signed', '9:32 AM'], sel: true },
+      { ref: '0139', type: 'Complaint', d: 'Wrong scheme allotted', c: 'Deepak Agarwal', f: 'Agarwal Family', ch: 'Email', a: 'NK', sla: ['ok', '15 days left', 'of 21 calendar days', 29], st: ['info', 'Open'], age: 6, u: ['AMC replied', 'Yesterday'] },
+      { ref: '0146', type: 'Complaint', d: 'Dividend not received', c: 'Harish Patel', f: 'Harish Patel Family', ch: 'Email', a: 'NK', sla: ['ok', '19 days left', 'of 21 calendar days', 10], st: ['info', 'Open'], age: 2, u: ['Acknowledged', '12 Nov'] },
+      { ref: '0143', type: 'SIP cancellation', d: '₹5,000 SIP · 2 bounced debits', c: 'Lakshmi Narayanan', f: 'Narayanan Family', ch: 'WhatsApp', a: 'KM', sla: ['ok', '1 d 20 h left', 'of 2 working days (SEBI)', 10], st: ['info', 'Open'], age: 0, u: ['Retention call logged', '10:30 AM'] },
+      { ref: '0140', type: 'Nomination update', d: '2 folios · add nominee', c: 'Anjali Verma', f: 'Verma Family', ch: 'WhatsApp', a: 'PN', sla: ['pause', 'Paused: waiting on client', '1 d 6 h left when resumed', 58], st: ['neutral', 'Waiting on client'], age: 4, u: ['Form to be signed this week', '11:45 AM'] },
+      { ref: '0135', type: 'Address change', d: 'Updated on KRA', c: 'Deepak Agarwal', f: 'Agarwal Family', ch: 'Email', a: 'AD', sla: ['pause', 'Paused: waiting on KFin', '1 d left when resumed', 50], st: ['neutral', 'Waiting on RTA'], age: 5, u: ['KFin ticket raised', '11 Nov'] },
+      { ref: '0133', type: 'KYC modification', d: 'Name as per PAN', c: 'Farhan Qureshi', f: 'Qureshi Family', ch: 'Phone', a: 'SI', sla: ['pause', 'Paused: waiting on client', '3 d left when resumed', 40], st: ['neutral', 'Waiting on client'], age: 8, u: ['PAN copy requested', '10 Nov'] },
+      { ref: '0141', type: 'Redemption not credited', d: '₹1,25,000 · bank changed', c: 'Meera Joshi', f: 'Joshi Family', ch: 'Phone', a: 'AD', sla: ['pause', 'Paused: waiting on bank', '2 d left when resumed', 33], st: ['neutral', 'Waiting on bank'], age: 3, u: ['Bank UTR shared', '13 Nov'] }
+    ];
+    var TRIAGE = [
+      { ref: '0150', type: 'Redemption not credited', d: 'Missed call · voicemail', c: 'Suresh Iyer', f: 'Iyer Family', ch: 'Phone', a: null, sla: ['new', '3 days left', 'starts on assignment · 3 WD', 2], st: ['info', 'New'], age: 0, u: ['Voicemail transcribed', '11:52 AM'], ai: 'AI: 88% confident' },
+      { ref: '0149', type: 'Address change', d: '“Shifted to Powai, update address”', c: 'Rahul Verma', f: 'Verma Family', ch: 'Email', a: null, sla: ['new', '2 days left', 'starts on assignment · 2 BD', 4], st: ['info', 'New'], age: 0, u: ['Email received', '9:05 AM'], ai: 'AI: 91% confident' },
+      { ref: '0148', type: 'SIP cancellation', d: '“Please stop my SIP from Dec”', c: 'Vandana Patel', f: 'Harish Patel Family', ch: 'WhatsApp', a: null, sla: ['new', '2 days left', 'starts on assignment · 2 WD', 6], st: ['info', 'New'], age: 0, u: ['WhatsApp message', '8:40 AM'], ai: 'AI: 96% confident' }
+    ];
+    var RESOLVED = [
+      { ref: '0137', type: 'Nomination update', d: '3 nominees · 40/30/30', c: 'Suresh Iyer', f: 'Iyer Family', ch: 'Walk-in', a: 'RM', sla: ['met', 'Met · 1.6 days', 'of 3 business days', 53], st: ['success', 'Resolved'], age: 2, u: ['Resolved by Rohan', '13 Nov'] },
+      { ref: '0134', type: 'Bank mandate change', d: 'SBI → Kotak · e-NACH', c: 'Farhan Qureshi', f: 'Qureshi Family', ch: 'WhatsApp', a: 'PN', sla: ['met', 'Met · 3.1 days', 'of 5 business days', 62], st: ['success', 'Resolved'], age: 4, u: ['UMRN confirmed', '13 Nov'] },
+      { ref: '0132', type: 'SIP cancellation', d: '₹3,000 SIP · Kotak Small Cap', c: 'Meera Joshi', f: 'Joshi Family', ch: 'Phone', a: 'AD', sla: ['met', 'Met · 1.2 days', 'of 2 working days', 60], st: ['success', 'Resolved'], age: 2, u: ['AMC confirmed', '12 Nov'] },
+      { ref: '0130', type: 'Redemption not credited', d: '₹62,000 · bank mismatch', c: 'Deepak Agarwal', f: 'Agarwal Family', ch: 'Email', a: 'SI', sla: ['missed', 'Missed by 4 h', '3 working days', 100], st: ['success', 'Resolved'], age: 4, u: ['Credited on 12 Nov', '12 Nov'] },
+      { ref: '0128', type: 'Address change', d: 'Updated via MF Central', c: 'Anjali Verma', f: 'Verma Family', ch: 'Email', a: 'PN', sla: ['met', 'Met · 0.8 days', 'of 2 business days', 40], st: ['success', 'Resolved'], age: 1, u: ['Resolved by Priya', '11 Nov'] }
+    ];
+
+    var state = { tab: 'team', kpi: null, q: '', types: null, channels: null };
+
+    function icon(n, c) { return AK.icon(n, c); }
+    function person(k) { var p = P[k]; return '<span class="person" title="' + p[1] + '"><span class="avatar avatar-sm ' + p[2] + '">' + p[0] + '</span><span class="person-name">' + p[1].split(' ')[0] + ' ' + p[1].split(' ')[1].charAt(0) + '.</span></span>'; }
+    function slaCell(s) {
+      var k = s[0], h = '<div class="sla">';
+      if (k === 'breach') h += '<span class="badge badge-danger">' + icon('clock') + s[1] + '</span><div class="sla-sub">' + s[2] + '</div>';
+      else if (k === 'pause') h += '<span class="badge badge-neutral">' + icon('pause') + s[1] + '</span><div class="sla-sub">' + s[2] + '</div>';
+      else if (k === 'met') h += '<span class="badge badge-success">' + icon('check') + s[1] + '</span><div class="sla-sub">' + s[2] + '</div>';
+      else if (k === 'missed') h += '<span class="badge badge-warning">' + icon('clock') + s[1] + '</span><div class="sla-sub">' + s[2] + '</div>';
+      else {
+        var cls = k === 'warn' ? 'is-warn' : 'is-ok';
+        var bar = k === 'warn' ? 'p-warning' : '';
+        h += '<div class="sla-line ' + cls + '">' + icon('clock', 'i-sm') + s[1] + '</div><div class="progress ' + bar + '"><span style="width:' + s[3] + '%"></span></div><div class="sla-sub">' + s[2] + '</div>';
+      }
+      return h + '</div>';
+    }
+    function rowHtml(r) {
+      var isC = r.type === 'Complaint';
+      var tsub = r.ai ? '<span class="ai-mini">' + icon('sparkles') + r.ai + '</span> · ' + r.d : r.d;
+      return '<tr data-ref="' + r.ref + '"' + (r.sel ? ' class="is-selected"' : '') + '>' +
+        '<td><label class="check" onclick="event.stopPropagation()"><input type="checkbox" aria-label="Select SR-2026-' + r.ref + '"></label></td>' +
+        '<td class="ref-cell"><a href="#" data-open-sr>SR-2026-' + r.ref + '</a></td>' +
+        '<td><div class="cell-title">' + (isC ? '<span class="cx">' + icon('alert', 'i-sm') + '</span>' : '') + r.type + '</div><div class="cell-sub type-sub">' + tsub + '</div></td>' +
+        '<td class="client-cell"><div class="cell-title truncate"><a href="08-client-360.html" onclick="event.stopPropagation()" style="color:inherit">' + r.c + '</a></div><div class="cell-sub">' + r.f + '</div></td>' +
+        '<td><span class="ch tooltip" data-tip="' + r.ch + '" aria-label="Came in via ' + r.ch + '">' + icon(CH_IC[r.ch], r.ch === 'WhatsApp' ? 'is-wa' : '') + '</span></td>' +
+        '<td>' + (r.a ? person(r.a) : '<button class="btn btn-soft btn-sm assign-btn" data-assign>' + icon('user-plus') + 'Assign</button>') + '</td>' +
+        '<td>' + slaCell(r.sla) + '</td>' +
+        '<td><span class="badge badge-dot badge-' + r.st[0] + '">' + r.st[1] + '</span></td>' +
+        '<td class="num">' + (r.age >= 7 ? '<span class="age-hot">' + r.age + '</span>' : r.age) + '</td>' +
+        '<td><div class="upd truncate">' + r.u[0] + '<small>' + r.u[1] + '</small></div></td>' +
+        '<td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="More actions" onclick="event.stopPropagation()">' + icon('more-h') + '</button></span></td></tr>';
+    }
+
+    var KPI_LABEL = { open: 'Open (not paused)', warn: 'Breaching in < 24 h', breach: 'Breached', pause: 'Waiting on RTA/client', done: 'Resolved this week', median: 'All open' };
+    function source() {
+      if (state.tab === 'triage') return TRIAGE;
+      if (state.tab === 'resolved') return RESOLVED;
+      if (state.tab === 'mine') return ROWS.filter(function (r) { return r.a === 'NK' || r.ref === '0147'; });
+      return ROWS;
+    }
+    function render() {
+      var rows = source().filter(function (r) {
+        if (state.kpi === 'warn' && r.sla[0] !== 'warn') return false;
+        if (state.kpi === 'breach' && r.sla[0] !== 'breach') return false;
+        if (state.kpi === 'pause' && r.sla[0] !== 'pause') return false;
+        if (state.kpi === 'open' && (r.sla[0] === 'pause')) return false;
+        if (state.types && state.types.indexOf(r.type) < 0) return false;
+        if (state.channels && state.channels.indexOf(r.ch) < 0) return false;
+        if (state.q) {
+          var hay = ('sr-2026-' + r.ref + ' ' + r.c + ' ' + r.f + ' ' + r.type + ' abcp').toLowerCase();
+          if (hay.indexOf(state.q) < 0) return false;
+        }
+        return true;
+      });
+      var body = document.getElementById('sr-body');
+      body.innerHTML = rows.length ? rows.map(rowHtml).join('') :
+        '<tr class="empty-row"><td colspan="11">No requests match these filters · <a href="#" id="sr-clear">Clear filters</a></td></tr>';
+      var total = { team: 23, mine: 3, triage: 3, resolved: 31 }[state.tab];
+      var filtered = state.kpi || state.q || state.types || state.channels;
+      document.getElementById('sr-count').textContent = filtered ? 'rows · ' + rows.length + ' matching' : 'rows · 1–' + rows.length + ' of ' + total;
+      var clr = document.getElementById('sr-clear'); if (clr) clr.addEventListener('click', function (e) { e.preventDefault(); resetAll(); });
+    }
+    function resetAll() {
+      state.kpi = null; state.q = ''; state.types = null; state.channels = null;
+      document.getElementById('sr-search').value = '';
+      document.querySelectorAll('#pop-type input, #pop-channel input').forEach(function (i) { i.checked = true; });
+      setKpi(null);
+    }
+    function setKpi(k) {
+      state.kpi = (k === 'median') ? null : k;
+      document.querySelectorAll('#kpis .stat').forEach(function (s) { s.classList.toggle('is-on', s.getAttribute('data-kpi') === state.kpi); });
+      var chip = document.getElementById('kpi-chip');
+      chip.classList.toggle('hidden', !state.kpi);
+      if (state.kpi) document.getElementById('kpi-chip-text').textContent = KPI_LABEL[state.kpi];
+      render();
+    }
+
+    // ---------- Wiring ----------
+    document.querySelectorAll('#kpis .stat').forEach(function (s) {
+      s.addEventListener('click', function () {
+        var k = s.getAttribute('data-kpi');
+        if (k === 'done') { activateTab('resolved'); return; }
+        if (state.tab === 'triage' || state.tab === 'resolved') activateTab('team', true);
+        setKpi(state.kpi === k ? null : k);
+      });
+    });
+    document.getElementById('kpi-chip-x').addEventListener('click', function () { setKpi(null); });
+    function activateTab(q, silent) {
+      document.querySelectorAll('#sr-tabs .tab').forEach(function (t) { t.classList.toggle('is-active', t.getAttribute('data-q') === q); });
+      state.tab = q; if (!silent) setKpi(null);
+    }
+    document.querySelectorAll('#sr-tabs .tab').forEach(function (t) {
+      t.addEventListener('click', function () { state.tab = t.getAttribute('data-q'); setKpi(null); });
+    });
+    document.getElementById('sr-search').addEventListener('input', function (e) { state.q = e.target.value.trim().toLowerCase(); render(); });
+    document.getElementById('sr-reset').addEventListener('click', resetAll);
+    function readChecks(sel, attr) {
+      var all = document.querySelectorAll(sel), on = [];
+      all.forEach(function (i) { if (i.checked) on.push(i.getAttribute(attr)); });
+      return on.length === all.length ? null : on;
+    }
+    document.querySelectorAll('#pop-type input').forEach(function (i) { i.addEventListener('change', function () { state.types = readChecks('#pop-type input', 'data-type'); render(); }); });
+    document.querySelectorAll('#pop-channel input').forEach(function (i) { i.addEventListener('change', function () { state.channels = readChecks('#pop-channel input', 'data-channel'); render(); }); });
+
+    var ALL = ROWS.concat(TRIAGE, RESOLVED);
+    document.getElementById('sr-body').addEventListener('click', function (e) {
+      if (e.target.closest('[data-assign]')) {
+        e.stopPropagation();
+        var tr0 = e.target.closest('tr');
+        AK.toast('SR-2026-' + tr0.getAttribute('data-ref') + ' assigned to Arjun Desai · SLA clock started', { icon: 'user-plus' });
+        return;
+      }
+      var tr = e.target.closest('tr[data-ref]'); if (!tr) return;
+      e.preventDefault();
+      var r = ALL.filter(function (x) { return x.ref === tr.getAttribute('data-ref'); })[0];
+      document.querySelectorAll('#sr-body tr').forEach(function (x) { x.classList.toggle('is-selected', x === tr); });
+      document.getElementById('dr-ref').textContent = 'SR-2026-' + r.ref;
+      document.getElementById('dr-title').textContent = r.type + ' – ' + r.c;
+      var b = document.getElementById('dr-status'); b.className = 'badge badge-dot badge-' + r.st[0]; b.textContent = r.st[1];
+      document.getElementById('dr-note').classList.toggle('hidden', r.ref === '0142');
+      AK.openDrawer('drawer-sr');
+    });
+
+    document.getElementById('btn-new').addEventListener('click', function () { AK.openDrawer('drawer-new'); });
+
+    // Checklist toggling
+    var cl = document.getElementById('checklist');
+    function updateChecklist() {
+      var items = cl.querySelectorAll('li'), done = cl.querySelectorAll('li.is-done').length;
+      document.getElementById('cl-count').textContent = done + '/' + items.length;
+      document.getElementById('cl-bar').style.width = (done / items.length * 100) + '%';
+      var left = items.length - done;
+      document.getElementById('resolve-hint').textContent = left ? left + ' checklist item' + (left > 1 ? 's' : '') + ' left' : 'Checklist complete';
+    }
+    cl.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      var li = e.target.closest('li'); if (!li) return;
+      li.classList.toggle('is-done');
+      updateChecklist();
+      AK.toast((li.classList.contains('is-done') ? 'Done: ' : 'Reopened: ') + li.querySelector('.cl-text').textContent);
+    });
+    document.getElementById('btn-resolve').addEventListener('click', function () {
+      var left = cl.querySelectorAll('li:not(.is-done)').length;
+      if (left) AK.toast('Finish the checklist first: ' + left + ' item' + (left > 1 ? 's' : '') + ' left', { icon: 'alert', undo: false });
+      else { AK.closeDrawer('drawer-sr'); AK.toast('SR-2026-0142 resolved · client notified on WhatsApp'); }
+    });
+
+    // SLA pause / resume
+    var paused = false;
+    document.getElementById('sla-toggle').addEventListener('click', function () {
+      paused = !paused;
+      var reason = document.getElementById('sla-reason').value;
+      document.getElementById('sla-card').classList.toggle('is-paused', paused);
+      this.innerHTML = AK.icon(paused ? 'play' : 'pause') + '<span>' + (paused ? 'Resume clock' : 'Pause clock') + '</span>';
+      document.getElementById('sla-label').textContent = paused ? 'SLA clock · paused' : 'SLA clock · running';
+      document.getElementById('sla-big').innerHTML = paused ? 'Paused <small>2 days left when resumed</small>' : '2 days <small>left of 5 business days</small>';
+      document.getElementById('sla-due').innerHTML = paused ? '<b>' + reason + '</b> since today, 12:05 PM · the due date moves out while paused' : 'Due <b>Tue 17 Nov 2026, 6:00 PM</b> · 3 of 5 days used · 0 h paused';
+      var b = document.getElementById('dr-status');
+      b.className = 'badge badge-dot badge-' + (paused ? 'neutral' : 'info'); b.textContent = paused ? reason : 'In progress';
+      AK.toast(paused ? 'SLA paused: ' + reason : 'SLA clock resumed', { icon: paused ? 'pause' : 'play' });
+    });
+
+    var qTab = new URLSearchParams(location.search).get('tab');
+    if (qTab && /^(mine|team|triage|resolved)$/.test(qTab)) activateTab(qTab); else render();
+  })();
+  </script>
+</body>
+</html>

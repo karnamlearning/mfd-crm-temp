@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leads pipeline · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Pipeline summary strip ---- */
+    .pipe-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.6fr); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); margin-bottom: var(--sp-4); }
+    .pipe-cell { padding: 10px var(--sp-4); border-left: 1px solid var(--border); min-width: 0; }
+    .pipe-cell:first-child { border-left: 0; }
+    .pipe-label { font-size: 12px; line-height: 16px; color: var(--text-2); font-weight: 500; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .pipe-label .i { color: var(--text-3); }
+    .pipe-value { font-size: var(--fs-lg); line-height: 28px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 2px; }
+    .pipe-value small { font-size: 13px; font-weight: 500; color: var(--text-3); letter-spacing: 0; margin-left: 2px; }
+    .pipe-meta { font-size: 12px; line-height: 16px; color: var(--text-3); display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pipe-meta .up { color: var(--success); font-weight: 600; display: inline-flex; align-items: center; gap: 2px; }
+    .stage-bar { display: flex; height: 8px; gap: 2px; margin: 8px 0 7px; border-radius: var(--r-full); overflow: hidden; }
+    .stage-bar span { display: block; height: 100%; }
+    .stage-legend { display: flex; gap: 12px; font-size: 12px; color: var(--text-2); flex-wrap: wrap; row-gap: 2px; }
+    .stage-legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .stage-legend i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+    /* ---- Board ---- */
+    .toolbar .input-group { width: 290px; }
+    .board .kcol { flex: 1 1 0; width: auto; min-width: 248px; max-height: calc(100vh - 446px); min-height: 340px; transition: border-color .12s, background .12s; }
+    .board .kcol.is-over { border-color: var(--primary); background: var(--primary-soft); }
+    .kcol-head .kcol-name { white-space: nowrap; }
+    .kcol-head .kcol-count { font-variant-numeric: tabular-nums; }
+    .kcol-od { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--danger); background: var(--danger-soft); border-radius: var(--r-full); padding: 0 6px; line-height: 18px; }
+    .kcol-od .i { width: 11px; height: 11px; }
+    .kcol-sum { display: flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+    .kcol-sum b { color: var(--text); font-weight: 600; }
+    .kcol-foot { padding: 0 8px 8px; flex: none; }
+    .kcol-foot .kadd { width: 100%; }
+
+    .lead { gap: 6px; padding: 10px 12px; position: relative; }
+    .lead:focus-visible { border-color: var(--primary); box-shadow: var(--focus-ring); border-radius: var(--r-md); }
+    .lead.is-dragging { opacity: .45; }
+    .lc-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .lc-top .kcard-title { color: var(--text); min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lc-top .kcard-title:hover { color: var(--primary-text); }
+    .lc-more { width: 26px !important; height: 26px; margin: -4px -6px -4px 0; color: var(--text-3); }
+    .lc-top .badge { height: 20px; font-size: 11.5px; flex: none; }
+    .lc-mid { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; row-gap: 4px; }
+    .lc-value { font-weight: 600; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .lc-value small { font-weight: 400; color: var(--text-3); font-size: 12px; }
+    .lc-value { margin-right: 4px; }
+    .lc-mid .tag { height: 20px; font-size: 11.5px; padding: 0 6px; }
+    .lead .kcard-foot { gap: 10px; padding-top: 8px; }
+    .lc-fu { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; color: var(--text-2); }
+    .lc-fu .i { color: var(--text-3); }
+    .lc-fu.is-today { color: var(--warning); font-weight: 500; }
+    .lc-fu.is-today .i { color: var(--warning); }
+    .lc-fu.is-none { color: var(--text-3); }
+    .lead .overdue .i { color: var(--danger); }
+    .lc-src { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; background: var(--surface-2); color: var(--text-2); }
+    .lc-src .i { width: 12px; height: 12px; }
+    .lc-src.is-ai { background: var(--ai-soft); color: var(--ai); }
+    .lc-age { display: inline-flex; align-items: center; gap: 3px; color: var(--text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .lc-age .i { width: 12px; height: 12px; }
+    .lc-age.is-stale { color: var(--danger); font-weight: 600; }
+    .lead .kcard-foot .avatar { margin-left: auto; }
+
+    .board-wrap { position: relative; }
+    .kdrops { z-index: 5; padding: var(--sp-3) 0 var(--sp-3); margin-top: 0; background: var(--bg); }
+    .kdrop { height: 48px; transition: transform .12s, box-shadow .12s; }
+    .kdrop .kdrop-sub { font-weight: 400; font-size: 12px; opacity: .85; }
+    .kdrop.is-over { transform: scale(1.01); box-shadow: var(--shadow-md); border-style: solid; }
+    .board-hint { font-size: 12px; color: var(--text-3); display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Move-to menu (floating) */
+    #move-menu { position: fixed; z-index: 70; display: none; min-width: 220px; }
+    #move-menu.is-open { display: block; }
+    #move-menu .menu-item[aria-disabled="true"] { color: var(--text-3); cursor: default; background: none; }
+    #move-menu .menu-item .stage-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; margin: 0 4px; }
+    #move-menu .menu-item.is-won { color: var(--success); }
+    #move-menu .menu-item.is-won .i { color: var(--success); }
+
+    /* ---- Configurations drawer ---- */
+    .drawer-tabs { padding: 0 var(--sp-5); border-bottom: 1px solid var(--border); flex: none; }
+    .drawer-tabs .tabs { margin: 0; border-bottom: 0; gap: var(--sp-6); }
+    .cfg-intro { color: var(--text-2); font-size: 13px; margin-bottom: var(--sp-4); display: flex; align-items: center; gap: var(--sp-3); }
+    .cfg-section + .cfg-section { margin-top: var(--sp-5); }
+    .cfg-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .cfg-head .over { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .cfg-head .help { margin-left: auto; }
+    .cfg-list { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+    .cfg-row { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 8px 6px 12px; border-top: 1px solid var(--border); }
+    .cfg-row:first-child { border-top: 0; }
+    .cfg-row:hover { background: var(--surface-2); }
+    .cfg-row.is-off .cfg-name { color: var(--text-3); }
+    .cfg-grip { color: var(--text-3); cursor: grab; display: inline-grid; place-items: center; width: 16px; }
+    .cfg-grip.is-locked { cursor: default; }
+    .cfg-name { font-weight: 500; min-width: 0; }
+    .cfg-desc { font-size: 12px; color: var(--text-3); line-height: 16px; }
+    .cfg-main { flex: 1; min-width: 0; }
+    .cfg-meta { font-size: 12px; color: var(--text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .cfg-actions { display: flex; gap: 2px; align-items: center; }
+    .cfg-actions .btn-icon { color: var(--text-3); }
+    .cfg-actions .btn-icon:hover { color: var(--text); }
+    .cfg-actions .btn-danger-ghost.btn-icon { color: var(--text-3); }
+    .cfg-actions .btn-danger-ghost.btn-icon:hover { color: var(--danger); }
+    .cfg-icon { width: 32px; height: 32px; border-radius: var(--r-md); background: var(--surface-2); color: var(--text-2); display: grid; place-items: center; flex: none; border: 1px solid var(--border); }
+    .cfg-icon.is-ai { background: var(--ai-soft); color: var(--ai); border-color: transparent; }
+    .cfg-add { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
+    .cfg-add .input { flex: 1; min-width: 180px; height: 34px; }
+    .cfg-add .btn { height: 34px; }
+
+    .swatch { width: 16px; height: 16px; border-radius: 50%; flex: none; border: 0; padding: 0; display: inline-block; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--border); }
+    button.swatch { cursor: pointer; }
+    button.swatch:hover { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--border-strong); }
+    .swatches { display: inline-flex; gap: 10px; align-items: center; padding: 0 4px; }
+    .swatches .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface-2), 0 0 0 4px var(--text); }
+    .swatch-label { font-size: 12px; color: var(--text-3); }
+
+    .lost-reasons { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 12px 12px 40px; border-top: 1px dashed var(--border); }
+    .lost-reasons .chip { background: var(--surface-2); color: var(--text-2); border-color: var(--border); }
+
+    .prod-cat { width: 128px; flex: none; }
+    .prod-val { width: 150px; flex: none; font-size: 12px; color: var(--text-2); }
+    .prod-cnt { width: 80px; flex: none; text-align: right; }
+    .cfg-colhead { display: flex; align-items: center; gap: 12px; padding: 0 8px 6px 12px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+
+    .rule { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); }
+    .rule + .rule { margin-top: var(--sp-3); }
+    .rule.is-off { background: var(--surface-2); }
+    .rule.is-off .rule-body { opacity: .6; }
+    .rule-head { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; }
+    .rule-head .cfg-icon { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+    .rule-title { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .rule-body { padding: 0 14px 12px 58px; }
+    .rule-map { display: grid; grid-template-columns: minmax(0, 1.2fr) 20px minmax(0, 1fr) auto; align-items: center; gap: 6px 10px; font-size: 13px; }
+    .rule-map .i { color: var(--text-3); }
+    .rule-map .select { height: 32px; font-size: 13px; }
+    .rule-map .cond { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+    .order-chain { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); }
+    .order-chain .step { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); font-weight: 500; color: var(--text); }
+    .order-chain .step b { color: var(--text-3); font-weight: 600; }
+    .order-chain > .i { color: var(--text-3); width: 14px; height: 14px; }
+    .master { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-text); margin-bottom: var(--sp-4); }
+    .master b { color: var(--text); }
+    .master .cfg-desc { color: var(--text-2); }
+
+    @media (max-width: 1280px) {
+      .pipe-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .pipe-mix { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); padding-top: 4px; }
+      .pipe-mix .pipe-label { display: none; }
+      .board .kcol { max-height: calc(100vh - 496px); min-height: 300px; min-width: 226px; }
+      .toolbar .input-group { width: 210px; }
+      .tb-reset { display: none; }
+      .lead .kcard-foot { gap: 8px; }
+    }
+    @media (max-width: 768px) {
+      .pipe-strip { grid-template-columns: 1fr 1fr; }
+      .pipe-cell:nth-child(3) { border-left: 0; }
+      .pipe-cell:nth-child(n+3) { border-top: 1px solid var(--border); }
+      .board .kcol { max-height: none; min-width: 272px; }
+      .prod-val, .prod-cat { display: none; }
+      .rule-body { padding-left: 14px; }
+    }
+  </style>
+</head>
+<body data-page="leads" data-crumb="Leads|Pipeline">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Leads</h1>
+            <p class="page-sub">Move prospects from first contact to a won client. Drag a card or use <b>⋯ Move to…</b></p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" data-open-drawer="drawer-config"><svg class="i"><use href="#i-sliders"/></svg>Configurations</button>
+            <a class="btn btn-primary" href="05-lead-create.html"><svg class="i"><use href="#i-plus"/></svg>Create lead</a>
+          </div>
+        </div>
+
+        <div class="tabs" data-tabs="vis">
+          <button class="tab is-active">My Leads <span class="count">14</span></button>
+          <button class="tab">Collaborations <span class="count">3</span></button>
+          <button class="tab">My Team Leads <span class="count">62</span></button>
+          <button class="tab">New Leads <span class="count">5</span></button>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" id="board-search" placeholder="Search by name, mobile or product"></label>
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-filter"/></svg>Filters <span class="filter-count">1</span></button>
+            <span class="chip">Follow-up: <b>Next 30 days</b><button class="chip-remove" aria-label="Remove filter"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <button class="btn btn-ghost tb-reset">Reset</button>
+          </div>
+          <div class="toolbar-right">
+            <label class="check"><input type="checkbox" id="show-closed"> Show Completed &amp; Lost</label>
+            <button class="btn btn-ghost btn-icon tooltip" data-tip="Saved views" aria-label="Saved views"><svg class="i"><use href="#i-star"/></svg></button>
+            <div class="segmented" data-segmented role="group" aria-label="View">
+              <button aria-pressed="false" onclick="location.href='04-leads-list.html'"><svg class="i"><use href="#i-list"/></svg>Table</button>
+              <button aria-pressed="true"><svg class="i"><use href="#i-kanban"/></svg>Kanban</button>
+            </div>
+          </div>
+        </div>
+
+        <section class="pipe-strip" aria-label="Pipeline summary">
+          <div class="pipe-cell">
+            <div class="pipe-label"><svg class="i i-sm"><use href="#i-rupee"/></svg>Total open value</div>
+            <div class="pipe-value">₹1.33 Cr</div>
+            <div class="pipe-meta">₹1.10 Cr on this board</div>
+          </div>
+          <div class="pipe-cell">
+            <div class="pipe-label"><svg class="i i-sm"><use href="#i-target"/></svg>Open leads</div>
+            <div class="pipe-value">16</div>
+            <div class="pipe-meta">13 mine · 3 collaborations</div>
+          </div>
+          <div class="pipe-cell">
+            <div class="pipe-label"><svg class="i i-sm"><use href="#i-trending-up"/></svg>Conversion this month</div>
+            <div class="pipe-value">18%</div>
+            <div class="pipe-meta"><span class="up"><svg class="i i-sm"><use href="#i-arrow-up"/></svg>4 pts</span> vs Oct · 4 of 22 won</div>
+          </div>
+          <div class="pipe-cell">
+            <div class="pipe-label"><svg class="i i-sm"><use href="#i-clock"/></svg>Avg. days to convert</div>
+            <div class="pipe-value">12<small>days</small></div>
+            <div class="pipe-meta"><span class="up"><svg class="i i-sm"><use href="#i-arrow-down"/></svg>3 days</span> faster than Oct</div>
+          </div>
+          <div class="pipe-cell pipe-mix">
+            <div class="pipe-label">Value by stage <span class="faint" style="font-weight:400">· this board</span></div>
+            <div class="stage-bar" id="stage-bar" aria-hidden="true"></div>
+            <div class="stage-legend" id="stage-legend"></div>
+          </div>
+        </section>
+
+        <div class="board-wrap">
+          <div class="kanban board" id="board" aria-label="Leads by stage"></div>
+
+          <div class="kdrops" aria-label="Close a lead">
+            <div class="kdrop kdrop-won" data-drop="won"><svg class="i"><use href="#i-check"/></svg>Drop here: Completed (won) <span class="kdrop-sub">· 4 this month · ₹9.2 L</span></div>
+            <div class="kdrop kdrop-lost" data-drop="lost"><svg class="i"><use href="#i-x"/></svg>Drop here: Lost <span class="kdrop-sub">· 3 this month · reason asked</span></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Floating "Move to…" menu: keyboard / touch alternative to drag and drop -->
+  <div class="menu" id="move-menu" role="menu" aria-label="Move lead to"></div>
+
+  <!-- ================= Configurations drawer ================= -->
+  <aside class="drawer drawer-wide" id="drawer-config" aria-label="Lead configurations">
+    <div class="drawer-header">
+      <div class="card-icon"><svg class="i"><use href="#i-sliders"/></svg></div>
+      <div><div class="drawer-title">Configurations</div><div class="drawer-sub">Leads · applies to everyone at Sharma Wealth Partners</div></div>
+      <button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="drawer-tabs">
+      <div class="tabs" data-tabs="cfg" id="cfg-tabs">
+        <button class="tab is-active" data-tab="stages">Status stages <span class="count">6</span></button>
+        <button class="tab" data-tab="products">Products <span class="count">8</span></button>
+        <button class="tab" data-tab="sources">Lead sources <span class="count">7</span></button>
+        <button class="tab" data-tab="assign">Auto-assignment</button>
+      </div>
+    </div>
+
+    <div class="drawer-body">
+
+      <!-- Status stages -->
+      <div data-tab-panel="stages" data-tab-scope="cfg" class="is-active">
+        <p class="cfg-intro">Define the stages a lead moves through, from first capture to won or lost. Stages appear as Kanban columns in this order.</p>
+
+        <div class="cfg-section">
+          <div class="cfg-head"><span class="over">New stage</span><span class="badge badge-neutral badge-square"><svg class="i"><use href="#i-lock"/></svg>Fixed</span><span class="help">Every new lead starts here</span></div>
+          <div class="cfg-list">
+            <div class="cfg-row">
+              <span class="cfg-grip is-locked"><svg class="i i-sm"><use href="#i-lock"/></svg></span>
+              <span class="swatch" style="background:var(--info)"></span>
+              <div class="cfg-main"><div class="cfg-name">New</div></div>
+              <span class="cfg-meta">3 open leads</span>
+              <div class="cfg-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Rename New"><svg class="i"><use href="#i-edit"/></svg></button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <div class="cfg-head"><span class="over">Initial stage</span><span class="help">Where a lead moves when its first activity is logged</span></div>
+          <div class="cfg-list">
+            <div class="cfg-row">
+              <span class="cfg-grip"><svg class="i i-sm"><use href="#i-zap"/></svg></span>
+              <div class="cfg-main"><div class="cfg-name">After the first call, visit or WhatsApp, move the lead to</div><div class="cfg-desc">Saves a manual step; staff can still change the stage.</div></div>
+              <select class="select" style="width:170px" aria-label="Initial stage"><option>Contacted</option><option>Follow-up</option><option>Stay in New</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <div class="cfg-head"><span class="over">Additional stages</span><span class="help">Drag <svg class="i i-sm" style="vertical-align:-2px"><use href="#i-grip"/></svg> to reorder</span></div>
+          <div class="cfg-list" id="stage-list">
+            <div class="cfg-row">
+              <span class="cfg-grip" title="Drag to reorder"><svg class="i"><use href="#i-grip"/></svg></span>
+              <button class="swatch" style="background:var(--neutral)" aria-label="Change colour of Contacted"></button>
+              <div class="cfg-main"><div class="cfg-name">Contacted</div></div>
+              <span class="cfg-meta">3 open leads</span>
+              <div class="cfg-actions">
+                <button class="btn btn-ghost btn-icon btn-sm" aria-label="Rename Contacted"><svg class="i"><use href="#i-edit"/></svg></button>
+                <button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Contacted" onclick="AK.toast('Contacted deleted · 3 leads moved to New')"><svg class="i"><use href="#i-trash"/></svg></button>
+              </div>
+            </div>
+            <div class="cfg-row">
+              <span class="cfg-grip" title="Drag to reorder"><svg class="i"><use href="#i-grip"/></svg></span>
+              <button class="swatch" style="background:var(--warning)" aria-label="Change colour of Follow-up"></button>
+              <div class="cfg-main"><div class="cfg-name">Follow-up</div></div>
+              <span class="cfg-meta">4 open leads</span>
+              <div class="cfg-actions">
+                <button class="btn btn-ghost btn-icon btn-sm" aria-label="Rename Follow-up"><svg class="i"><use href="#i-edit"/></svg></button>
+                <button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Follow-up" onclick="AK.toast('Follow-up deleted · 4 leads moved to Contacted')"><svg class="i"><use href="#i-trash"/></svg></button>
+              </div>
+            </div>
+            <div class="cfg-row">
+              <span class="cfg-grip" title="Drag to reorder"><svg class="i"><use href="#i-grip"/></svg></span>
+              <button class="swatch" style="background:var(--danger)" aria-label="Change colour of Hot lead"></button>
+              <div class="cfg-main"><div class="cfg-name">Hot lead</div></div>
+              <span class="cfg-meta">3 open leads</span>
+              <div class="cfg-actions">
+                <button class="btn btn-ghost btn-icon btn-sm" aria-label="Rename Hot lead"><svg class="i"><use href="#i-edit"/></svg></button>
+                <button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Hot lead" onclick="AK.toast('Hot lead deleted · 3 leads moved to Follow-up')"><svg class="i"><use href="#i-trash"/></svg></button>
+              </div>
+            </div>
+            <div class="cfg-add">
+              <input class="input" id="new-stage" placeholder="New stage name, e.g. Documents pending">
+              <span class="swatch-label">Colour</span>
+              <div class="swatches" data-swatches>
+                <button class="swatch" style="background:var(--primary)" aria-pressed="false" aria-label="Blue"></button>
+                <button class="swatch" style="background:var(--chart-2)" aria-pressed="false" aria-label="Sky"></button>
+                <button class="swatch" style="background:var(--ai)" aria-pressed="true" aria-label="Violet"></button>
+                <button class="swatch" style="background:var(--warning)" aria-pressed="false" aria-label="Amber"></button>
+                <button class="swatch" style="background:var(--success)" aria-pressed="false" aria-label="Green"></button>
+                <button class="swatch" style="background:var(--neutral)" aria-pressed="false" aria-label="Slate"></button>
+              </div>
+              <button class="btn btn-secondary" id="add-stage"><svg class="i"><use href="#i-plus"/></svg>Add stage</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <div class="cfg-head"><span class="over">Final stages</span><span class="badge badge-neutral badge-square"><svg class="i"><use href="#i-lock"/></svg>Fixed</span><span class="help">Closed leads leave the board</span></div>
+          <div class="cfg-list">
+            <div class="cfg-row">
+              <span class="cfg-grip is-locked"><svg class="i i-sm"><use href="#i-lock"/></svg></span>
+              <span class="swatch" style="background:var(--success)"></span>
+              <div class="cfg-main"><div class="cfg-name">Completed</div><div class="cfg-desc">Counts as a conversion · offers "Create client in MF Box"</div></div>
+              <span class="cfg-meta">4 this month</span>
+              <div class="cfg-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Rename Completed"><svg class="i"><use href="#i-edit"/></svg></button></div>
+            </div>
+            <div class="cfg-row">
+              <span class="cfg-grip is-locked"><svg class="i i-sm"><use href="#i-lock"/></svg></span>
+              <span class="swatch" style="background:var(--neutral)"></span>
+              <div class="cfg-main"><div class="cfg-name">Lost</div><div class="cfg-desc">Ask for a reason when a lead is marked Lost</div></div>
+              <label class="switch" title="Ask for a lost reason"><input type="checkbox" checked aria-label="Ask for a lost reason"><span></span></label>
+              <div class="cfg-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Rename Lost"><svg class="i"><use href="#i-edit"/></svg></button></div>
+            </div>
+            <div class="lost-reasons">
+              <span class="chip">Not interested now<button class="chip-remove" aria-label="Remove reason"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <span class="chip">Went with another advisor<button class="chip-remove" aria-label="Remove reason"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <span class="chip">Not reachable<button class="chip-remove" aria-label="Remove reason"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <span class="chip">Budget / timing<button class="chip-remove" aria-label="Remove reason"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <button class="chip chip-ghost"><svg class="i i-sm"><use href="#i-plus"/></svg>Add reason</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div data-tab-panel="products" data-tab-scope="cfg">
+        <p class="cfg-intro">Products a lead can be interested in. They show as tags on cards and decide how the ₹ value of a lead is counted.</p>
+        <div class="cfg-colhead"><span style="width:16px"></span><span style="flex:1">Product</span><span class="prod-cat">Category</span><span class="prod-val">Value counted as</span><span class="prod-cnt">Open leads</span><span style="width:102px"></span></div>
+        <div class="cfg-list">
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Health Insurance</div></div>
+            <span class="prod-cat"><span class="tag">Insurance</span></span>
+            <span class="prod-val">Annual premium</span>
+            <span class="prod-cnt cfg-meta">4</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="Health Insurance active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit Health Insurance"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Health Insurance"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">ITR e-filing</div></div>
+            <span class="prod-cat"><span class="tag">Tax services</span></span>
+            <span class="prod-val">Fee</span>
+            <span class="prod-cnt cfg-meta">2</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="ITR e-filing active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit ITR e-filing"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete ITR e-filing"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">MF-SIP</div></div>
+            <span class="prod-cat"><span class="tag">Mutual funds</span></span>
+            <span class="prod-val">Monthly SIP × 12</span>
+            <span class="prod-cnt cfg-meta">5</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="MF-SIP active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit MF-SIP"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete MF-SIP"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">MF-Lumpsum</div></div>
+            <span class="prod-cat"><span class="tag">Mutual funds</span></span>
+            <span class="prod-val">Investment amount</span>
+            <span class="prod-cnt cfg-meta">4</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="MF-Lumpsum active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit MF-Lumpsum"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete MF-Lumpsum"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Term Insurance</div></div>
+            <span class="prod-cat"><span class="tag">Insurance</span></span>
+            <span class="prod-val">Annual premium</span>
+            <span class="prod-cnt cfg-meta">4</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="Term Insurance active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit Term Insurance"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Term Insurance"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">NPS</div></div>
+            <span class="prod-cat"><span class="tag">Retirement</span></span>
+            <span class="prod-val">Annual contribution</span>
+            <span class="prod-cnt cfg-meta">3</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="NPS active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit NPS"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete NPS"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Fixed Deposit</div></div>
+            <span class="prod-cat"><span class="tag">Fixed income</span></span>
+            <span class="prod-val">Deposit amount</span>
+            <span class="prod-cnt cfg-meta">2</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="Fixed Deposit active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit Fixed Deposit"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Fixed Deposit"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-grip"><svg class="i"><use href="#i-grip"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">PMS</div></div>
+            <span class="prod-cat"><span class="tag">Portfolio mgmt</span></span>
+            <span class="prod-val">Investment amount</span>
+            <span class="prod-cnt cfg-meta">2</span>
+            <div class="cfg-actions"><label class="switch" title="Active"><input type="checkbox" checked aria-label="PMS active"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit PMS"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete PMS"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-add">
+            <input class="input" placeholder="Product name, e.g. Sovereign Gold Bond">
+            <select class="select" style="width:150px" aria-label="Category"><option>Category</option><option>Mutual funds</option><option>Insurance</option><option>Fixed income</option><option>Tax services</option><option>Retirement</option></select>
+            <button class="btn btn-secondary" onclick="AK.toast('Product added')"><svg class="i"><use href="#i-plus"/></svg>Add product</button>
+          </div>
+        </div>
+        <div class="banner banner-info mt-4"><svg class="i"><use href="#i-info"/></svg><span>Turning a product off hides it from new leads; existing leads keep their tags.</span></div>
+      </div>
+
+      <!-- Lead sources -->
+      <div data-tab-panel="sources" data-tab-scope="cfg">
+        <p class="cfg-intro">Where leads come from. The source shows as a small icon on every card, and Reports shows conversion by source.</p>
+        <div class="cfg-list">
+          <div class="cfg-row">
+            <span class="cfg-icon"><svg class="i"><use href="#i-globe"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Website form</div><div class="cfg-desc">sharmawealth.in/contact · auto-captured</div></div>
+            <span class="cfg-meta">9 this month</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" checked aria-label="Website form on"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Copy embed code" onclick="AK.toast('Form embed code copied',{undo:false,icon:'copy'})"><svg class="i"><use href="#i-copy"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit Website form"><svg class="i"><use href="#i-edit"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-icon"><svg class="i"><use href="#i-qr"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">QR code</div><div class="cfg-desc">Branch standees and investor-awareness events</div></div>
+            <span class="cfg-meta">5 this month</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" checked aria-label="QR code on"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download QR"><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit QR code"><svg class="i"><use href="#i-edit"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-icon"><svg class="i"><use href="#i-whatsapp"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">WhatsApp</div><div class="cfg-desc">Click-to-chat on +91 22•• ••4410 · first message creates a lead</div></div>
+            <span class="cfg-meta">4 this month</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" checked aria-label="WhatsApp on"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit WhatsApp" style="visibility:hidden"><svg class="i"><use href="#i-copy"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit WhatsApp"><svg class="i"><use href="#i-edit"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-icon"><svg class="i"><use href="#i-users"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Referral</div><div class="cfg-desc">An existing client refers someone; the referrer is credited</div></div>
+            <span class="cfg-meta">6 this month</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" checked aria-label="Referral on"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" style="visibility:hidden" tabindex="-1" aria-hidden="true"><svg class="i"><use href="#i-copy"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit Referral"><svg class="i"><use href="#i-edit"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-icon"><svg class="i"><use href="#i-user-plus"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Manual entry <span class="badge badge-neutral badge-square" style="margin-left:6px"><svg class="i"><use href="#i-lock"/></svg>Always on</span></div><div class="cfg-desc">Added by staff from Create lead</div></div>
+            <span class="cfg-meta">7 this month</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" checked disabled aria-label="Manual entry always on"><span style="opacity:.55;cursor:default"></span></label><button class="btn btn-ghost btn-icon btn-sm" style="visibility:hidden" tabindex="-1" aria-hidden="true"><svg class="i"><use href="#i-copy"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit Manual entry"><svg class="i"><use href="#i-edit"/></svg></button></div>
+          </div>
+          <div class="cfg-row">
+            <span class="cfg-icon is-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">AI generated <span class="badge badge-ai" style="margin-left:6px"><svg class="i"><use href="#i-sparkles"/></svg>AI</span></div><div class="cfg-desc">Suggested from MF Box signals (e.g. FD maturity); a human approves first</div></div>
+            <span class="cfg-meta">2 this month</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" checked aria-label="AI generated on"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" style="visibility:hidden" tabindex="-1" aria-hidden="true"><svg class="i"><use href="#i-copy"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit AI generated"><svg class="i"><use href="#i-edit"/></svg></button></div>
+          </div>
+          <div class="cfg-row is-off">
+            <span class="cfg-icon"><svg class="i"><use href="#i-map-pin"/></svg></span>
+            <div class="cfg-main"><div class="cfg-name">Walk-in</div><div class="cfg-desc">Visitor at a branch, logged by the front desk</div></div>
+            <span class="cfg-meta">Off</span>
+            <div class="cfg-actions"><label class="switch"><input type="checkbox" aria-label="Walk-in on"><span></span></label><button class="btn btn-ghost btn-icon btn-sm" style="visibility:hidden" tabindex="-1" aria-hidden="true"><svg class="i"><use href="#i-copy"/></svg></button><button class="btn btn-danger-ghost btn-icon btn-sm" aria-label="Delete Walk-in"><svg class="i"><use href="#i-trash"/></svg></button></div>
+          </div>
+          <div class="cfg-add">
+            <input class="input" placeholder="Source name, e.g. Seminar · Diwali 2026">
+            <button class="btn btn-secondary" onclick="AK.toast('Lead source added')"><svg class="i"><use href="#i-plus"/></svg>Add source</button>
+          </div>
+        </div>
+        <p class="help mt-3">Form fields, QR designs and the WhatsApp greeting are set in <a href="20-settings.html">Settings → Lead capture</a>.</p>
+      </div>
+
+      <!-- Auto-assignment -->
+      <div data-tab-panel="assign" data-tab-scope="cfg">
+        <div class="master">
+          <svg class="i i-lg"><use href="#i-zap"/></svg>
+          <div class="cfg-main"><b>Auto-assign new leads</b><div class="cfg-desc">Website, QR and WhatsApp leads get an owner within seconds instead of waiting in New Leads.</div></div>
+          <label class="switch"><input type="checkbox" checked aria-label="Auto-assign new leads"><span></span></label>
+        </div>
+
+        <div class="cfg-head"><span class="over">Rules run in this order · first match wins</span></div>
+        <div class="order-chain mb-4">
+          <span class="step"><b>1</b>By product</span><svg class="i"><use href="#i-arrow-right"/></svg>
+          <span class="step"><b>2</b>By branch</span><svg class="i"><use href="#i-arrow-right"/></svg>
+          <span class="step"><b>3</b>Round robin</span><svg class="i"><use href="#i-arrow-right"/></svg>
+          <span>otherwise</span>
+          <select class="select" style="width:auto;height:28px;font-size:12px" aria-label="Fallback owner"><option>Neha Kapoor (Branch Manager)</option><option>Leave in New Leads</option></select>
+        </div>
+
+        <div class="rule">
+          <div class="rule-head">
+            <span class="cfg-icon"><svg class="i"><use href="#i-tag"/></svg></span>
+            <div class="cfg-main"><div class="rule-title">By product</div><div class="cfg-desc">Send specialist products to the person who handles them.</div></div>
+            <label class="switch"><input type="checkbox" checked data-rule aria-label="By product rule"><span></span></label>
+          </div>
+          <div class="rule-body">
+            <div class="rule-map">
+              <span class="cond"><span class="tag">Health Insurance</span><span class="tag">Term Insurance</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Owner"><option>Sneha Iyer</option></select><label class="switch"><input type="checkbox" checked aria-label="Rule on"><span></span></label>
+              <span class="cond"><span class="tag">ITR e-filing</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Owner"><option>Priya Nair (Ops)</option></select><label class="switch"><input type="checkbox" checked aria-label="Rule on"><span></span></label>
+              <span class="cond"><span class="tag">MF-Lumpsum</span><span class="faint text-sm">≥ ₹10,00,000</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Owner"><option>Neha Kapoor</option></select><label class="switch"><input type="checkbox" checked aria-label="Rule on"><span></span></label>
+              <span class="cond"><span class="tag">NPS</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Owner"><option>Kavya Menon (Sub-broker)</option></select><label class="switch"><input type="checkbox" aria-label="Rule on"><span></span></label>
+            </div>
+            <button class="btn btn-ghost btn-sm mt-2" style="margin-left:-10px"><svg class="i"><use href="#i-plus"/></svg>Add product rule</button>
+          </div>
+        </div>
+
+        <div class="rule">
+          <div class="rule-head">
+            <span class="cfg-icon"><svg class="i"><use href="#i-building"/></svg></span>
+            <div class="cfg-main"><div class="rule-title">By branch</div><div class="cfg-desc">Match the lead's city or PIN code to the nearest branch.</div></div>
+            <label class="switch"><input type="checkbox" checked data-rule aria-label="By branch rule"><span></span></label>
+          </div>
+          <div class="rule-body">
+            <div class="rule-map">
+              <span class="cond">Mumbai <span class="faint text-sm">· PIN 400xxx</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Branch"><option>Andheri · round robin</option></select><span></span>
+              <span class="cond">Thane <span class="faint text-sm">· PIN 4006xx</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Branch"><option>Thane · Aman Gupta</option></select><span></span>
+              <span class="cond">Pune <span class="faint text-sm">· PIN 411xxx</span></span><svg class="i"><use href="#i-arrow-right"/></svg>
+              <select class="select" aria-label="Branch"><option>Pune · Vikram Rao</option></select><span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rule">
+          <div class="rule-head">
+            <span class="cfg-icon"><svg class="i"><use href="#i-repeat"/></svg></span>
+            <div class="cfg-main"><div class="rule-title">Round robin</div><div class="cfg-desc">Share the remaining leads evenly across the Andheri team.</div></div>
+            <label class="switch"><input type="checkbox" checked data-rule aria-label="Round robin rule"><span></span></label>
+          </div>
+          <div class="rule-body">
+            <div class="row gap-3 wrap">
+              <span class="avatar-group"><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a2">RM</span><span class="avatar avatar-sm a3">SI</span></span>
+              <span class="text-md muted">Neha Kapoor, Rohan Mehta, Sneha Iyer</span>
+              <span class="faint text-sm">· next up: <b class="muted">Sneha Iyer</b></span>
+              <button class="btn btn-ghost btn-sm ml-auto">Edit pool</button>
+            </div>
+            <div class="row gap-5 wrap mt-3">
+              <label class="check"><input type="checkbox" checked> Skip people on leave</label>
+              <label class="check"><input type="checkbox" checked> Cap at 15 open leads per person</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="cfg-section">
+          <div class="cfg-head"><span class="over">After assignment</span></div>
+          <div class="cfg-list">
+            <div class="cfg-row">
+              <span class="cfg-icon"><svg class="i"><use href="#i-whatsapp"/></svg></span>
+              <div class="cfg-main"><div class="cfg-name">Notify the owner on WhatsApp and in the app</div></div>
+              <label class="switch"><input type="checkbox" checked aria-label="Notify owner"><span></span></label>
+            </div>
+            <div class="cfg-row">
+              <span class="cfg-icon"><svg class="i"><use href="#i-clock"/></svg></span>
+              <div class="cfg-main"><div class="cfg-name">Re-assign if not contacted within</div><div class="cfg-desc">The branch manager is told when this happens</div></div>
+              <select class="select" style="width:120px" aria-label="Re-assign after"><option>24 hours</option><option>4 hours</option><option>48 hours</option></select>
+              <label class="switch"><input type="checkbox" checked aria-label="Re-assign rule"><span></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="drawer-footer">
+      <span class="faint text-sm">Last changed by Rajesh Sharma · 02 Nov 2026</span>
+      <span class="spacer"></span>
+      <button class="btn btn-secondary" data-close-drawer>Cancel</button>
+      <button class="btn btn-primary" onclick="AK.closeDrawer('drawer-config'); AK.toast('Lead configurations saved', {undo:false})">Save changes</button>
+    </div>
+  </aside>
+
+  <script>
+  (function () {
+    var STAGES = [
+      { id: 'new',       name: 'New',       color: 'var(--info)' },
+      { id: 'contacted', name: 'Contacted', color: 'var(--neutral)' },
+      { id: 'followup',  name: 'Follow-up', color: 'var(--warning)' },
+      { id: 'hot',       name: 'Hot lead',  color: 'var(--danger)' }
+    ];
+    var OWNERS = {
+      NK: ['Neha Kapoor', ''], RM: ['Rohan Mehta', 'a2'], SI: ['Sneha Iyer', 'a3'],
+      KM: ['Kavya Menon (Sub-broker)', 'a4'], IS: ['Imran Sheikh (Sub-broker)', 'a5']
+    };
+    var SOURCES = {
+      web: ['globe', 'Website form'], qr: ['qr', 'QR code'], wa: ['whatsapp', 'WhatsApp'],
+      ref: ['users', 'Referral'], man: ['user-plus', 'Manual entry'], ai: ['sparkles', 'AI generated'], sb: ['briefcase', 'Sub-broker']
+    };
+    var NATURE = { Hot: 'badge-danger', Warm: 'badge-warning', Cold: 'badge-info' };
+    // fu = follow-up day in Nov 2026 (today = 14), acted = days since last activity
+    var LEADS = [
+      { n: 'Fatima Siddiqui', s: 'new', p: ['MF-SIP'], v: 180000, na: 'Warm', fu: 14, o: 'NK', src: 'wa', a: 1 },
+      { n: 'Tanvi Deshmukh',  s: 'new', p: ['MF-Lumpsum'], v: 1500000, na: 'Hot', fu: 14, o: 'NK', src: 'qr', a: 0 },
+      { n: 'Pallavi Dutta',   s: 'new', p: ['ITR e-filing'], v: 8500, na: 'Warm', fu: 15, o: 'NK', src: 'web', a: 2 },
+
+      { n: 'Nisha Reddy',     s: 'contacted', p: ['ITR e-filing', 'NPS'], v: 12000, na: 'Warm', fu: 15, o: 'NK', src: 'wa', a: 1 },
+      { n: 'Ananya Bose',     s: 'contacted', p: ['MF-SIP'], v: 240000, na: 'Warm', fu: 15, o: 'NK', src: 'web', a: 3 },
+      { n: 'Sandeep Hegde',   s: 'contacted', p: ['Term Insurance'], v: 30000, na: 'Warm', fu: 15, o: 'NK', src: 'sb', a: 4 },
+
+      { n: 'Ishaan Kapadia',  s: 'followup', p: ['MF-SIP', 'NPS', 'Term Insurance'], v: 600000, na: 'Hot', fu: 9, o: 'NK', src: 'qr', a: 6 },
+      { n: 'Vivek Chandra',   s: 'followup', p: ['Health Insurance'], v: 35000, na: 'Warm', fu: 10, o: 'NK', src: 'sb', a: 9 },
+      { n: 'Ritu Saxena',     s: 'followup', p: ['Term Insurance'], v: 48000, na: 'Warm', fu: 12, o: 'NK', src: 'web', a: 2 },
+      { n: 'Rakesh Jain',     s: 'followup', p: ['NPS', 'Term Insurance'], v: 300000, na: 'Hot', fu: 13, o: 'NK', src: 'man', a: 8 },
+
+      { n: 'Kunal Shah',      s: 'hot', p: ['MF-Lumpsum', 'Fixed Deposit'], v: 2500000, na: 'Hot', fu: 11, o: 'NK', src: 'man', a: 3 },
+      { n: 'Gaurav Sinha',    s: 'hot', p: ['PMS'], v: 5000000, na: 'Hot', fu: 14, o: 'NK', src: 'ref', a: 1 },
+      { n: 'Karan Malhotra',  s: 'hot', p: ['MF-SIP', 'MF-Lumpsum'], v: 500000, na: 'Hot', fu: 14, o: 'NK', src: 'web', a: 0 }
+    ];
+    LEADS.forEach(function (l, i) { l.id = 'L' + (1040 + i); });
+
+    var ic = function (n, cls) { return '<svg class="i' + (cls ? ' ' + cls : '') + '"><use href="#i-' + n + '"/></svg>'; };
+    var inr = function (n) { return '₹' + n.toLocaleString('en-IN'); };
+    var lakh = function (n) { return '₹' + (n / 1e5).toFixed(1).replace(/\.0$/, '') + ' L'; };
+    var DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var dateLabel = function (d) { return String(d).padStart(2, '0') + ' Nov'; };
+    var dayName = function (d) { return DOW[(d + 0) % 7]; }; // 1 Nov 2026 is a Sunday
+
+    function fuHTML(d) {
+      if (d == null) return '<span class="lc-fu is-none" title="No follow-up date set">' + ic('calendar', 'i-sm') + 'No date</span>';
+      if (d < 14) return '<span class="overdue" title="Follow-up overdue since ' + dateLabel(d) + ' 2026">' + ic('clock', 'i-sm') + dateLabel(d) + '</span>';
+      if (d === 14) return '<span class="lc-fu is-today" title="Follow-up due today">' + ic('clock', 'i-sm') + 'Today</span>';
+      if (d === 15) return '<span class="lc-fu" title="Follow-up 15 Nov 2026">' + ic('calendar', 'i-sm') + 'Tomorrow</span>';
+      return '<span class="lc-fu" title="Follow-up ' + dateLabel(d) + ' 2026">' + ic('calendar', 'i-sm') + dayName(d) + ', ' + dateLabel(d) + '</span>';
+    }
+    function cardHTML(l) {
+      var o = OWNERS[l.o], s = SOURCES[l.src];
+      var acted = l.a === 0 ? 'today' : l.a + 'd';
+      return '<article class="kcard lead" draggable="true" tabindex="0" data-id="' + l.id + '" aria-label="' + l.n + ', ' + inr(l.v) + '">' +
+        '<div class="lc-top"><a class="kcard-title" href="05-lead-create.html" draggable="false">' + l.n + '</a>' +
+          '<span class="badge badge-dot ' + NATURE[l.na] + '">' + l.na + '</span>' +
+          '<button class="btn btn-ghost btn-icon btn-sm lc-more" data-move="' + l.id + '" aria-haspopup="menu" aria-label="Move ' + l.n + ' to another stage" title="Move to…">' + ic('more-h') + '</button></div>' +
+        '<div class="lc-mid"><span class="lc-value">' + inr(l.v) + '</span>' + l.p.map(function (p) { return '<span class="tag">' + p + '</span>'; }).join('') + '</div>' +
+        '<div class="kcard-foot">' + fuHTML(l.fu) +
+          '<span class="lc-src' + (l.src === 'ai' ? ' is-ai' : '') + '" title="Source: ' + s[1] + '" aria-label="Source: ' + s[1] + '">' + ic(s[0]) + '</span>' +
+          '<span class="lc-age' + (l.a >= 5 ? ' is-stale' : '') + '" title="Last acted on ' + (l.a === 0 ? 'today' : l.a + ' days ago') + '">' + ic('activity') + acted + '</span>' +
+          '<span class="avatar avatar-xs ' + o[1] + '" title="Owner: ' + o[0] + '">' + l.o + '</span>' +
+        '</div></article>';
+    }
+
+    var board = document.getElementById('board');
+    function render() {
+      board.innerHTML = STAGES.map(function (st) {
+        var list = LEADS.filter(function (l) { return l.s === st.id; });
+        var total = list.reduce(function (a, l) { return a + l.v; }, 0);
+        var od = list.filter(function (l) { return l.fu != null && l.fu < 14; }).length;
+        return '<section class="kcol" data-stage="' + st.id + '" aria-label="' + st.name + ', ' + list.length + ' leads">' +
+          '<div class="kcol-head"><span class="kcol-dot" style="background:' + st.color + '"></span><span class="kcol-name">' + st.name + '</span><span class="kcol-count">' + list.length + '</span>' +
+            (od ? '<span class="kcol-od" title="' + od + ' overdue follow-up' + (od > 1 ? 's' : '') + '">' + ic('clock') + od + '</span>' : '') +
+            '<div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Column options">' + ic('more-h') + '</button></div></div>' +
+          '<div class="kcol-sum"><b>' + lakh(total) + '</b> total value</div>' +
+          '<div class="kcol-body">' + list.map(cardHTML).join('') + '</div>' +
+          '<div class="kcol-foot"><a class="kadd" href="05-lead-create.html">' + ic('plus') + 'Add lead</a></div>' +
+        '</section>';
+      }).join('');
+      // stage mix bar
+      var grand = LEADS.reduce(function (a, l) { return a + l.v; }, 0);
+      document.getElementById('stage-bar').innerHTML = STAGES.map(function (st) {
+        var t = LEADS.filter(function (l) { return l.s === st.id; }).reduce(function (a, l) { return a + l.v; }, 0);
+        return '<span style="flex:' + t + ';background:' + st.color + '"></span>';
+      }).join('');
+      document.getElementById('stage-legend').innerHTML = STAGES.map(function (st) {
+        var t = LEADS.filter(function (l) { return l.s === st.id; }).reduce(function (a, l) { return a + l.v; }, 0);
+        return '<span><i style="background:' + st.color + '"></i>' + st.name + ' ' + lakh(t) + '</span>';
+      }).join('');
+    }
+    render();
+
+    function find(id) { for (var i = 0; i < LEADS.length; i++) if (LEADS[i].id === id) return LEADS[i]; }
+    function stageName(id) { if (id === 'won') return 'Completed (won)'; if (id === 'lost') return 'Lost'; for (var i = 0; i < STAGES.length; i++) if (STAGES[i].id === id) return STAGES[i].name; }
+    function moveLead(id, to) {
+      var l = find(id); if (!l || l.s === to) return;
+      var from = l.s; l.s = to; l.a = 0;
+      if (to === 'won' || to === 'lost') { var idx = LEADS.indexOf(l); LEADS.splice(idx, 1); l._idx = idx; }
+      render();
+      var msg = to === 'won' ? '<b>' + l.n + '</b> marked Completed (won) · ' + inr(l.v) : to === 'lost' ? '<b>' + l.n + '</b> marked Lost · reason: Not interested now' : '<b>' + l.n + '</b> moved to ' + stageName(to);
+      AK.toast(msg);
+      var t = document.querySelector('.toast-stack .toast:last-child .btn');
+      if (t) t.addEventListener('click', function () {
+        l.s = from; if (l._idx != null) { LEADS.splice(l._idx, 0, l); l._idx = null; }
+        render(); this.closest('.toast').remove();
+      });
+    }
+
+    // Move-to menu
+    var menu = document.getElementById('move-menu'), menuFor = null, menuBtn = null;
+    function openMenu(btn) {
+      var l = find(btn.getAttribute('data-move')); menuFor = l.id; menuBtn = btn;
+      var h = '<div class="menu-label">Move ' + l.n.split(' ')[0] + ' to…</div>';
+      STAGES.forEach(function (st) {
+        var cur = st.id === l.s;
+        h += '<button class="menu-item" role="menuitem" data-to="' + st.id + '"' + (cur ? ' aria-disabled="true"' : '') + '><span class="stage-dot" style="background:' + st.color + '"></span>' + st.name + (cur ? '<span class="menu-hint">Current</span>' : '') + '</button>';
+      });
+      h += '<div class="menu-sep"></div>' +
+        '<button class="menu-item is-won" role="menuitem" data-to="won">' + ic('check') + 'Completed (won)</button>' +
+        '<button class="menu-item is-danger" role="menuitem" data-to="lost">' + ic('x') + 'Lost…</button>' +
+        '<div class="menu-sep"></div>' +
+        '<a class="menu-item" role="menuitem" href="05-lead-create.html">' + ic('eye') + 'Open lead</a>' +
+        '<button class="menu-item" role="menuitem" data-act="log">' + ic('phone') + 'Log activity</button>';
+      menu.innerHTML = h;
+      var r = btn.getBoundingClientRect();
+      menu.classList.add('is-open');
+      var mw = menu.offsetWidth, mh = menu.offsetHeight;
+      var left = Math.min(r.right - mw, window.innerWidth - mw - 8); if (left < 8) left = 8;
+      var top = r.bottom + 4; if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 4);
+      menu.style.left = left + 'px'; menu.style.top = top + 'px';
+      var first = menu.querySelector('.menu-item:not([aria-disabled])'); if (first) first.focus();
+    }
+    function closeMenu(refocus) { menu.classList.remove('is-open'); if (refocus && menuBtn && document.body.contains(menuBtn)) menuBtn.focus(); menuFor = null; }
+
+    document.addEventListener('click', function (e) {
+      var mb = e.target.closest('[data-move]');
+      if (mb) { e.preventDefault(); e.stopPropagation(); if (menu.classList.contains('is-open') && menuFor === mb.getAttribute('data-move')) closeMenu(); else openMenu(mb); return; }
+      var mi = e.target.closest('#move-menu .menu-item');
+      if (mi) {
+        if (mi.getAttribute('aria-disabled') === 'true') return;
+        if (mi.getAttribute('data-to')) { var id = menuFor; closeMenu(); moveLead(id, mi.getAttribute('data-to')); }
+        else if (mi.getAttribute('data-act') === 'log') { closeMenu(); AK.toast('Log activity: call, visit or WhatsApp opens here', { undo: false, icon: 'phone' }); }
+        return;
+      }
+      if (!e.target.closest('#move-menu')) closeMenu();
+      var sw = e.target.closest('[data-swatches] .swatch');
+      if (sw) sw.parentNode.querySelectorAll('.swatch').forEach(function (b) { b.setAttribute('aria-pressed', b === sw ? 'true' : 'false'); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (menu.classList.contains('is-open')) {
+        var items = [].slice.call(menu.querySelectorAll('.menu-item:not([aria-disabled])'));
+        var i = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+        if (e.key === 'Escape') { closeMenu(true); }
+        return;
+      }
+      var card = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('lead') ? document.activeElement : null;
+      if (card && (e.key === 'm' || e.key === 'M')) { e.preventDefault(); openMenu(card.querySelector('[data-move]')); }
+    });
+    window.addEventListener('scroll', function () { closeMenu(); }, true);
+
+    // Drag and drop
+    var dragId = null;
+    board.addEventListener('dragstart', function (e) {
+      var c = e.target.closest('.lead'); if (!c) return;
+      dragId = c.getAttribute('data-id'); c.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', dragId); } catch (err) {}
+    });
+    document.addEventListener('dragend', function () { dragId = null; document.querySelectorAll('.is-dragging,.is-over').forEach(function (x) { x.classList.remove('is-dragging', 'is-over'); }); });
+    function target(e) { return e.target.closest('.kcol[data-stage], .kdrop[data-drop]'); }
+    document.addEventListener('dragover', function (e) { var t = target(e); if (!t || !dragId) return; e.preventDefault(); document.querySelectorAll('.is-over').forEach(function (x) { if (x !== t) x.classList.remove('is-over'); }); t.classList.add('is-over'); });
+    document.addEventListener('drop', function (e) {
+      var t = target(e); if (!t || !dragId) return; e.preventDefault();
+      var id = dragId; dragId = null; t.classList.remove('is-over');
+      moveLead(id, t.getAttribute('data-stage') || t.getAttribute('data-drop'));
+    });
+
+    // Search filter
+    document.getElementById('board-search').addEventListener('input', function () {
+      var q = this.value.trim().toLowerCase();
+      document.querySelectorAll('.lead').forEach(function (c) { c.style.display = !q || c.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none'; });
+    });
+    document.getElementById('show-closed').addEventListener('change', function () {
+      AK.toast(this.checked ? 'Showing Completed and Lost columns' : 'Completed and Lost hidden', { undo: false, icon: 'eye' });
+    });
+
+    // Config drawer: add stage, rule switches, deep link to a tab (?cfg=products)
+    document.getElementById('add-stage').addEventListener('click', function () {
+      var inp = document.getElementById('new-stage'); var name = inp.value.trim() || 'Documents pending';
+      var sw = document.querySelector('[data-swatches] [aria-pressed="true"]');
+      var row = document.createElement('div'); row.className = 'cfg-row';
+      row.innerHTML = '<span class="cfg-grip">' + ic('grip') + '</span><button class="swatch" style="background:' + sw.style.background + '"></button><div class="cfg-main"><div class="cfg-name"></div></div><span class="cfg-meta">0 open leads</span><div class="cfg-actions"><button class="btn btn-ghost btn-icon btn-sm">' + ic('edit') + '</button><button class="btn btn-danger-ghost btn-icon btn-sm">' + ic('trash') + '</button></div>';
+      row.querySelector('.cfg-name').textContent = name;
+      var add = document.querySelector('#stage-list .cfg-add'); add.parentNode.insertBefore(row, add);
+      inp.value = ''; AK.toast('Stage "' + name + '" added');
+    });
+    document.querySelectorAll('[data-rule]').forEach(function (cb) {
+      cb.addEventListener('change', function () { this.closest('.rule').classList.toggle('is-off', !this.checked); });
+    });
+    var cfg = new URLSearchParams(location.search).get('cfg');
+    if (cfg && document.querySelector('#cfg-tabs [data-tab="' + cfg + '"]')) {
+      document.querySelectorAll('#cfg-tabs .tab').forEach(function (x) { x.classList.toggle('is-active', x.getAttribute('data-tab') === cfg); });
+      document.querySelectorAll('[data-tab-scope="cfg"]').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-tab-panel') === cfg); });
+    }
+  })();
+  </script>
+</body>
+</html>

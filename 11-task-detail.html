@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task detail · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Header ---- */
+    .td-top { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); font-size: 13px; font-weight: 500; height: 28px; padding: 0 8px 0 4px; margin-left: -4px; border-radius: var(--r-sm); }
+    .back-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .td-id { font-family: var(--mono); font-size: 12px; color: var(--text-3); display: inline-flex; align-items: center; gap: 6px; }
+    .td-id .btn { color: var(--text-3); }
+    .td-nav { margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-3); }
+    .td-nav .tnum { padding: 0 6px; }
+
+    .td-head { display: flex; align-items: flex-start; gap: var(--sp-4); }
+    .td-title { font-size: var(--fs-xl); line-height: 32px; font-weight: 700; letter-spacing: -.02em; }
+    .td-head .page-actions { margin-left: auto; flex: none; }
+
+    .props { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-top: var(--sp-3); }
+    .prop { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--r-md); font-size: 13px; color: var(--text-2); white-space: nowrap; font-weight: 500; }
+    button.prop:hover, a.prop:hover { border-color: var(--border-strong); background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .prop .i { width: 14px; height: 14px; color: var(--text-3); }
+    .prop .prio { font-size: 13px; }
+    .prop-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+    .status-btn { border: 0; cursor: pointer; height: 28px; padding: 0 8px 0 10px; font-size: 13px; }
+    .status-btn .i { width: 12px; height: 12px; opacity: .8; }
+    .collab { display: inline-flex; align-items: center; gap: 6px; }
+    .collab .avatar-group .avatar { width: 28px; height: 28px; font-size: 10.5px; margin-left: -6px; }
+    .collab .avatar-group .avatar:first-child { margin-left: 0; }
+    .add-circle { width: 28px; height: 28px; border-radius: 50%; border: 1px dashed var(--border-strong); background: transparent; color: var(--text-3); display: inline-grid; place-items: center; padding: 0; }
+    .add-circle:hover { border-color: var(--primary); color: var(--primary-text); background: var(--primary-soft); }
+    .add-circle .i { width: 14px; height: 14px; }
+    .td-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: var(--sp-3); font-size: 12.5px; color: var(--text-3); }
+    .td-meta b { color: var(--text-2); font-weight: 500; }
+    .td-meta .avatar { width: 18px; height: 18px; font-size: 8px; }
+    .td-meta .sep { color: var(--border-strong); }
+    .td-headwrap { padding-bottom: var(--sp-5); margin-bottom: var(--sp-5); border-bottom: 1px solid var(--border); }
+
+    /* ---- Layout ---- */
+    .td-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-5); align-items: start; }
+    .td-side { display: flex; flex-direction: column; gap: var(--sp-4); position: sticky; top: calc(var(--topbar-h) + var(--sp-4)); }
+    .td-main { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+    /* ---- Description & checklist ---- */
+    .desc { color: var(--text); font-size: 14px; line-height: 22px; }
+    .desc p + p, .desc p + ul, .desc ul + p { margin-top: 10px; }
+    .desc ul { margin: 0; padding-left: 20px; }
+    .desc li { margin: 2px 0; }
+    .desc li::marker { color: var(--text-3); }
+    .section-head { display: flex; align-items: center; gap: var(--sp-3); }
+    .overline { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .cl-progress { display: flex; align-items: center; gap: 10px; margin-left: auto; font-size: 12px; color: var(--text-2); }
+    .cl-progress .progress { width: 120px; }
+    .checklist { list-style: none; margin: var(--sp-3) 0 0; padding: 0; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+    .cl-item { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 6px 12px; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+    .cl-item:last-child { border-bottom: 0; }
+    .cl-item:hover { background: var(--surface-2); }
+    .cl-item .check { flex: none; }
+    .cl-text { flex: 1; min-width: 0; color: var(--text); }
+    .cl-item.is-done .cl-text { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+    .cl-when { font-size: 12px; color: var(--text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .cl-item.is-suggested { background: var(--primary-soft); }
+    .cl-hint { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--primary-text); font-weight: 500; margin-left: 8px; }
+    .cl-add { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; color: var(--text-3); font-size: 13px; border: 0; background: none; width: 100%; text-align: left; }
+    .cl-add:hover { color: var(--primary-text); background: var(--surface-2); }
+
+    /* ---- Comments & Activities ---- */
+    .ca-head { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+    .composer-row { display: grid; grid-template-columns: 28px 1fr; gap: 12px; }
+    .composer-row .avatar { width: 28px; height: 28px; font-size: 10px; margin-top: 4px; }
+    .composer textarea { min-height: 56px; }
+    .internal-tag { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 8px; border-radius: var(--r-sm); font-size: 12px; font-weight: 500; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); margin-left: 4px; }
+    .internal-tag .i { width: 12px; height: 12px; }
+    .mention-menu { min-width: 240px; }
+    .mention { background: var(--primary-soft); color: var(--primary-text); font-weight: 500; border-radius: 4px; padding: 0 3px; }
+
+    .feed { position: relative; margin-top: var(--sp-5); }
+    .feed::before { content: ""; position: absolute; left: 13.5px; top: 6px; bottom: 16px; width: 1px; background: var(--border); }
+    .feed-day { position: relative; display: flex; align-items: center; gap: 10px; margin: var(--sp-4) 0 var(--sp-2) 40px; }
+    .feed-day:first-child { margin-top: 0; }
+    .feed-day::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .ev { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: 7px 0; }
+    .ev-ico { width: 28px; height: 28px; display: grid; place-items: center; background: var(--surface); border-radius: 50%; position: relative; z-index: 1; }
+    .ev-dot { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-3); }
+    .ev-dot .i { width: 12px; height: 12px; }
+    .ev-dot.is-primary { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+    .ev-dot.is-success { background: var(--success-soft); color: var(--success); border-color: transparent; }
+    .ev-dot.is-warning { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+    .ev-ico .avatar { width: 28px; height: 28px; font-size: 10px; }
+    .ev-line { font-size: 13px; color: var(--text-2); line-height: 20px; padding-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .ev-line b { color: var(--text); font-weight: 600; }
+    .ev-time { color: var(--text-3); font-size: 12px; }
+    .ev-time::before { content: "·"; margin-right: 6px; }
+    .ev-line .badge { height: 20px; font-size: 11.5px; }
+    .chg-old { color: var(--text-3); text-decoration: line-through; }
+    .ev-line .i.arrow { width: 12px; height: 12px; color: var(--text-3); }
+
+    .ev-card { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); overflow: hidden; }
+    .ev-card-head { display: flex; align-items: center; gap: 8px; padding: 8px 8px 0 12px; font-size: 13px; }
+    .ev-card-head b { font-weight: 600; }
+    .ev-card-head .ev-time { font-size: 12px; }
+    .ev-card-head .btn { margin-left: auto; color: var(--text-3); }
+    .ev-card-body { padding: 4px 12px 10px; font-size: 13.5px; line-height: 21px; color: var(--text); }
+    .ev-card.is-mention { border-color: var(--primary-soft-2); box-shadow: inset 3px 0 0 var(--primary); }
+    .ev-card-foot { display: flex; align-items: center; gap: 6px; padding: 0 12px 10px; }
+    .react { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: var(--r-full); border: 1px solid var(--border); background: var(--surface); font-size: 12px; color: var(--text-2); }
+    .react:hover { border-color: var(--border-strong); }
+    .react .i { width: 12px; height: 12px; }
+
+    .ev-detail { margin-top: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); padding: 10px 12px; font-size: 13px; }
+    .ev-kv { display: grid; grid-template-columns: repeat(4, minmax(0, auto)); gap: 4px 20px; justify-content: start; }
+    .ev-kv span { display: block; font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+    .ev-kv b { font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .ev-detail-foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-2); }
+
+    .wa { display: flex; flex-direction: column; gap: 6px; }
+    .wa-msg { max-width: 88%; padding: 7px 10px; border-radius: 10px; font-size: 13px; line-height: 19px; }
+    .wa-out { align-self: flex-end; background: var(--success-soft); color: var(--text); border-bottom-right-radius: 3px; }
+    .wa-in { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 3px; }
+    .wa-meta { display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .wa-meta .i { width: 13px; height: 13px; color: var(--primary); }
+    .wa-tpl { font-size: 11px; color: var(--text-3); }
+
+    .file-chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border: 1px solid var(--border); border-radius: var(--r-sm); background: var(--surface); font-size: 12.5px; color: var(--text); font-weight: 500; }
+    .file-chip .i { width: 13px; height: 13px; color: var(--danger); }
+    .feed-more { margin: 4px 0 0 40px; }
+
+    /* ---- Right panel ---- */
+    .props-list { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; row-gap: 4px; column-gap: 8px; font-size: 13px; }
+    .props-list dt { color: var(--text-3); }
+    .props-list dd { margin: 0; min-height: 30px; display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--text); font-weight: 500; }
+    .props-list dd .person-name { font-size: 13px; }
+    .pv { display: inline-flex; align-items: center; gap: 6px; padding: 0 6px; margin-left: -6px; height: 28px; border-radius: var(--r-sm); min-width: 0; }
+    .pv:hover { background: var(--surface-2); }
+    .client-chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); color: var(--text); margin-top: 6px; }
+    .client-chip:hover { border-color: var(--primary); background: var(--primary-soft); text-decoration: none; }
+    .client-chip .avatar { width: 32px; height: 32px; }
+    .client-chip .cc-name { font-weight: 600; font-size: 13.5px; }
+    .client-chip .cc-sub { font-size: 12px; color: var(--text-3); }
+    .client-chip .cc-aum { margin-left: auto; text-align: right; }
+    .client-chip .cc-aum b { display: block; font-size: 14px; font-variant-numeric: tabular-nums; }
+    .client-chip .cc-aum span { font-size: 11px; color: var(--text-3); }
+    .sync { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-3); }
+    .sync .dot { width: 6px; height: 6px; }
+
+    .side-card .card-header { padding: 12px 16px; }
+    .side-card .card-title { font-size: 13.5px; }
+    .side-card .card-title .count { font-size: 12px; font-weight: 600; color: var(--text-3); }
+    .side-card .card-body { padding: 12px 16px 14px; }
+    .link-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px; margin: 0 -8px; border-radius: var(--r-md); color: var(--text); }
+    .link-row:hover { background: var(--surface-2); text-decoration: none; }
+    .link-ico { width: 30px; height: 30px; border-radius: var(--r-md); display: grid; place-items: center; flex: none; background: var(--primary-soft); color: var(--primary-text); }
+    .link-ico .i { width: 15px; height: 15px; }
+    .link-ico.li-success { background: var(--success-soft); color: var(--success); }
+    .link-ico.li-file { background: var(--danger-soft); color: var(--danger); }
+    .link-main { min-width: 0; flex: 1; }
+    .link-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .link-sub { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .link-row .badge { height: 20px; font-size: 11.5px; }
+    .link-row > .btn, .rem-row > .switch { align-self: center; }
+    .link-row .link-ico { margin-top: 1px; }
+    .dropzone { margin-top: 8px; border: 1px dashed var(--border-strong); border-radius: var(--r-md); height: 40px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12.5px; color: var(--text-3); }
+    .dropzone a { font-weight: 500; }
+    .rem-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .rem-row:last-of-type { border-bottom: 0; }
+    .rem-row .link-sub { white-space: normal; }
+
+    .menu .badge { height: 20px; }
+    .status-menu { min-width: 190px; }
+    .status-menu .menu-item .i.ok { margin-left: auto; color: var(--primary-text); visibility: hidden; }
+    .status-menu .menu-item.is-current .i.ok { visibility: visible; }
+    .popover.left { right: auto; left: 0; }
+
+    @media (max-width: 1280px) {
+      .td-grid { grid-template-columns: minmax(0, 1fr) 316px; }
+      .ev-kv { grid-template-columns: repeat(2, minmax(0, auto)); }
+      .prop-sep { display: none; }
+    }
+    @media (max-width: 1100px) {
+      .td-grid { grid-template-columns: 1fr; }
+      .td-side { position: static; }
+    }
+    @media (max-width: 768px) {
+      .td-head { flex-direction: column; }
+      .td-head .page-actions { margin-left: 0; }
+      .td-title { font-size: var(--fs-lg); line-height: 28px; }
+      .td-nav { display: none; }
+      .cl-when { display: none; }
+    }
+  </style>
+</head>
+<body data-page="tasks" data-crumb="Tasks|SIP top-up proposal – Suresh Iyer">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- ===== Header ===== -->
+        <div class="td-headwrap">
+          <div class="td-top">
+            <a class="back-link" href="09-tasks-list.html"><svg class="i"><use href="#i-arrow-left"/></svg>My Tasks</a>
+            <span class="faint">/</span>
+            <span class="td-id">TSK-1042
+              <button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Copy link" onclick="AK.toast('Link to TSK-1042 copied',{undo:false,icon:'link'})"><svg class="i i-sm"><use href="#i-link"/></svg></button>
+            </span>
+            <div class="td-nav">
+              <span class="tnum">3 / 12</span>
+              <a class="btn btn-secondary btn-icon btn-sm tooltip" data-tip="Previous task (k)" href="11-task-detail.html"><svg class="i"><use href="#i-chevron-up"/></svg></a>
+              <a class="btn btn-secondary btn-icon btn-sm tooltip" data-tip="Next task (j)" href="11-task-detail.html"><svg class="i"><use href="#i-chevron-down"/></svg></a>
+            </div>
+          </div>
+
+          <div class="td-head">
+            <h1 class="td-title">SIP top-up proposal – Suresh Iyer</h1>
+            <div class="page-actions">
+              <button class="btn btn-primary" id="btn-done"><svg class="i"><use href="#i-check"/></svg>Mark done</button>
+              <button class="btn btn-secondary" data-open-drawer="drawer-edit"><svg class="i"><use href="#i-edit"/></svg>Edit</button>
+              <div class="popover-wrap">
+                <button class="btn btn-secondary btn-icon" data-popover="pop-more" aria-label="More actions"><svg class="i"><use href="#i-more-h"/></svg></button>
+                <div class="popover" id="pop-more">
+                  <div class="menu">
+                    <button class="menu-item" data-act="dup"><svg class="i"><use href="#i-copy"/></svg>Duplicate<span class="menu-hint">Ctrl D</span></button>
+                    <a class="menu-item" href="16-service-requests.html"><svg class="i"><use href="#i-life-buoy"/></svg>Convert to service request</a>
+                    <button class="menu-item" data-act="link"><svg class="i"><use href="#i-link"/></svg>Copy link</button>
+                    <div class="menu-sep"></div>
+                    <button class="menu-item is-danger" data-act="del"><svg class="i"><use href="#i-trash"/></svg>Delete<span class="menu-hint">Undo available</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="props">
+            <div class="popover-wrap">
+              <button class="badge badge-dot badge-info status-btn" id="status-pill" data-popover="pop-status" aria-label="Change status"><span id="status-text">In progress</span><svg class="i"><use href="#i-chevron-down"/></svg></button>
+              <div class="popover left" id="pop-status">
+                <div class="menu status-menu">
+                  <div class="menu-label">Set status</div>
+                  <button class="menu-item" data-status="Pending" data-variant="warning"><span class="badge badge-dot badge-warning">Pending</span><svg class="i ok"><use href="#i-check"/></svg></button>
+                  <button class="menu-item is-current" data-status="In progress" data-variant="info"><span class="badge badge-dot badge-info">In progress</span><svg class="i ok"><use href="#i-check"/></svg></button>
+                  <button class="menu-item" data-status="On hold" data-variant="neutral"><span class="badge badge-dot badge-neutral">On hold</span><svg class="i ok"><use href="#i-check"/></svg></button>
+                  <button class="menu-item" data-status="Done" data-variant="success"><span class="badge badge-dot badge-success">Done</span><svg class="i ok"><use href="#i-check"/></svg></button>
+                </div>
+              </div>
+            </div>
+            <button class="prop"><span class="prio prio-high">High</span></button>
+            <span class="prop"><svg class="i"><use href="#i-tag"/></svg>Transaction Proposal: SIP</span>
+            <span class="prop"><svg class="i"><use href="#i-calendar"/></svg>Due Mon 16 Nov <span class="faint">· in 2 days</span></span>
+            <a class="prop" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg>Suresh Iyer</a>
+            <span class="badge badge-success"><svg class="i"><use href="#i-shield"/></svg>Approved by Neha Kapoor</span>
+            <span class="prop-sep"></span>
+            <div class="collab">
+              <span class="faint text-sm">Collaborators</span>
+              <span class="avatar-group">
+                <span class="avatar a4 tooltip" data-tip="Vikram Rao · Branch Manager, Pune">VR</span>
+                <span class="avatar a2 tooltip" data-tip="Rohan Mehta · RM">RM</span>
+                <span class="avatar a3 tooltip" data-tip="Priya Nair · Ops Executive">PN</span>
+              </span>
+              <div class="popover-wrap">
+                <button class="add-circle tooltip" data-tip="Add collaborator" data-popover="pop-collab" aria-label="Add collaborator"><svg class="i"><use href="#i-plus"/></svg></button>
+                <div class="popover left" id="pop-collab">
+                  <div class="menu mention-menu">
+                    <div style="padding:4px 4px 6px"><label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" style="height:32px" placeholder="Search team…"></label></div>
+                    <label class="menu-item"><span class="check"><input type="checkbox" checked></span><span class="avatar avatar-xs a4">VR</span>Vikram Rao<span class="menu-hint">BM · Pune</span></label>
+                    <label class="menu-item"><span class="check"><input type="checkbox" checked></span><span class="avatar avatar-xs a2">RM</span>Rohan Mehta<span class="menu-hint">RM</span></label>
+                    <label class="menu-item"><span class="check"><input type="checkbox" checked></span><span class="avatar avatar-xs a3">PN</span>Priya Nair<span class="menu-hint">Ops</span></label>
+                    <label class="menu-item"><span class="check"><input type="checkbox"></span><span class="avatar avatar-xs">SI</span>Sneha Iyer<span class="menu-hint">RM</span></label>
+                    <label class="menu-item"><span class="check"><input type="checkbox"></span><span class="avatar avatar-xs a5">AD</span>Arjun Desai<span class="menu-hint">Service</span></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="td-meta">
+            <span>Created by</span><span class="avatar a4">VR</span><b>Vikram Rao</b>
+            <span class="sep">·</span><span>9 Nov 2026</span>
+            <span class="sep">·</span><span>Last acted on <b>2 h ago</b></span>
+            <span class="sep">·</span><span>Assigned to <b>Neha Kapoor (you)</b></span>
+          </div>
+        </div>
+
+        <!-- ===== Body ===== -->
+        <div class="td-grid">
+          <div class="td-main">
+
+            <!-- Description + checklist -->
+            <section class="card">
+              <div class="card-body">
+                <div class="section-head mb-3">
+                  <span class="overline">Description</span>
+                  <span class="faint text-sm ml-auto">Edited by Neha Kapoor · 12 Nov</span>
+                  <button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-edit" aria-label="Edit description"><svg class="i"><use href="#i-edit"/></svg></button>
+                </div>
+                <div class="desc">
+                  <p>Suresh's salary went up in October and his current SIP book (₹25,000/mo across 4 funds) is under his goal for his daughter's higher education in 2034. Propose a <b>₹15,000/mo top-up</b> into a flexi-cap fund, taking him to <b>₹40,000/mo</b>, in line with his <b>Moderately aggressive</b> risk profile.</p>
+                  <ul>
+                    <li>Use the existing HDFC Bank e-mandate (limit ₹50,000) so no new mandate is needed.</li>
+                    <li>Get Neha's approval before sharing (Transaction Proposal rule).</li>
+                    <li>Share the proposal PDF on WhatsApp and record the client's consent here.</li>
+                  </ul>
+                </div>
+
+                <hr style="margin:20px 0 16px">
+
+                <div class="section-head">
+                  <span class="overline">Checklist</span>
+                  <div class="cl-progress"><span id="cl-count" class="tnum"><b>3</b> of 5 done</span><div class="progress p-success"><span id="cl-bar" style="width:60%"></span></div></div>
+                </div>
+                <ul class="checklist" id="checklist">
+                  <li class="cl-item is-done"><label class="check"><input type="checkbox" checked></label><span class="cl-text">Review current SIP book and risk profile (from MF Box)</span><span class="avatar avatar-xs a2">RM</span><span class="cl-when">10 Nov</span></li>
+                  <li class="cl-item is-done"><label class="check"><input type="checkbox" checked></label><span class="cl-text">Prepare top-up proposal and get manager approval</span><span class="avatar avatar-xs">NK</span><span class="cl-when">13 Nov</span></li>
+                  <li class="cl-item is-done"><label class="check"><input type="checkbox" checked></label><span class="cl-text">Share proposal with client and record consent</span><span class="avatar avatar-xs a2">RM</span><span class="cl-when">13 Nov</span></li>
+                  <li class="cl-item is-suggested" id="cl-suggest"><label class="check"><input type="checkbox"></label><span class="cl-text">Confirm SIP registration in MF Box<span class="cl-hint"><svg class="i i-sm"><use href="#i-refresh"/></svg>Match found today</span></span><span class="avatar avatar-xs a3">PN</span><span class="cl-when">15 Nov</span></li>
+                  <li class="cl-item"><label class="check"><input type="checkbox"></label><span class="cl-text">Send confirmation and first-debit date to client</span><span class="avatar avatar-xs">NK</span><span class="cl-when">16 Nov</span></li>
+                  <li><button class="cl-add"><svg class="i"><use href="#i-plus"/></svg>Add item</button></li>
+                </ul>
+              </div>
+            </section>
+
+            <!-- Comments & Activities -->
+            <section class="card">
+              <div class="card-body">
+                <div class="ca-head mb-4">
+                  <h2 style="font-size:15px">Comments &amp; Activities</h2>
+                  <span class="faint text-sm tnum">12</span>
+                  <div class="segmented ml-auto" data-segmented id="feed-filter">
+                    <button aria-pressed="true" data-f="all">All</button>
+                    <button aria-pressed="false" data-f="comment">Comments</button>
+                    <button aria-pressed="false" data-f="activity">Activity</button>
+                  </div>
+                </div>
+
+                <div class="composer-row">
+                  <span class="avatar">NK</span>
+                  <div class="composer">
+                    <textarea id="composer-text" placeholder="Leave a comment… type @ to mention a teammate"></textarea>
+                    <div class="composer-bar">
+                      <div class="popover-wrap">
+                        <button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Mention" data-popover="pop-mention" aria-label="Mention"><svg class="i"><use href="#i-at"/></svg></button>
+                        <div class="popover left" id="pop-mention" style="top:auto;bottom:calc(100% + 6px)">
+                          <div class="menu mention-menu">
+                            <div class="menu-label">Collaborators</div>
+                            <button class="menu-item" data-mention="Vikram Rao"><span class="avatar avatar-xs a4">VR</span>Vikram Rao<span class="menu-hint">BM · Pune</span></button>
+                            <button class="menu-item" data-mention="Rohan Mehta"><span class="avatar avatar-xs a2">RM</span>Rohan Mehta<span class="menu-hint">RM</span></button>
+                            <button class="menu-item" data-mention="Priya Nair"><span class="avatar avatar-xs a3">PN</span>Priya Nair<span class="menu-hint">Ops</span></button>
+                            <div class="menu-sep"></div>
+                            <button class="menu-item" data-mention="Arjun Desai"><span class="avatar avatar-xs a5">AD</span>Arjun Desai<span class="menu-hint">Service</span></button>
+                          </div>
+                        </div>
+                      </div>
+                      <button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Attach file" aria-label="Attach file" onclick="AK.toast('File picker opens here',{undo:false,icon:'paperclip'})"><svg class="i"><use href="#i-paperclip"/></svg></button>
+                      <button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Emoji" aria-label="Emoji"><svg class="i"><use href="#i-smile"/></svg></button>
+                      <span class="internal-tag tooltip" data-tip="Visible to your team only. Never shared with the client."><svg class="i"><use href="#i-lock"/></svg>Internal only</span>
+                      <span class="spacer"></span><span class="faint text-sm tb-hide-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span></span>
+                      <button class="btn btn-primary btn-sm" id="btn-send"><svg class="i"><use href="#i-send"/></svg>Send</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="feed" id="feed">
+                  <!-- Today -->
+                  <div class="feed-day overline" data-day>Today · Sat 14 Nov</div>
+                  <div id="feed-today-anchor"></div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot is-primary"><svg class="i"><use href="#i-refresh"/></svg></span></span>
+                    <div>
+                      <div class="ev-line"><b>MF Box</b> SIP of ₹15,000 registered: auto-linked <span class="badge badge-neutral"><svg class="i"><use href="#i-link"/></svg>Auto-linked</span><span class="ev-time">10:42 AM</span></div>
+                      <div class="ev-detail">
+                        <div class="ev-kv">
+                          <div><span>Scheme</span><b>Parag Parikh Flexi Cap – Direct Gr</b></div>
+                          <div><span>Folio</span><b>••••4821</b></div>
+                          <div><span>Amount</span><b>₹15,000 / month</b></div>
+                          <div><span>First debit</span><b>5 Dec 2026</b></div>
+                        </div>
+                        <div class="ev-detail-foot">
+                          <svg class="i i-sm"><use href="#i-info"/></svg>Matches checklist item “Confirm SIP registration in MF Box”.
+                          <button class="btn btn-soft btn-sm ml-auto" id="btn-tick">Tick item</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ev" data-kind="comment">
+                    <span class="ev-ico"><span class="avatar a4">VR</span></span>
+                    <div class="ev-card is-mention">
+                      <div class="ev-card-head"><b>Vikram Rao</b><span class="ev-time">10:15 AM</span><span class="badge badge-info" style="height:20px;font-size:11px"><svg class="i"><use href="#i-at"/></svg>Mentioned you</span>
+                        <button class="btn btn-ghost btn-icon btn-sm" aria-label="Comment actions"><svg class="i"><use href="#i-more-h"/></svg></button></div>
+                      <div class="ev-card-body"><span class="mention">@Neha Kapoor</span> Suresh confirmed on WhatsApp last night. Can you check the HDFC mandate limit covers his SIPs after the top-up (₹40,000 total) before Priya registers? Once it reflects in MF Box we can close this.</div>
+                      <div class="ev-card-foot"><button class="react"><svg class="i"><use href="#i-check"/></svg>2</button><button class="btn btn-ghost btn-sm" style="height:24px;padding:0 6px;font-size:12px">Reply</button></div>
+                    </div>
+                  </div>
+
+                  <!-- Yesterday -->
+                  <div class="feed-day overline" data-day>Yesterday · Fri 13 Nov</div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></span></span>
+                    <div>
+                      <div class="ev-line"><b>Rohan Mehta</b> sent a WhatsApp message to <a href="08-client-360.html">Suresh Iyer</a><span class="ev-time">6:05 PM</span></div>
+                      <div class="ev-detail wa">
+                        <div class="wa-tpl">Template · proposal_share_v2 · +91 97••• ••356</div>
+                        <div class="wa-msg wa-out">Hi Suresh ji, as discussed on Thursday, sharing the SIP top-up proposal: ₹15,000/month in Parag Parikh Flexi Cap from December. Please reply YES to go ahead.
+                          <div class="mt-2"><span class="file-chip"><svg class="i"><use href="#i-file"/></svg>Proposal_SIP_TopUp.pdf · 412 KB</span></div>
+                          <div class="wa-meta">6:05 PM <svg class="i"><use href="#i-check"/></svg>Read 6:21 PM</div></div>
+                        <div class="wa-msg wa-in">YES, looks good. Please go ahead from December.
+                          <div class="wa-meta">9:48 PM</div></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot"><svg class="i"><use href="#i-paperclip"/></svg></span></span>
+                    <div class="ev-line"><b>Rohan Mehta</b> attached <span class="file-chip"><svg class="i"><use href="#i-file"/></svg>Proposal_SIP_TopUp.pdf</span><span class="ev-time">5:58 PM</span></div>
+                  </div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot"><svg class="i"><use href="#i-activity"/></svg></span></span>
+                    <div class="ev-line"><b>Neha Kapoor</b> changed status <span class="badge badge-dot badge-warning">Pending</span><svg class="i arrow"><use href="#i-arrow-right"/></svg><span class="badge badge-dot badge-info">In progress</span><span class="ev-time">4:30 PM</span></div>
+                  </div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot is-success"><svg class="i"><use href="#i-shield"/></svg></span></span>
+                    <div class="ev-line"><b>Neha Kapoor</b> approved the transaction proposal<span class="ev-time">4:28 PM</span></div>
+                  </div>
+
+                  <!-- 12 Nov -->
+                  <div class="feed-day overline" data-day>Thu 12 Nov</div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot"><svg class="i"><use href="#i-calendar"/></svg></span></span>
+                    <div class="ev-line"><b>Neha Kapoor</b> changed <b>Due date</b> from <span class="chg-old">12 Nov</span><svg class="i arrow"><use href="#i-arrow-right"/></svg><b>16 Nov</b><span class="ev-time">3:10 PM</span></div>
+                  </div>
+
+                  <div class="ev" data-kind="comment">
+                    <span class="ev-ico"><span class="avatar">NK</span></span>
+                    <div class="ev-card">
+                      <div class="ev-card-head"><b>Neha Kapoor</b><span class="ev-time">3:08 PM</span>
+                        <button class="btn btn-ghost btn-icon btn-sm" aria-label="Comment actions"><svg class="i"><use href="#i-more-h"/></svg></button></div>
+                      <div class="ev-card-body">Review meeting done. Suresh is fine with ₹15,000 more per month in flexi cap; he wants the first debit after his December bonus. He is travelling till Sunday, so moving the due date to Monday. <span class="mention">@Rohan Mehta</span> please draft the proposal tonight.</div>
+                    </div>
+                  </div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot is-primary"><svg class="i"><use href="#i-video"/></svg></span></span>
+                    <div class="ev-line"><b>Meeting</b> <a href="14-meeting-detail.html">Portfolio review – Suresh Iyer</a> marked <span class="badge badge-dot badge-success">Completed</span><span class="ev-time">12:40 PM</span></div>
+                  </div>
+
+                  <!-- 9 Nov -->
+                  <div class="feed-day overline" data-day>Mon 9 Nov</div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot"><svg class="i"><use href="#i-paperclip"/></svg></span></span>
+                    <div class="ev-line"><b>Priya Nair</b> attached <span class="file-chip"><svg class="i"><use href="#i-file"/></svg>Risk_profile.pdf</span><span class="ev-time">2:15 PM</span></div>
+                  </div>
+
+                  <div class="ev" data-kind="activity">
+                    <span class="ev-ico"><span class="ev-dot"><svg class="i"><use href="#i-plus"/></svg></span></span>
+                    <div class="ev-line"><b>Vikram Rao</b> created the task, assigned it to <b>Neha Kapoor</b> and added 2 collaborators<span class="ev-time">11:02 AM</span></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- ===== Right panel ===== -->
+          <aside class="td-side">
+            <section class="card side-card">
+              <div class="card-header"><div class="card-title">Overview</div></div>
+              <div class="card-body">
+                <dl class="props-list">
+                  <dt>Task age</dt><dd><span class="tnum">5 days</span></dd>
+                  <dt>Status</dt><dd><span class="badge badge-dot badge-info" id="ov-status">In progress</span></dd>
+                  <dt>Priority</dt><dd><span class="prio prio-high">High</span></dd>
+                  <dt>Category</dt><dd><span class="tag">Transaction Proposal: SIP</span></dd>
+                  <dt>Due date</dt><dd><span class="pv"><svg class="i i-sm faint"><use href="#i-calendar"/></svg>Mon 16 Nov 2026</span></dd>
+                  <dt>Assigned to</dt><dd><span class="pv person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></dd>
+                  <dt>Approval</dt><dd><span class="badge badge-dot badge-success">Approved</span><span class="faint text-sm">13 Nov</span></dd>
+                </dl>
+                <div class="row mt-4" style="justify-content:space-between">
+                  <span class="faint text-md">Created for</span>
+                  <span class="sync"><span class="dot dot-success"></span>Synced from MF Box · 10:42</span>
+                </div>
+                <a class="client-chip" href="08-client-360.html">
+                  <span class="avatar a2">SI</span>
+                  <span style="min-width:0"><span class="cc-name" style="display:block">Suresh Iyer</span><span class="cc-sub">Client · BDKPI••••R</span></span>
+                  <span class="cc-aum"><b>₹86.5 L</b><span>AUM</span></span>
+                </a>
+              </div>
+            </section>
+
+            <section class="card side-card">
+              <div class="card-header"><div class="card-title">Linked records <span class="count">2</span></div>
+                <div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Link a record" aria-label="Link a record"><svg class="i"><use href="#i-plus"/></svg></button></div></div>
+              <div class="card-body" style="padding-top:8px;padding-bottom:8px">
+                <a class="link-row" href="12-opportunities.html">
+                  <span class="link-ico"><svg class="i"><use href="#i-target"/></svg></span>
+                  <span class="link-main"><span class="link-title" style="display:block">SIP top-up – Suresh Iyer</span><span class="link-sub">Opportunity · <b class="tnum" style="color:var(--text-2);font-weight:500">₹15,000/mo</b><span class="badge badge-dot badge-info ml-auto">In progress</span></span></span>
+                </a>
+                <a class="link-row" href="14-meeting-detail.html">
+                  <span class="link-ico li-success"><svg class="i"><use href="#i-video"/></svg></span>
+                  <span class="link-main"><span class="link-title" style="display:block">Portfolio review – Suresh Iyer</span><span class="link-sub">Meeting · Thu 12 Nov, 11:00 AM<span class="badge badge-dot badge-success ml-auto">Completed</span></span></span>
+                </a>
+              </div>
+            </section>
+
+            <section class="card side-card">
+              <div class="card-header"><div class="card-title">Attachments <span class="count">2</span></div>
+                <div class="card-actions"><button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Upload" aria-label="Upload"><svg class="i"><use href="#i-upload"/></svg></button></div></div>
+              <div class="card-body" style="padding-top:8px">
+                <div class="link-row">
+                  <span class="link-ico li-file"><svg class="i"><use href="#i-file"/></svg></span>
+                  <span class="link-main"><span class="link-title" style="display:block">Proposal_SIP_TopUp.pdf</span><span class="link-sub">412 KB · Rohan Mehta · 13 Nov</span></span>
+                  <button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Download" aria-label="Download" onclick="AK.toast('Downloading Proposal_SIP_TopUp.pdf',{undo:false,icon:'download'})"><svg class="i"><use href="#i-download"/></svg></button>
+                </div>
+                <div class="link-row">
+                  <span class="link-ico li-file"><svg class="i"><use href="#i-file"/></svg></span>
+                  <span class="link-main"><span class="link-title" style="display:block">Risk_profile.pdf</span><span class="link-sub">186 KB · Priya Nair · 9 Nov</span></span>
+                  <button class="btn btn-ghost btn-icon btn-sm tooltip" data-tip="Download" aria-label="Download" onclick="AK.toast('Downloading Risk_profile.pdf',{undo:false,icon:'download'})"><svg class="i"><use href="#i-download"/></svg></button>
+                </div>
+                <div class="dropzone"><svg class="i i-sm"><use href="#i-upload"/></svg>Drop files or <a href="#" onclick="return false">browse</a></div>
+              </div>
+            </section>
+
+            <section class="card side-card">
+              <div class="card-header"><div class="card-title">Reminders <span class="count">2</span></div>
+                <div class="card-actions"><button class="btn btn-ghost btn-sm" style="height:26px"><svg class="i i-sm"><use href="#i-plus"/></svg>Add</button></div></div>
+              <div class="card-body" style="padding-top:4px;padding-bottom:6px">
+                <div class="rem-row">
+                  <span class="link-ico"><svg class="i"><use href="#i-bell"/></svg></span>
+                  <span class="link-main"><span class="link-title" style="display:block">1 day before due</span><span class="link-sub">Sun 15 Nov, 9:00 AM · In-app + WhatsApp</span></span>
+                  <label class="switch"><input type="checkbox" checked><span></span></label>
+                </div>
+                <div class="rem-row">
+                  <span class="link-ico"><svg class="i"><use href="#i-clock"/></svg></span>
+                  <span class="link-main"><span class="link-title" style="display:block">On due date</span><span class="link-sub">Mon 16 Nov, 10:00 AM · In-app</span></span>
+                  <label class="switch"><input type="checkbox" checked><span></span></label>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== Edit drawer ===== -->
+  <aside class="drawer" id="drawer-edit" aria-label="Edit task">
+    <div class="drawer-header"><div><div class="drawer-title">Edit task</div><div class="drawer-sub">TSK-1042 · changes are logged in Comments &amp; Activities</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Title <span class="req">*</span></label><input class="input" value="SIP top-up proposal – Suresh Iyer"></div>
+        <div class="field span-2"><label class="label">Description</label><textarea class="textarea" rows="4">Suresh's salary went up in October and his current SIP book (₹25,000/mo across 4 funds) is under his goal for his daughter's higher education in 2034. Propose a ₹15,000/mo top-up into a flexi-cap fund, taking him to ₹40,000/mo.</textarea></div>
+        <div class="field"><label class="label">Created for</label><div class="input-combo"><select class="select" style="width:100px"><option>Client</option><option>Lead</option></select><input class="input" value="Suresh Iyer"></div></div>
+        <div class="field"><label class="label">Assigned to <span class="req">*</span></label><select class="select"><option>Neha Kapoor (you)</option><option>Rohan Mehta</option><option>Sneha Iyer</option><option>Priya Nair</option></select></div>
+        <div class="field"><label class="label">Due date <span class="req">*</span></label><label class="input-group"><svg class="i"><use href="#i-calendar"/></svg><input class="input" value="Mon, 16 Nov 2026"></label></div>
+        <div class="field"><label class="label">Status</label><select class="select"><option>Pending</option><option selected>In progress</option><option>On hold</option><option>Done</option></select></div>
+        <div class="field"><label class="label">Category</label><select class="select"><option>Transaction Proposal: SIP</option><option>Transaction Proposal: Redemption</option><option>Proposal: Investment Proposal</option><option>KYC update</option><option>Portfolio review</option></select></div>
+        <div class="field"><label class="label">Priority</label><div class="segmented" data-segmented><button aria-pressed="false">Low</button><button aria-pressed="false">Medium</button><button aria-pressed="true">High</button></div></div>
+        <div class="field span-2"><label class="label">Collaborators</label><div class="row wrap gap-2" style="min-height:36px;padding:4px 6px;border:1px solid var(--border-strong);border-radius:var(--r-sm)"><span class="chip"><span class="avatar avatar-xs a4">VR</span>Vikram Rao<button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><span class="chip"><span class="avatar avatar-xs a2">RM</span>Rohan Mehta<button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><span class="chip"><span class="avatar avatar-xs a3">PN</span>Priya Nair<button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><span class="faint text-md" style="padding-left:4px">Add teammate…</span></div><span class="help">Collaborators see this task under Collaborations and can be @mentioned.</span></div>
+        <div class="field span-2"><label class="check"><input type="checkbox" checked>Send a reminder 1 day before the due date</label></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" id="btn-save">Save changes</button></div>
+  </aside>
+
+  <script>
+  (function () {
+    // Status change (pill menu + Mark done)
+    var pill = document.getElementById('status-pill'), ptext = document.getElementById('status-text'), ov = document.getElementById('ov-status');
+    function setStatus(name, variant, silent) {
+      ['warning','info','neutral','success'].forEach(function (v) { pill.classList.remove('badge-' + v); ov.classList.remove('badge-' + v); });
+      pill.classList.add('badge-' + variant); ov.classList.add('badge-' + variant);
+      ptext.textContent = name; ov.textContent = name;
+      document.querySelectorAll('.status-menu .menu-item').forEach(function (m) { m.classList.toggle('is-current', m.getAttribute('data-status') === name); });
+      document.getElementById('pop-status').classList.remove('is-open');
+      if (!silent) AK.toast('Status changed to <b>' + name + '</b>');
+    }
+    document.querySelectorAll('.status-menu .menu-item').forEach(function (m) {
+      m.addEventListener('click', function () { setStatus(m.getAttribute('data-status'), m.getAttribute('data-variant')); });
+    });
+    document.getElementById('btn-done').addEventListener('click', function () { setStatus('Done', 'success', true); AK.toast('Task marked <b>Done</b>. Suresh Iyer’s timeline updated'); });
+
+    // More menu
+    document.querySelectorAll('[data-act]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = b.getAttribute('data-act');
+        document.getElementById('pop-more').classList.remove('is-open');
+        if (a === 'dup') AK.toast('Duplicated as TSK-1043');
+        if (a === 'link') AK.toast('Link copied', { undo: false, icon: 'link' });
+        if (a === 'del') AK.toast('Task moved to Deleted (kept for audit)', { icon: 'trash' });
+      });
+    });
+
+    // Checklist
+    var list = document.getElementById('checklist');
+    function recount() {
+      var boxes = list.querySelectorAll('.cl-item input'), done = 0;
+      boxes.forEach(function (c) { c.closest('.cl-item').classList.toggle('is-done', c.checked); if (c.checked) done++; });
+      document.getElementById('cl-count').innerHTML = '<b>' + done + '</b> of ' + boxes.length + ' done';
+      document.getElementById('cl-bar').style.width = Math.round(done / boxes.length * 100) + '%';
+    }
+    list.addEventListener('change', function (e) {
+      var item = e.target.closest('.cl-item'); if (item) { item.classList.remove('is-suggested'); var h = item.querySelector('.cl-hint'); if (h) h.remove(); }
+      recount();
+    });
+    document.getElementById('btn-tick').addEventListener('click', function () {
+      var s = document.getElementById('cl-suggest'); s.querySelector('input').checked = true;
+      s.dispatchEvent(new Event('change', { bubbles: true }));
+      this.textContent = 'Ticked'; this.disabled = true; AK.toast('Checklist item ticked: 4 of 5 done');
+    });
+
+    // Feed filter
+    document.querySelectorAll('#feed-filter button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var f = b.getAttribute('data-f');
+        document.querySelectorAll('#feed .ev').forEach(function (ev) { ev.style.display = (f === 'all' || ev.getAttribute('data-kind') === f) ? '' : 'none'; });
+        // hide day headers that have no visible events
+        var days = document.querySelectorAll('#feed [data-day]');
+        days.forEach(function (d) {
+          var n = d.nextElementSibling, any = false;
+          while (n && !n.hasAttribute('data-day')) { if (n.classList.contains('ev') && n.style.display !== 'none') any = true; n = n.nextElementSibling; }
+          d.style.display = any ? '' : 'none';
+        });
+      });
+    });
+
+    // Mentions + send
+    var ta = document.getElementById('composer-text');
+    document.querySelectorAll('[data-mention]').forEach(function (m) {
+      m.addEventListener('click', function () { ta.value += (ta.value && !/\s$/.test(ta.value) ? ' ' : '') + '@' + m.getAttribute('data-mention') + ' '; document.getElementById('pop-mention').classList.remove('is-open'); ta.focus(); });
+    });
+    function esc(s) { return s.replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+    function send() {
+      var v = ta.value.trim(); if (!v) { ta.focus(); return; }
+      var html = esc(v).replace(/@(Vikram Rao|Rohan Mehta|Priya Nair|Arjun Desai|Neha Kapoor)/g, '<span class="mention">@$1</span>');
+      var ev = document.createElement('div'); ev.className = 'ev'; ev.setAttribute('data-kind', 'comment');
+      ev.innerHTML = '<span class="ev-ico"><span class="avatar">NK</span></span><div class="ev-card"><div class="ev-card-head"><b>Neha Kapoor</b><span class="ev-time">Just now</span></div><div class="ev-card-body">' + html + '</div></div>';
+      var anchor = document.getElementById('feed-today-anchor'); anchor.parentNode.insertBefore(ev, anchor.nextSibling);
+      ta.value = ''; AK.toast('Comment posted. Mentioned teammates are notified', { undo: false });
+    }
+    document.getElementById('btn-send').addEventListener('click', send);
+    ta.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); send(); }
+      if (e.key === '@') { setTimeout(function () { document.getElementById('pop-mention').classList.add('is-open'); }, 0); }
+    });
+
+    // Edit drawer save
+    document.getElementById('btn-save').addEventListener('click', function () { AK.closeDrawer('drawer-edit'); AK.toast('Task updated'); });
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && document.getElementById('drawer-edit').classList.contains('is-open')) { e.preventDefault(); document.getElementById('btn-save').click(); }
+    });
+  })();
+  </script>
+</body>
+</html>

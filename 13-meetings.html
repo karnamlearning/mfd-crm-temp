@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meetings · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Meetings list (page-specific, tokens only) ---- */
+    .mt-banner { margin-bottom: var(--sp-4); }
+    .mt-banner .btn-secondary { border-color: var(--warning); color: var(--warning); background: var(--surface); }
+    .mt-select { width: auto; min-width: 150px; }
+    .sync-note { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); }
+    .sync-note .dot { width: 6px; height: 6px; }
+
+    .mt-table td { height: 64px; }
+    .mt-table th, .mt-table td { padding-left: 10px; padding-right: 10px; }
+    .mt-table th.ta-r, .mt-table td.ta-r { text-align: right; }
+    .mt-table tr.mt-group td { height: 36px; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .mt-table tbody tr.mt-group:hover td { background: var(--bg); }
+    .mt-day { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+    .mt-day b { font-weight: 600; color: var(--text); }
+    .mt-day .faint { font-size: 12px; }
+    .mt-day .cnt { font-size: 11px; font-weight: 600; color: var(--text-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-full); padding: 0 7px; line-height: 16px; }
+    .mt-day.is-today b { color: var(--primary-text); }
+
+    .mt-table tr.mt-now td { height: 0; padding-top: 0; padding-bottom: 0; border-bottom: 0; }
+    .mt-table tbody tr.mt-now:hover td { background: transparent; }
+    .mt-now-line { position: relative; height: 0; border-top: 1.5px solid var(--primary); margin: 0 0 0 var(--sp-1); }
+    .mt-now-line::before { content: ""; position: absolute; left: -5px; top: -5.5px; width: 9px; height: 9px; border-radius: 50%; background: var(--primary); }
+    .mt-now-line span { position: absolute; left: 10px; top: -10px; font-size: 11px; font-weight: 600; color: var(--primary-text); background: var(--surface); padding: 0 6px; line-height: 18px; border-radius: var(--r-sm); border: 1px solid var(--primary-soft-2); }
+
+    .mt-time { display: flex; flex-direction: column; line-height: 18px; font-variant-numeric: tabular-nums; }
+    .mt-time b { font-weight: 600; font-size: 13.5px; }
+    .mt-time span { font-size: 12px; color: var(--text-3); }
+    .mt-subj { font-weight: 600; color: var(--text); font-size: 13.5px; }
+    .mt-subj:hover { color: var(--primary-text); }
+    .mt-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; font-size: 12px; color: var(--text-3); line-height: 16px; }
+    .mt-meta .tag { height: 20px; font-size: 11.5px; }
+    .mt-meta .soon { color: var(--primary-text); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .mt-meta .late { color: var(--warning); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .mt-past .mt-subj, .mt-past .mt-time b { color: var(--text-2); }
+
+    .mt-for { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .mt-for .col { line-height: 18px; min-width: 0; }
+    .mt-for a.person-name { font-size: 13.5px; }
+    .mt-for a.person-name:hover { color: var(--primary-text); text-decoration: none; }
+    .mt-for .person-sub { font-size: 12px; }
+    .avatar-ic { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+    .avatar-ic .i { width: 13px; height: 13px; }
+
+    .mt-people { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+    .mt-people .avatar-group .avatar + .avatar { margin-left: -5px; }
+    .prep-link { display: inline-flex; align-items: center; gap: 4px; color: var(--primary-text); font-weight: 500; }
+    .prep-link .i { width: 12px; height: 12px; }
+
+    .mode { display: inline-flex; align-items: center; gap: 10px; }
+    .mode-ic { width: 28px; height: 28px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); flex: none; }
+    .mode-online .mode-ic { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+    .mode .col { line-height: 17px; }
+    .mode b { font-weight: 500; font-size: 13px; }
+    .mode small { font-size: 12px; color: var(--text-3); }
+
+    .mt-actions { display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end; }
+    .mt-actions .btn-sm { height: 28px; }
+    .mt-actions .btn-icon.btn-sm { width: 28px; }
+
+    .mt-foot { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border-top: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+
+    /* Lower cards */
+    .due-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-4); padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .due-row:last-child { border-bottom: 0; }
+    .due-gap { font-size: 12px; text-align: right; line-height: 16px; }
+    .due-gap b { display: block; font-size: 13px; font-weight: 600; }
+    .wk-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sp-3); }
+    .wk-grid .stat { padding: var(--sp-3) var(--sp-4); }
+    .wk-grid .stat-value { font-size: 22px; line-height: 28px; margin-top: 2px; }
+    .wk-rate { display: grid; grid-template-columns: 160px minmax(0, 1fr) 40px; align-items: center; gap: var(--sp-3); font-size: 13px; color: var(--text-2); padding: 8px 0; }
+    .wk-rate b { text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
+
+    /* ---- Drawer ---- */
+    .drawer .form-section { padding: var(--sp-5) 0; }
+    .drawer .form-section:first-child { padding-top: 0; }
+    .drawer .textarea { min-height: 64px; }
+    .combo-search { display: flex; }
+    .combo-search .select { width: 170px; flex: none; border-radius: var(--r-sm) 0 0 var(--r-sm); background-color: var(--surface-2); }
+    .combo-search .input-group { flex: 1; margin-left: -1px; }
+    .combo-search .input-group .input { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+    .picked { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); background: var(--surface-2); border-radius: var(--r-md); margin-top: 8px; }
+    .picked .col { min-width: 0; line-height: 18px; }
+    .picked .p-title { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .picked .p-sub { font-size: 12px; color: var(--text-3); }
+    .chip-input { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 36px; padding: 4px 6px; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface); }
+    .chip-input .chip { height: 26px; padding-left: 4px; }
+    .chip-input .chip .avatar { width: 18px; height: 18px; font-size: 8.5px; }
+    .chip-input .chip .chip-kind { color: var(--text-3); font-weight: 500; }
+    .chip-input .chip.chip-ext { background: var(--surface-2); color: var(--text); border-color: var(--border); }
+    .chip-input input { flex: 1; min-width: 160px; border: 0; background: transparent; height: 26px; padding: 0 6px; font-size: 13.5px; outline: none; }
+    .chip-input:focus-within { border-color: var(--primary); box-shadow: var(--focus-ring); }
+    .time-range { display: flex; align-items: center; gap: 6px; }
+    .time-range span { color: var(--text-3); }
+    .avail { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--success); background: var(--success-soft); border-radius: var(--r-md); padding: 8px 12px; }
+    .avail b { font-weight: 600; }
+    .choice-group .choice { flex: 1; justify-content: center; height: 38px; }
+    .agenda { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+    .ag-item { display: flex; align-items: center; gap: 10px; padding: 0 8px 0 6px; height: 38px; border-bottom: 1px solid var(--border); font-size: 13.5px; background: var(--surface); }
+    .ag-item:last-of-type { border-bottom: 0; }
+    .ag-item .grip { color: var(--text-3); cursor: grab; }
+    .ag-item .ag-text { flex: 1; min-width: 0; }
+    .ag-item .btn-icon { width: 26px; height: 26px; opacity: .6; }
+    .ag-item:hover { background: var(--surface-2); }
+    .ag-add { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 12px; border-top: 1px solid var(--border); color: var(--text-3); font-size: 13px; background: var(--surface-2); }
+    .ag-add input { flex: 1; border: 0; background: transparent; outline: none; font-size: 13.5px; height: 30px; }
+    .auto-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .auto-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .auto-row .card-icon { width: 30px; height: 30px; }
+    .auto-row .col { flex: 1; min-width: 0; line-height: 18px; }
+    .auto-row b { font-weight: 600; font-size: 13.5px; }
+    .auto-row .help { margin-top: 2px; }
+    .auto-row .switch { margin-top: 5px; }
+    .note-box { margin-top: 8px; }
+
+    @media (max-width: 1360px) {
+      .mt-table th:nth-child(4), .mt-table td:nth-child(4) { display: none; }
+      .mt-meta > span:not(.tag):not(.soon):not(.late) { display: none; }
+      .mode small { display: none; }
+      .mt-table th, .mt-table td { padding-left: 8px; padding-right: 8px; }
+    }
+    @media (max-width: 1280px) {
+      .wk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 768px) {
+      .mt-banner { flex-wrap: wrap; }
+      .wk-rate { grid-template-columns: 1fr 48px; }
+      .wk-rate .progress { grid-column: span 2; order: 3; }
+      .combo-search { flex-direction: column; gap: 8px; }
+      .combo-search .select { width: 100%; border-radius: var(--r-sm); }
+      .combo-search .input-group { margin-left: 0; }
+      .combo-search .input-group .input { border-radius: var(--r-sm); }
+    }
+  </style>
+</head>
+<body data-page="meetings" data-crumb="Meetings">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Meetings</h1>
+            <p class="page-sub">Client reviews, onboarding, AMC and team meetings, each with a logged outcome</p>
+          </div>
+          <div class="page-actions">
+            <span class="sync-note"><span class="dot dot-success"></span>Synced from MF Box · 10:42</span>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-config"><svg class="i"><use href="#i-sliders"/></svg>Configurations</button>
+              <div class="popover" id="pop-config">
+                <div class="menu" style="min-width:260px">
+                  <div class="menu-label">Meeting settings</div>
+                  <a class="menu-item" href="20-settings.html#meetings"><svg class="i"><use href="#i-tag"/></svg>Meeting types &amp; agenda templates</a>
+                  <a class="menu-item" href="20-settings.html#meetings"><svg class="i"><use href="#i-repeat"/></svg>Portfolio review cadence<span class="menu-hint">By tier</span></a>
+                  <a class="menu-item" href="20-settings.html#meetings"><svg class="i"><use href="#i-bell"/></svg>Reminders &amp; outcome prompt<span class="menu-hint">15 min</span></a>
+                  <a class="menu-item" href="20-settings.html#meetings"><svg class="i"><use href="#i-check-square"/></svg>Outcome options</a>
+                  <div class="menu-sep"></div>
+                  <a class="menu-item" href="20-settings.html#meetings"><svg class="i"><use href="#i-link"/></svg>Calendar &amp; video links<span class="menu-hint">Google</span></a>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" data-open-drawer="drawer-meeting"><svg class="i"><use href="#i-plus"/></svg>Schedule meeting</button>
+          </div>
+        </div>
+
+        <div class="banner banner-warning mt-banner" role="status">
+          <svg class="i"><use href="#i-clock"/></svg>
+          <span><b>2 meetings are waiting for an outcome.</b> Outcomes logged within 24 h: <b>86%</b> this week.</span>
+          <div class="banner-actions"><button class="btn btn-secondary btn-sm" id="log-now"><svg class="i i-sm"><use href="#i-note"/></svg>Log now</button></div>
+        </div>
+
+        <div class="tabs" data-tabs="mt">
+          <button class="tab is-active" data-tab="upcoming">Upcoming <span class="count">6</span></button>
+          <button class="tab" data-tab="pending" id="tab-pending">Outcome pending <span class="count" style="background:var(--warning-soft);color:var(--warning)">2</span></button>
+          <button class="tab" data-tab="past">Past</button>
+          <button class="tab" data-tab="team">Team meetings <span class="count">11</span></button>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" id="mt-q" placeholder="Search subject, client, PAN or host"></label>
+            <button class="btn btn-secondary"><svg class="i"><use href="#i-filter"/></svg>Filters</button>
+            <select class="select mt-select" id="f-mode" aria-label="Mode">
+              <option value="">All modes</option><option value="online">Online</option><option value="offline">Offline</option><option value="phone">Phone</option>
+            </select>
+            <select class="select mt-select" id="f-type" aria-label="Type">
+              <option value="">All types</option><option value="review">Portfolio review</option><option value="onboarding">Onboarding</option><option value="sip">SIP review</option><option value="internal">Internal team meeting</option><option value="amc">AMC meeting</option>
+            </select>
+          </div>
+          <div class="toolbar-right">
+            <div class="segmented" data-segmented role="group" aria-label="View">
+              <button aria-pressed="true"><svg class="i i-sm"><use href="#i-list"/></svg>List</button>
+              <button aria-pressed="false" onclick="location.href='03-calendar.html'"><svg class="i i-sm"><use href="#i-calendar"/></svg>Calendar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ UPCOMING ============ -->
+        <div class="table-card is-active" data-tab-panel="upcoming" data-tab-scope="mt">
+          <div class="table-wrap">
+            <table class="table mt-table">
+              <thead><tr>
+                <th style="width:108px">Time</th><th>Meeting</th><th>Created for</th><th>People</th><th>Mode</th><th>Status</th><th class="ta-r">Actions</th>
+              </tr></thead>
+              <tbody>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day is-today"><b>Today</b><span class="faint">Sat 14 Nov</span><span class="cnt">3</span></span></td></tr>
+                <tr class="mt-past" data-mode="offline" data-type="review">
+                  <td><div class="mt-time"><b>11:00 AM</b><span>to 11:45 AM · 45 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Portfolio review – Verma Family</a><div class="mt-meta"><span class="tag">Portfolio review</span><span class="late"><svg class="i i-sm"><use href="#i-clock"/></svg>Ended 1 h 25 m ago</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a2">RV</span><span class="col"><a class="person-name" href="08-client-360.html">Rahul Verma</a><span class="person-sub">Verma Family · ₹1.24 Cr</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a2" title="Rohan Mehta">RM</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Andheri branch</small></span></span></td>
+                  <td><span class="badge badge-dot badge-warning">Outcome pending</span></td>
+                  <td class="ta-r"><span class="mt-actions"><a class="btn btn-soft btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-note"/></svg>Log outcome</a></span></td>
+                </tr>
+                <tr class="mt-now"><td colspan="7"><div class="mt-now-line"><span>Now · 1:10 PM</span></div></td></tr>
+                <tr data-mode="online" data-type="onboarding">
+                  <td><div class="mt-time"><b>3:30 PM</b><span>to 4:15 PM · 45 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Onboarding – Karan Malhotra</a><div class="mt-meta"><span class="tag">Onboarding</span><a class="prep-link" href="14-meeting-detail.html#prep"><svg class="i i-sm"><use href="#i-file"/></svg>Prep pack</a><span class="soon"><svg class="i i-sm"><use href="#i-clock"/></svg>In 2 h 20 m</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a3">KM</span><span class="col"><a class="person-name" href="05-lead-create.html">Karan Malhotra</a><span class="person-sub">Lead · Hot · MF-SIP</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a4" title="Sneha Iyer (collaborator)">SI</span></span></span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Google Meet</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-primary btn-sm js-join"><svg class="i i-sm"><use href="#i-video"/></svg>Join</button></span></td>
+                </tr>
+                <tr data-mode="online" data-type="internal">
+                  <td><div class="mt-time"><b>5:00 PM</b><span>to 5:30 PM · 30 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Weekly pipeline huddle – Andheri</a><div class="mt-meta"><span class="tag">Internal team meeting</span><span>Every Saturday · agenda 4 items</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm avatar-ic"><svg class="i"><use href="#i-users"/></svg></span><span class="col"><span class="person-name">Andheri branch team</span><span class="person-sub">Internal · 5 members</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a2" title="Rohan Mehta">RM</span><span class="avatar avatar-sm a4" title="Sneha Iyer">SI</span><span class="avatar avatar-sm a5" title="Priya Nair">PN</span></span></span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Google Meet</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-secondary btn-sm js-join"><svg class="i i-sm"><use href="#i-video"/></svg>Join</button></span></td>
+                </tr>
+
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Mon 16 Nov</b><span class="faint">in 2 days</span><span class="cnt">2</span></span></td></tr>
+                <tr data-mode="offline" data-type="review">
+                  <td><div class="mt-time"><b>10:30 AM</b><span>to 11:30 AM · 1 h</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Portfolio review – Farhan Qureshi</a><div class="mt-meta"><span class="tag">Portfolio review</span><a class="prep-link" href="14-meeting-detail.html#prep"><svg class="i i-sm"><use href="#i-file"/></svg>Prep pack</a></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a4">FQ</span><span class="col"><a class="person-name" href="08-client-360.html">Farhan Qureshi</a><span class="person-sub">Client · ₹2.1 Cr</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a2" title="Rohan Mehta">RM</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Bandra W office</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+                <tr data-mode="offline" data-type="amc">
+                  <td><div class="mt-time"><b>3:00 PM</b><span>to 3:45 PM · 45 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">NFO briefing – Bharat Mutual Fund</a><div class="mt-meta"><span class="tag">AMC meeting</span><span>Balanced Advantage NFO</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm avatar-ic"><svg class="i"><use href="#i-building"/></svg></span><span class="col"><span class="person-name">Bharat Mutual Fund</span><span class="person-sub">Organisation · AMC</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a4" title="Sneha Iyer">SI</span><span class="avatar avatar-sm a5" title="Ankit Shah (AMC, external)">AS</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Andheri branch</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Tue 17 Nov</b><span class="faint">in 3 days</span><span class="cnt">1</span></span></td></tr>
+                <tr data-mode="online" data-type="review">
+                  <td><div class="mt-time"><b>4:00 PM</b><span>to 5:00 PM · 1 h</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Half-yearly review – Harish Patel Family</a><div class="mt-meta"><span class="tag">Portfolio review</span><a class="prep-link" href="14-meeting-detail.html#prep"><svg class="i i-sm"><use href="#i-file"/></svg>Prep pack</a></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a3">HP</span><span class="col"><a class="person-name" href="08-client-360.html">Harish Patel Family</a><span class="person-sub">Family · ₹3.4 Cr</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a2" title="Rohan Mehta">RM</span><span class="avatar avatar-sm a5" title="Priya Nair">PN</span></span></span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Zoom</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Wed 18 Nov</b><span class="faint">in 4 days</span><span class="cnt">1</span></span></td></tr>
+                <tr data-mode="online" data-type="sip">
+                  <td><div class="mt-time"><b>12:00 PM</b><span>to 12:30 PM · 30 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">SIP top-up review – Suresh Iyer</a><div class="mt-meta"><span class="tag">SIP review</span><a class="prep-link" href="14-meeting-detail.html#prep"><svg class="i i-sm"><use href="#i-file"/></svg>Prep pack</a></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm">SI</span><span class="col"><a class="person-name" href="08-client-360.html">Suresh Iyer</a><span class="person-sub">Client · ₹86.5 L</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm" title="Neha Kapoor (host)">NK</span><span class="avatar avatar-sm a2" title="Rohan Mehta (RM)">RM</span></span></span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Zoom</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-foot"><span>6 upcoming · today to Wed 18 Nov</span><span class="faint">·</span><span class="faint">Prep packs are built from MF Box 1 h before each client meeting</span><a class="ml-auto" href="03-calendar.html">Open in calendar <svg class="i i-sm"><use href="#i-arrow-right"/></svg></a></div>
+        </div>
+
+        <!-- ============ OUTCOME PENDING ============ -->
+        <div class="table-card" data-tab-panel="pending" data-tab-scope="mt">
+          <div class="table-wrap">
+            <table class="table mt-table">
+              <thead><tr><th style="width:108px">Time</th><th>Meeting</th><th>Created for</th><th>People</th><th>Mode</th><th>Status</th><th class="ta-r">Actions</th></tr></thead>
+              <tbody>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day is-today"><b>Today</b><span class="faint">Sat 14 Nov</span><span class="cnt">1</span></span></td></tr>
+                <tr data-mode="offline" data-type="review">
+                  <td><div class="mt-time"><b>11:00 AM</b><span>to 11:45 AM · 45 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Portfolio review – Verma Family</a><div class="mt-meta"><span class="tag">Portfolio review</span><span class="late"><svg class="i i-sm"><use href="#i-clock"/></svg>Ended 1 h 25 m ago</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a2">RV</span><span class="col"><a class="person-name" href="08-client-360.html">Rahul Verma</a><span class="person-sub">Verma Family · ₹1.24 Cr</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a2">RM</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Andheri branch</small></span></span></td>
+                  <td><span class="badge badge-dot badge-warning">Outcome pending</span></td>
+                  <td class="ta-r"><span class="mt-actions"><a class="btn btn-soft btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-note"/></svg>Log outcome</a></span></td>
+                </tr>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Fri 13 Nov</b><span class="faint">Yesterday</span><span class="cnt">1</span></span></td></tr>
+                <tr data-mode="phone" data-type="sip">
+                  <td><div class="mt-time"><b>4:00 PM</b><span>to 4:30 PM · 30 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">SIP review – Meera Joshi</a><div class="mt-meta"><span class="tag">SIP review</span><span class="late"><svg class="i i-sm"><use href="#i-clock"/></svg>3 h 20 m left of 24 h</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a3">MJ</span><span class="col"><a class="person-name" href="08-client-360.html">Meera Joshi</a><span class="person-sub">Client · ₹42.3 L</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a4">SI</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-phone"/></svg></span><span class="col"><b>Phone</b><small>+91 97••• ••518</small></span></span></td>
+                  <td><span class="badge badge-dot badge-warning">Outcome pending</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm js-nudge tooltip" data-tip="Nudge Sneha" aria-label="Nudge Sneha"><svg class="i"><use href="#i-bell"/></svg></button><a class="btn btn-soft btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-note"/></svg>Log outcome</a></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-foot"><svg class="i i-sm faint"><use href="#i-info"/></svg><span>An outcome prompt is sent to the host 15 minutes after a meeting ends. Unlogged outcomes reach the branch manager after 24 h.</span></div>
+        </div>
+
+        <!-- ============ PAST ============ -->
+        <div class="table-card" data-tab-panel="past" data-tab-scope="mt">
+          <div class="table-wrap">
+            <table class="table mt-table">
+              <thead><tr><th style="width:108px">Time</th><th>Meeting</th><th>Created for</th><th>People</th><th>Mode</th><th>Status</th><th class="ta-r">Actions</th></tr></thead>
+              <tbody>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Thu 12 Nov</b><span class="cnt">2</span></span></td></tr>
+                <tr class="mt-past" data-mode="offline" data-type="review">
+                  <td><div class="mt-time"><b>11:00 AM</b><span>to 12:00 PM · 1 h</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Portfolio review – Lakshmi Narayanan</a><div class="mt-meta"><span class="tag">Portfolio review</span><span>Rebalancing agreed · 2 tasks</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a5">LN</span><span class="col"><a class="person-name" href="08-client-360.html">Lakshmi Narayanan</a><span class="person-sub">Client · ₹67.8 L</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm">NK</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Andheri branch</small></span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="ta-r"><span class="mt-actions"><a class="btn btn-ghost btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-eye"/></svg>View notes</a></span></td>
+                </tr>
+                <tr class="mt-past" data-mode="online" data-type="onboarding">
+                  <td><div class="mt-time"><b>4:30 PM</b><span>to 5:00 PM · 30 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Onboarding – Ritu Saxena</a><div class="mt-meta"><span class="tag">Onboarding</span><span>Term quote shared</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a3">RS</span><span class="col"><a class="person-name" href="05-lead-create.html">Ritu Saxena</a><span class="person-sub">Lead · Warm</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a2">RM</span></span></span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Google Meet</small></span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="ta-r"><span class="mt-actions"><a class="btn btn-ghost btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-eye"/></svg>View notes</a></span></td>
+                </tr>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Wed 11 Nov</b><span class="cnt">2</span></span></td></tr>
+                <tr class="mt-past" data-mode="phone" data-type="sip">
+                  <td><div class="mt-time"><b>12:15 PM</b><span>to 12:30 PM · 15 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">SIP restart – Deepak Agarwal</a><div class="mt-meta"><span class="tag">SIP review</span><span>Client asked to reschedule</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a2">DA</span><span class="col"><a class="person-name" href="08-client-360.html">Deepak Agarwal</a><span class="person-sub">Client · ₹15.2 L</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm">NK</span></span></span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-phone"/></svg></span><span class="col"><b>Phone</b><small>+91 99••• ••407</small></span></span></td>
+                  <td><span class="badge badge-dot badge-neutral">Cancelled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-meeting"><svg class="i i-sm"><use href="#i-repeat"/></svg>Reschedule</button></span></td>
+                </tr>
+                <tr class="mt-past" data-mode="online" data-type="internal">
+                  <td><div class="mt-time"><b>9:30 AM</b><span>to 10:00 AM · 30 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Branch review with Rajesh Sharma</a><div class="mt-meta"><span class="tag">Internal team meeting</span><span>SIP target ₹40 L / month</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm avatar-ic"><svg class="i"><use href="#i-users"/></svg></span><span class="col"><span class="person-name">All branch managers</span><span class="person-sub">Internal · 4 members</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a3">RS</span><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a4">VR</span></span></span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Google Meet</small></span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="ta-r"><span class="mt-actions"><a class="btn btn-ghost btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-eye"/></svg>View notes</a></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination"><select class="select"><option>20</option></select> rows · 1–4 of 38 this month
+            <div class="pg-btns"><button class="pg-btn"><svg class="i"><use href="#i-chevron-left"/></svg></button><button class="pg-btn is-active">1</button><button class="pg-btn">2</button><button class="pg-btn"><svg class="i"><use href="#i-chevron-right"/></svg></button></div>
+          </div>
+        </div>
+
+        <!-- ============ TEAM ============ -->
+        <div class="table-card" data-tab-panel="team" data-tab-scope="mt">
+          <div class="table-wrap">
+            <table class="table mt-table">
+              <thead><tr><th style="width:108px">Time</th><th>Meeting</th><th>Created for</th><th>People</th><th>Mode</th><th>Status</th><th class="ta-r">Actions</th></tr></thead>
+              <tbody>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day is-today"><b>Today</b><span class="faint">Sat 14 Nov</span><span class="cnt">2</span></span></td></tr>
+                <tr data-mode="offline" data-type="review">
+                  <td><div class="mt-time"><b>12:00 PM</b><span>to 12:45 PM · 45 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Portfolio review – Pooja Bansal</a><div class="mt-meta"><span class="tag">Portfolio review</span><span>New SIP ₹5,000</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a4">PB</span><span class="col"><a class="person-name" href="08-client-360.html">Pooja Bansal</a><span class="person-sub">Client · ₹9.8 L</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a2">RM</span></span>Rohan</span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Powai</small></span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="ta-r"><span class="mt-actions"><a class="btn btn-ghost btn-sm" href="14-meeting-detail.html"><svg class="i i-sm"><use href="#i-eye"/></svg>View notes</a></span></td>
+                </tr>
+                <tr data-mode="online" data-type="onboarding">
+                  <td><div class="mt-time"><b>6:00 PM</b><span>to 6:30 PM · 30 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Onboarding – Sameer Khan</a><div class="mt-meta"><span class="tag">Onboarding</span><span>Website lead</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a5">SK</span><span class="col"><a class="person-name" href="05-lead-create.html">Sameer Khan</a><span class="person-sub">Lead · MF-SIP</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a3">KM</span></span>Kavya</span></td>
+                  <td><span class="mode mode-online"><span class="mode-ic"><svg class="i i-sm"><use href="#i-video"/></svg></span><span class="col"><b>Online</b><small>Google Meet</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+                <tr class="mt-group"><td colspan="7"><span class="mt-day"><b>Mon 16 Nov</b><span class="cnt">2</span></span></td></tr>
+                <tr data-mode="offline" data-type="review">
+                  <td><div class="mt-time"><b>11:00 AM</b><span>to 12:00 PM · 1 h</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">Half-yearly review – Anjali Verma</a><div class="mt-meta"><span class="tag">Portfolio review</span><span>Thane branch</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a2">AV</span><span class="col"><a class="person-name" href="08-client-360.html">Anjali Verma</a><span class="person-sub">Verma Family</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a3">AG</span></span>Aman</span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-map-pin"/></svg></span><span class="col"><b>Offline</b><small>Thane branch</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+                <tr data-mode="phone" data-type="sip">
+                  <td><div class="mt-time"><b>2:30 PM</b><span>to 2:45 PM · 15 m</span></div></td>
+                  <td><a class="mt-subj" href="14-meeting-detail.html">SIP mandate check – Deepak Agarwal</a><div class="mt-meta"><span class="tag">SIP review</span><span>Rescheduled from 11 Nov</span></div></td>
+                  <td><span class="mt-for"><span class="avatar avatar-sm a2">DA</span><span class="col"><a class="person-name" href="08-client-360.html">Deepak Agarwal</a><span class="person-sub">Client · ₹15.2 L</span></span></span></td>
+                  <td><span class="mt-people"><span class="avatar-group"><span class="avatar avatar-sm a5">IS</span></span>Imran</span></td>
+                  <td><span class="mode"><span class="mode-ic"><svg class="i i-sm"><use href="#i-phone"/></svg></span><span class="col"><b>Phone</b><small>+91 99••• ••407</small></span></span></td>
+                  <td><span class="badge badge-dot badge-info">Scheduled</span></td>
+                  <td class="ta-r"><span class="mt-actions"><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-foot"><span>Showing 4 of 11 · Andheri, Thane and sub-brokers</span><a class="ml-auto" href="18-team-activity.html">Open Team Activity <svg class="i i-sm"><use href="#i-arrow-right"/></svg></a></div>
+        </div>
+
+        <!-- ============ Lower cards ============ -->
+        <div class="grid-2 mt-5">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon ci-warning"><svg class="i"><use href="#i-repeat"/></svg></span>
+              <div><div class="card-title">Portfolio reviews due</div><div class="text-sm faint">By tier: A quarterly · B half-yearly · C yearly · from MF Box</div></div>
+              <div class="card-actions"><span class="badge badge-warning">11 clients</span></div>
+            </div>
+            <div class="card-body tight">
+              <div class="due-row">
+                <span class="mt-for"><span class="avatar avatar-sm a2">DA</span><span class="col"><a class="person-name" href="08-client-360.html">Deepak Agarwal</a><span class="person-sub">₹15.2 L · Tier B · RM Rohan Mehta</span></span></span>
+                <span class="due-gap text-danger"><b>8 months</b>Last 18 Mar 2026</span>
+                <button class="btn btn-secondary btn-sm" data-open-drawer="drawer-meeting">Schedule</button>
+              </div>
+              <div class="due-row">
+                <span class="mt-for"><span class="avatar avatar-sm">SI</span><span class="col"><a class="person-name" href="08-client-360.html">Suresh Iyer</a><span class="person-sub">₹86.5 L · Tier B · RM Rohan Mehta</span></span></span>
+                <span class="due-gap text-warning"><b>6 months</b>Last 14 May 2026</span>
+                <button class="btn btn-secondary btn-sm" data-open-drawer="drawer-meeting">Schedule</button>
+              </div>
+              <div class="due-row">
+                <span class="mt-for"><span class="avatar avatar-sm a3">MJ</span><span class="col"><a class="person-name" href="08-client-360.html">Meera Joshi</a><span class="person-sub">₹42.3 L · Tier B · RM Sneha Iyer</span></span></span>
+                <span class="due-gap text-warning"><b>6 months</b>Last 20 May 2026</span>
+                <button class="btn btn-secondary btn-sm" data-open-drawer="drawer-meeting">Schedule</button>
+              </div>
+            </div>
+            <div class="card-footer text-sm"><svg class="i i-sm faint"><use href="#i-whatsapp"/></svg><span class="muted">WhatsApp review reminders: <b>By tier</b> · On</span><a class="ml-auto" href="20-settings.html#meetings">View all 11</a></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-icon"><svg class="i"><use href="#i-bar-chart"/></svg></span>
+              <div><div class="card-title">This week at a glance</div><div class="text-sm faint">Mon 9 – Sat 14 Nov · your meetings</div></div>
+              <div class="card-actions"><a class="btn btn-ghost btn-sm" href="19-reports.html">Reports</a></div>
+            </div>
+            <div class="card-body">
+              <div class="wk-grid">
+                <div class="stat stat-info"><div class="stat-label">Meetings</div><div class="stat-value">14</div><div class="stat-meta">9 with clients</div></div>
+                <div class="stat stat-success"><div class="stat-label">Completed</div><div class="stat-value">11</div><div class="stat-meta"><span class="delta-up">+3</span> vs last wk</div></div>
+                <div class="stat stat-warning"><div class="stat-label">Pending</div><div class="stat-value">2</div><div class="stat-meta">Oldest 21 h</div></div>
+                <div class="stat"><div class="stat-label">Cancelled</div><div class="stat-value">1</div><div class="stat-meta">1 rescheduled</div></div>
+              </div>
+              <div class="mt-3">
+                <div class="wk-rate"><span>Outcome logged ≤ 24 h</span><div class="progress p-success"><span style="width:86%"></span></div><b>86%</b></div>
+                <div class="wk-rate"><span>Tasks from outcomes</span><div class="progress"><span style="width:64%"></span></div><b>9</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= Create meeting drawer ================= -->
+  <aside class="drawer" id="drawer-meeting" aria-label="Schedule meeting">
+    <div class="drawer-header">
+      <span class="card-icon"><svg class="i"><use href="#i-video"/></svg></span>
+      <div><div class="drawer-title">Schedule meeting</div><div class="drawer-sub">Fields marked * are required</div></div>
+      <button class="btn btn-ghost btn-icon ml-auto" data-close-drawer title="Close"><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="form-section">
+        <div class="form-grid">
+          <div class="field span-2">
+            <label class="label" for="m-subj">Subject <span class="req">*</span></label>
+            <input class="input" id="m-subj" value="Portfolio review – Verma Family" placeholder="e.g. Portfolio review – Rahul Verma">
+          </div>
+          <div class="field span-2">
+            <label class="label" for="m-desc">Description</label>
+            <textarea class="textarea" id="m-desc" placeholder="What is this meeting about?">Quarterly review (Tier A). Check the December SIP top-up, Anjali’s nominations and the education goal for his daughter.</textarea>
+          </div>
+          <div class="field span-2" id="note-field">
+            <div class="label">Note <button class="btn btn-ghost btn-sm label-action" id="add-note" type="button"><svg class="i i-sm"><use href="#i-plus"/></svg>Add</button></div>
+            <div class="help">Internal notes are visible to your team only, never to the client.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">People</div>
+        <div class="form-grid">
+          <div class="field span-2">
+            <label class="label">Created for <span class="req">*</span><span class="label-action sync-note"><span class="dot dot-success"></span>MF Box</span></label>
+            <div class="combo-search">
+              <select class="select" aria-label="Created for type"><option>Family</option><option>Client</option><option>Lead</option><option>Organisation (AMC, insurer)</option></select>
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by name or PAN"></label>
+            </div>
+            <div class="picked">
+              <span class="avatar a2">VF</span>
+              <span class="col">
+                <span class="p-title">Verma Family <span class="badge badge-neutral">Family</span></span>
+                <span class="p-sub">Head: Rahul Verma · ABCPV••••K · ₹1.24 Cr · Last review 14 Nov</span>
+              </span>
+              <button class="btn btn-ghost btn-icon btn-sm ml-auto" title="Remove"><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="label">Host <span class="req">*</span></label>
+            <label class="input-group"><span class="input-icon"><span class="avatar avatar-xs">NK</span></span><input class="input" value="Neha Kapoor (you)" style="padding-left:38px"></label>
+          </div>
+          <div class="field">
+            <label class="label">Remind me before</label>
+            <select class="select"><option>15 mins before</option><option>5 mins before</option><option>30 mins before</option><option>1 hour before</option><option>1 day before</option></select>
+          </div>
+          <div class="field span-2">
+            <label class="label">Participants</label>
+            <div class="chip-input">
+              <span class="chip"><span class="avatar avatar-xs a2">RM</span>Rohan Mehta <span class="chip-kind">· Team</span><button class="chip-remove" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <span class="chip chip-ext"><span class="avatar avatar-xs a3">RV</span>Rahul Verma <span class="chip-kind">· Client</span><button class="chip-remove" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <span class="chip chip-ext"><span class="avatar avatar-xs a3">AV</span>Anjali Verma <span class="chip-kind">· Family</span><button class="chip-remove" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <input placeholder="Add team member, client or email…">
+            </div>
+            <div class="help">Internal team and external contacts (family members, AMC or insurer staff) get the invite.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">When</div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="label">Date <span class="req">*</span></label>
+            <label class="input-group"><svg class="i"><use href="#i-calendar"/></svg><input class="input" value="Mon, 15 Feb 2027"></label>
+          </div>
+          <div class="field">
+            <label class="label">Time <span class="req">*</span></label>
+            <div class="time-range">
+              <select class="select"><option>11:00 AM</option><option>11:30 AM</option></select><span>–</span>
+              <select class="select"><option>12:00 PM</option><option>12:30 PM</option></select>
+            </div>
+          </div>
+          <div class="field span-2">
+            <div class="avail"><svg class="i i-sm"><use href="#i-check"/></svg><span><b>No clashes.</b> Neha, Rohan and meeting room 2 are free at this time.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Where &amp; type</div>
+        <div class="form-grid">
+          <div class="field span-2">
+            <label class="label">Mode <span class="req">*</span></label>
+            <div class="choice-group" data-single id="mode-group">
+              <button class="choice" type="button" aria-pressed="true" data-mode="online"><svg class="i"><use href="#i-video"/></svg>Online</button>
+              <button class="choice" type="button" aria-pressed="false" data-mode="offline"><svg class="i"><use href="#i-map-pin"/></svg>Offline</button>
+              <button class="choice" type="button" aria-pressed="false" data-mode="phone"><svg class="i"><use href="#i-phone"/></svg>Phone</button>
+            </div>
+          </div>
+          <div class="field span-2">
+            <label class="label" id="loc-label">Meeting link</label>
+            <div class="row gap-2">
+              <label class="input-group" style="flex:1"><svg class="i" id="loc-icon-svg"><use href="#i-link"/></svg><input class="input" id="loc-input" value="meet.google.com/vrm-qkte-hpa"></label>
+              <button class="btn btn-secondary" type="button" id="loc-btn"><svg class="i i-sm"><use href="#i-refresh"/></svg>New Meet link</button>
+            </div>
+          </div>
+          <div class="field span-2">
+            <label class="label">Type <span class="req">*</span></label>
+            <div class="row gap-2">
+              <select class="select" style="flex:1"><option>Portfolio review</option><option>Onboarding</option><option>SIP review</option><option>Internal team meeting</option><option>AMC meeting</option><option>Insurance review</option></select>
+              <a class="btn btn-secondary btn-icon" href="20-settings.html#meetings" title="Manage meeting types"><svg class="i"><use href="#i-settings"/></svg></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Agenda &amp; automation</div>
+        <div class="field">
+          <div class="label">Agenda <span class="label-action badge badge-outline">From “Portfolio review” template</span></div>
+          <div class="agenda" id="agenda">
+            <div class="ag-item"><svg class="i i-sm grip"><use href="#i-grip"/></svg><label class="check"><input type="checkbox"></label><span class="ag-text">Asset allocation vs risk profile (Moderate)</span><button class="btn btn-ghost btn-icon" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></div>
+            <div class="ag-item"><svg class="i i-sm grip"><use href="#i-grip"/></svg><label class="check"><input type="checkbox"></label><span class="ag-text">SIP performance and top-up (family ₹62,500 / month)</span><button class="btn btn-ghost btn-icon" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></div>
+            <div class="ag-item"><svg class="i i-sm grip"><use href="#i-grip"/></svg><label class="check"><input type="checkbox"></label><span class="ag-text">Education goal for daughter (2032)</span><button class="btn btn-ghost btn-icon" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></div>
+            <div class="ag-item"><svg class="i i-sm grip"><use href="#i-grip"/></svg><label class="check"><input type="checkbox"></label><span class="ag-text">Nominee update on 2 folios</span><button class="btn btn-ghost btn-icon" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button></div>
+            <div class="ag-add"><svg class="i i-sm"><use href="#i-plus"/></svg><input id="ag-new" placeholder="Add agenda item and press Enter"></div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <div class="auto-row">
+            <span class="card-icon"><svg class="i i-sm"><use href="#i-file"/></svg></span>
+            <span class="col"><b>Auto-generate prep pack from MF Box</b><span class="help">AUM, XIRR, SIPs, recent transactions and open tasks, ready 1 h before the meeting.</span></span>
+            <label class="switch"><input type="checkbox" checked><span></span></label>
+          </div>
+          <div class="auto-row">
+            <span class="card-icon ci-warning"><svg class="i i-sm"><use href="#i-bell"/></svg></span>
+            <span class="col"><b>Ask for outcome 15 min after end</b><span class="help">Prompts the host on Home and My Day; escalates to the branch manager after 24 h.</span></span>
+            <label class="switch"><input type="checkbox" checked><span></span></label>
+          </div>
+          <div class="auto-row">
+            <span class="card-icon ci-success"><svg class="i i-sm"><use href="#i-whatsapp"/></svg></span>
+            <span class="col"><b>Send WhatsApp confirmation to client</b><span class="help">Approved template with date, time and link; reminder 2 h before.</span></span>
+            <label class="switch"><input type="checkbox" checked><span></span></label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="drawer-footer">
+      <span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to schedule</span>
+      <span class="spacer"></span>
+      <button class="btn btn-secondary" data-close-drawer>Cancel</button>
+      <button class="btn btn-primary" id="m-save"><svg class="i"><use href="#i-check"/></svg>Schedule</button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+
+      // Banner "Log now" -> Outcome pending tab
+      document.getElementById('log-now').addEventListener('click', function () { document.getElementById('tab-pending').click(); });
+
+      // Search + mode/type filters on the visible panel
+      var q = document.getElementById('mt-q'), fm = document.getElementById('f-mode'), ft = document.getElementById('f-type');
+      function applyFilters() {
+        var v = q.value.trim().toLowerCase(), m = fm.value, t = ft.value;
+        document.querySelectorAll('.mt-table tbody').forEach(function (tb) {
+          var group = null, shown = 0;
+          function closeGroup() { if (group) group.style.display = shown ? '' : 'none'; }
+          tb.querySelectorAll('tr').forEach(function (tr) {
+            if (tr.classList.contains('mt-group')) { closeGroup(); group = tr; shown = 0; return; }
+            if (tr.classList.contains('mt-now')) { tr.style.display = (v || m || t) ? 'none' : ''; return; }
+            var ok = (!m || tr.dataset.mode === m) && (!t || tr.dataset.type === t) && (!v || tr.textContent.toLowerCase().indexOf(v) > -1);
+            tr.style.display = ok ? '' : 'none'; if (ok) shown++;
+          });
+          closeGroup();
+        });
+      }
+      q.addEventListener('input', applyFilters); fm.addEventListener('change', applyFilters); ft.addEventListener('change', applyFilters);
+
+      // Quick actions
+      document.querySelectorAll('.js-join').forEach(function (b) { b.addEventListener('click', function () { AK.toast('Opening Google Meet · attendance logged', { icon: 'video', undo: false }); }); });
+      document.querySelectorAll('.js-nudge').forEach(function (b) { b.addEventListener('click', function () { AK.toast('Reminder sent to Sneha Iyer', { icon: 'bell' }); }); });
+
+      // Drawer: Note + Add
+      document.getElementById('add-note').addEventListener('click', function () {
+        var t = document.createElement('textarea'); t.className = 'textarea note-box'; t.placeholder = 'Write a note for your team…';
+        document.getElementById('note-field').appendChild(t); t.focus();
+      });
+
+      // Drawer: Mode switches link / location field
+      var MODES = {
+        online: ['Meeting link', 'link', 'meet.google.com/vrm-qkte-hpa', 'New Meet link'],
+        offline: ['Location', 'map-pin', 'Sharma Wealth Partners, Andheri branch · Meeting room 2', 'Use client address'],
+        phone: ['Phone number', 'phone', '+91 98••• ••210 (Rahul Verma)', 'Change number']
+      };
+      document.getElementById('mode-group').addEventListener('click', function (e) {
+        var c = e.target.closest('.choice'); if (!c) return;
+        var m = MODES[c.dataset.mode];
+        document.getElementById('loc-label').textContent = m[0];
+        document.querySelector('#loc-icon-svg use').setAttribute('href', '#i-' + m[1]);
+        document.getElementById('loc-input').value = m[2];
+        document.getElementById('loc-btn').lastChild.textContent = m[3];
+      });
+
+      // Drawer: agenda add / remove
+      var agenda = document.getElementById('agenda'), agNew = document.getElementById('ag-new');
+      agNew.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' || !agNew.value.trim()) return;
+        e.preventDefault();
+        var row = document.createElement('div'); row.className = 'ag-item';
+        row.innerHTML = '<svg class="i i-sm grip"><use href="#i-grip"/></svg><label class="check"><input type="checkbox"></label><span class="ag-text"></span><button class="btn btn-ghost btn-icon" type="button"><svg class="i i-sm"><use href="#i-x"/></svg></button>';
+        row.querySelector('.ag-text').textContent = agNew.value.trim();
+        agenda.insertBefore(row, agNew.parentNode); agNew.value = '';
+      });
+      agenda.addEventListener('click', function (e) { var b = e.target.closest('.ag-item .btn-icon'); if (b) b.closest('.ag-item').remove(); });
+      document.querySelectorAll('.chip-input .chip-remove').forEach(function (b) { b.addEventListener('click', function () { b.closest('.chip').remove(); }); });
+
+      // Save
+      function save() { AK.closeDrawer('drawer-meeting'); AK.toast('Meeting scheduled for Mon 15 Feb 2027, 11:00 AM · invites sent to 3 people'); }
+      document.getElementById('m-save').addEventListener('click', save);
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && document.getElementById('drawer-meeting').classList.contains('is-open')) { e.preventDefault(); save(); }
+      });
+    })();
+  </script>
+</body>
+</html>

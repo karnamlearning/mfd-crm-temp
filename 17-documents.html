@@ -1,0 +1,746 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documents · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---------- Documents page (tokens only) ---------- */
+    .sync-note { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); }
+    .sync-note .dot { width: 6px; height: 6px; }
+
+    .doc-stats { margin-bottom: var(--sp-5); }
+    .doc-stats .stat-value small { font-size: 14px; font-weight: 500; color: var(--text-3); letter-spacing: 0; }
+    .doc-stats .stat-label .i { color: var(--text-3); }
+    .doc-stats .stat-warning .stat-label .i, .doc-stats .stat-warning .stat-value { color: var(--warning); }
+    .doc-stats .progress { margin-top: 10px; }
+
+    /* File-manager shell: one card, tree on the left */
+    .dm { display: grid; grid-template-columns: 208px minmax(0, 1fr); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .dm-side { border-right: 1px solid var(--border); padding: var(--sp-3) 10px; display: flex; flex-direction: column; gap: 2px; background: var(--surface); min-width: 0; }
+    .dm-main { min-width: 0; display: flex; flex-direction: column; }
+
+    .ft-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); padding: var(--sp-3) var(--sp-2) 6px; }
+    .ft-label:first-child { padding-top: 2px; }
+    .fnode { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 6px; border-radius: var(--r-sm); color: var(--text-2); font-size: 13px; font-weight: 500; border: 0; background: none; width: 100%; text-align: left; white-space: nowrap; }
+    .fnode:hover { background: var(--surface-2); color: var(--text); }
+    .fnode.is-active { background: var(--primary-soft); color: var(--primary-text); font-weight: 600; }
+    .fnode .i { color: var(--text-3); }
+    .fnode.is-active .i { color: var(--primary-text); }
+    .fnode .fn-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .fnode .fn-count { margin-left: auto; font-size: 11.5px; color: var(--text-3); font-variant-numeric: tabular-nums; font-weight: 500; }
+    .fnode.is-active .fn-count { color: var(--primary-text); }
+    .fnode .caret { width: 14px; height: 14px; margin-left: -2px; transition: transform .15s; }
+    .fnode[aria-expanded="true"] .caret { transform: rotate(90deg); }
+    .fn-children { margin: 2px 0 4px 15px; padding-left: 8px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 1px; }
+    .fn-children .fnode { height: 28px; font-weight: 400; }
+    .fn-children[hidden] { display: none; }
+    .fn-more { font-size: 12px; color: var(--primary-text); padding: 4px 8px; }
+    .fn-sync { font-size: 10px; font-weight: 600; color: var(--success); background: var(--success-soft); border-radius: var(--r-full); padding: 0 6px; line-height: 16px; }
+    .side-sep { height: 1px; background: var(--border); margin: var(--sp-2) 0; }
+
+    .wait { margin-top: var(--sp-2); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); padding: 10px; }
+    .wait-head { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .wait-head .fn-count { margin-left: auto; }
+    .wait-foot { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 2px; }
+    .wait-item { display: flex; gap: 8px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 12px; line-height: 16px; }
+    .wait-item:first-of-type { border-top: 0; }
+    .wait-item .i { margin-top: 1px; color: var(--text-3); }
+    .wait-item b { font-weight: 600; color: var(--text); display: block; }
+    .wait-item span { color: var(--text-3); }
+    .w-txt { min-width: 0; flex: 1; }
+    .w-txt span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .w-age { margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .wait-item .w-age.overdue { color: var(--danger); }
+    .wait-item .overdue { font-size: 12px; gap: 4px; }
+
+    .dm-head { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-4) var(--sp-5) 0; }
+    .dm-path { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-3); }
+    .dm-path b { color: var(--text); font-size: 15px; font-weight: 600; }
+    .dm-toolbar { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-3) var(--sp-5); flex-wrap: wrap; }
+    .dm-toolbar .input-group { flex: 1; min-width: 220px; max-width: 360px; }
+    .dm-toolbar .select { width: auto; min-width: 128px; }
+    .dm-toolbar .segmented { margin-left: auto; }
+
+    .dropzone { margin: 0 var(--sp-5) var(--sp-3); border: 1.5px dashed var(--border-strong); border-radius: var(--r-md); background: var(--surface-2); display: flex; align-items: center; gap: var(--sp-3); padding: 10px var(--sp-4); font-size: 13px; color: var(--text-2); transition: border-color .15s, background .15s; }
+    .dropzone.is-hot { border-color: var(--primary); background: var(--primary-soft); }
+    .dz-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; flex: none; }
+    .dropzone b { color: var(--text); font-weight: 600; }
+    .dz-sep { color: var(--text-3); }
+    .dz-mask { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--success); font-weight: 500; font-size: 12px; white-space: nowrap; }
+
+    .quick { display: flex; gap: var(--sp-2); padding: 0 var(--sp-5) var(--sp-3); flex-wrap: wrap; }
+    .quick .chip { cursor: pointer; }
+    .quick .chip-ghost .i { color: var(--text-3); }
+
+    /* table inside the shell */
+    .dm-table { border-top: 1px solid var(--border); }
+    .dm-main > [data-tab-panel].is-active { flex: 1; display: flex; flex-direction: column; }
+    .dm-main > [data-tab-panel] > .table-wrap, .dm-main > [data-tab-panel] > .fgrid { flex: 1; }
+    .dm-table .table-wrap { border: 0; border-radius: 0; box-shadow: none; }
+    .dm .table td { height: 56px; }
+    .dm .table th, .dm .table td { padding: 0 8px; }
+    .dm .table th:first-child, .dm .table td:first-child { padding-left: var(--sp-4); }
+    .dm .table th:last-child, .dm .table td:last-child { padding: 0; width: 0; }
+
+    .ft { width: 30px; height: 34px; border-radius: 6px; display: grid; place-items: center; font-size: 9px; font-weight: 700; letter-spacing: .03em; flex: none; position: relative; }
+    .ft::after { content: ""; position: absolute; top: 0; right: 0; width: 8px; height: 8px; border-radius: 0 6px 0 4px; background: currentColor; opacity: .22; }
+    .ft-pdf { background: var(--danger-soft); color: var(--danger); }
+    .ft-img { background: var(--primary-soft); color: var(--primary-text); }
+    .ft-xls { background: var(--success-soft); color: var(--success); }
+    .ft-doc { background: var(--neutral-soft); color: var(--neutral); }
+    .ft-lg { width: 40px; height: 46px; font-size: 11px; border-radius: 8px; }
+
+    .th-name { display: inline-flex; align-items: center; gap: 17px; padding-left: 7px; }
+    .ft-sel { position: relative; width: 30px; height: 34px; flex: none; cursor: pointer; }
+    .ft-sel .check { position: absolute; inset: 0; display: none; place-items: center; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+    .table tbody tr:hover .ft-sel .check, .ft-sel:has(input:checked) .check { display: grid; }
+    .doc-txt { min-width: 0; max-width: 196px; }
+    .doc-txt .doc-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+    .doc-txt .doc-sub .i, .doc-txt .doc-sub .mask-badge { vertical-align: -2px; }
+    .doc { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .doc-name { display: block; font-weight: 500; color: var(--text); max-width: 196px; overflow: hidden; text-overflow: ellipsis; }
+    a.doc-name:hover { color: var(--primary-text); }
+    .doc-sub { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); line-height: 16px; }
+    .doc-sub .i { width: 12px; height: 12px; }
+    .star-on { color: var(--warning); fill: currentColor; }
+    .mask-badge { display: inline-flex; align-items: center; gap: 3px; color: var(--success); font-weight: 500; }
+
+    .rec { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px; border-radius: var(--r-full); background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 12px; font-weight: 500; max-width: 124px; text-decoration: none; }
+    .rec span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rec .i { width: 12px; height: 12px; color: var(--text-3); }
+    a.rec:hover { text-decoration: none; border-color: var(--border-strong); color: var(--primary-text); }
+    .rec-lead .i { color: var(--warning); }
+    .rec-task .i { color: var(--primary-text); }
+    .rec-firm { background: transparent; border-style: dashed; color: var(--text-2); }
+
+    .up { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); line-height: 16px; margin-top: 2px; }
+    .when { font-size: 13px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .exp { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; }
+    .exp-warn { color: var(--warning); }
+    .exp-none { color: var(--text-3); font-weight: 400; }
+    .exp-ok { color: var(--text-2); font-weight: 400; }
+    .access { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-2); }
+    .access .i { width: 14px; height: 14px; color: var(--text-3); }
+
+    /* hover actions float over the right edge of the row */
+    .act { position: relative; width: 0; height: 56px; }
+    .act .row-actions { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 4px 4px 4px 28px; background: linear-gradient(to right, transparent, var(--surface-2) 24px); }
+    .table tr.is-selected .act .row-actions { background: linear-gradient(to right, transparent, var(--surface-2) 24px); }
+
+    .dm-foot { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-5); border-top: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+    .dm-foot .select { width: 72px; height: 30px; font-size: 13px; }
+    .dm-foot .pg-btns { margin-left: auto; display: flex; gap: 4px; align-items: center; }
+
+    /* grid view */
+    .fgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: var(--sp-3); padding: var(--sp-4) var(--sp-5) var(--sp-5); border-top: 1px solid var(--border); }
+    .fcard { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; cursor: pointer; transition: border-color .12s, box-shadow .12s; }
+    .fcard:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
+    .fthumb { height: 112px; background: var(--surface-2); border-bottom: 1px solid var(--border); position: relative; display: grid; place-items: center; }
+    .fthumb .paper { width: 74px; height: 92px; margin-top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px 4px 0 0; box-shadow: var(--shadow-sm); padding: 10px 9px; display: flex; flex-direction: column; gap: 5px; }
+    .fthumb .paper i { display: block; height: 3px; border-radius: 2px; background: var(--surface-3); }
+    .fthumb .paper i:nth-child(1) { width: 60%; background: var(--border-strong); }
+    .fthumb .paper i:nth-child(3) { width: 80%; }
+    .fthumb .paper i:nth-child(5) { width: 70%; }
+    .fthumb .ft { position: absolute; left: 10px; top: 10px; }
+    .fthumb .fexp { position: absolute; right: 8px; top: 8px; }
+    .fthumb .photo { width: 96px; height: 64px; margin-top: 14px; border-radius: 6px; background: linear-gradient(135deg, var(--primary-soft-2), var(--surface-3)); border: 1px solid var(--border); display: grid; place-items: center; color: var(--text-3); }
+    .fthumb .sheet { width: 96px; height: 70px; margin-top: 16px; border: 1px solid var(--border); background: var(--surface); border-radius: 4px; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 24px 14px; }
+    .fbody { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .fname { font-weight: 500; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fmeta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3); }
+    .fmeta .access { margin-left: auto; font-size: 12px; }
+
+    /* ---------- Preview drawer ---------- */
+    .pv-head-title { font-size: 15px; font-weight: 600; max-width: 440px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pv { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: var(--sp-5); align-items: start; }
+    .pv-left { position: sticky; top: 0; }
+    .pv-stage { background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px; }
+    .paper-lg { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; box-shadow: var(--shadow-md); padding: 16px 16px 12px; font-size: 9.5px; line-height: 13px; color: var(--text-2); min-height: 420px; }
+    .pp-head { display: flex; align-items: center; gap: 7px; padding-bottom: 8px; border-bottom: 1.5px solid var(--primary); }
+    .pp-logo { width: 20px; height: 20px; border-radius: 5px; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; font-weight: 700; font-size: 8px; }
+    .pp-firm { font-weight: 700; color: var(--text); font-size: 10px; }
+    .pp-title { margin-left: auto; text-align: right; }
+    .pp-title b { display: block; color: var(--text); font-size: 10.5px; }
+    .pp-inv { display: flex; justify-content: space-between; gap: 8px; padding: 8px 0; }
+    .pp-inv b { color: var(--text); display: block; font-size: 10.5px; }
+    .pp-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+    .pp-sum div { background: var(--surface-2); border-radius: 4px; padding: 5px 6px; }
+    .pp-sum b { display: block; font-size: 11.5px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .pp-alloc { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin: 2px 0 4px; }
+    .pp-alloc span:nth-child(1) { background: var(--chart-1); }
+    .pp-alloc span:nth-child(2) { background: var(--chart-2); }
+    .pp-alloc span:nth-child(3) { background: var(--chart-4); }
+    .pp-legend { display: flex; gap: 10px; margin-bottom: 8px; }
+    .pp-legend i { display: inline-block; width: 6px; height: 6px; border-radius: 2px; margin-right: 4px; }
+    .pp-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    .pp-table th { text-align: left; font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); padding: 3px 0; font-size: 8.5px; text-transform: uppercase; letter-spacing: .04em; }
+    .pp-table td { padding: 4px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+    .pp-table .r { text-align: right; }
+    .pp-table tfoot td { font-weight: 700; border-bottom: 0; padding-top: 6px; }
+    .pp-foot { margin-top: 10px; display: flex; justify-content: space-between; color: var(--text-3); font-size: 8.5px; }
+    .watermark { position: absolute; inset: -40px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; transform: rotate(-30deg); pointer-events: none; }
+    .watermark span { font-size: 12px; font-weight: 600; color: var(--text-3); opacity: .3; white-space: nowrap; letter-spacing: .02em; }
+    .pv-thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+    .pv-thumbs span { height: 64px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); padding: 8px 7px; display: flex; flex-direction: column; gap: 5px; cursor: pointer; }
+    .pv-thumbs span.is-active { border-color: var(--primary); box-shadow: var(--focus-ring); }
+    .pv-thumbs i { display: block; height: 3px; border-radius: 2px; background: var(--surface-3); }
+    .pv-thumbs i:first-child { width: 60%; background: var(--border-strong); }
+    .pv-ctrl { display: flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px; color: var(--text-2); }
+    .pv-ctrl .pages { margin: 0 auto 0 4px; font-variant-numeric: tabular-nums; }
+    .pv-note { margin-top: 10px; display: flex; gap: 8px; font-size: 12px; line-height: 16px; color: var(--text-2); }
+    .pv-note .i { color: var(--success); margin-top: 1px; }
+
+    .sec { padding-bottom: var(--sp-4); margin-bottom: var(--sp-4); border-bottom: 1px solid var(--border); }
+    .sec:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+    .sec-title { display: flex; align-items: center; gap: 8px; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin-bottom: 10px; }
+    .sec-title a { margin-left: auto; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 500; }
+    .pv .kv { grid-template-columns: 92px 1fr; gap: 8px 10px; font-size: 13px; }
+    .pv .kv dd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .recs { display: flex; flex-wrap: wrap; gap: 6px; }
+    .recs .rec { max-width: 100%; }
+
+    .ver { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--border); }
+    .ver:first-of-type { border-top: 0; padding-top: 0; }
+    .ver-n { width: 28px; height: 22px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); font-size: 11px; font-weight: 600; color: var(--text-2); display: grid; place-items: center; }
+    .ver.is-current .ver-n { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+    .ver-t { font-size: 13px; color: var(--text); font-weight: 500; }
+    .ver-m { font-size: 12px; color: var(--text-3); line-height: 16px; }
+
+    .log { display: flex; flex-direction: column; }
+    .log-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; color: var(--text-2); }
+    .log-row .lg-ic { width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); display: grid; place-items: center; flex: none; }
+    .log-row .lg-ic .i { width: 13px; height: 13px; }
+    .log-row b { color: var(--text); font-weight: 600; }
+    .log-row time { margin-left: auto; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .lg-ext { background: var(--success-soft) !important; color: var(--success); border-color: transparent !important; }
+
+    /* request drawer */
+    .wa-preview { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); padding: 12px; }
+    .wa-bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 10px 10px 10px 2px; padding: 10px 12px; font-size: 13px; line-height: 19px; color: var(--text); max-width: 92%; }
+    .wa-bubble .lnk { color: var(--primary-text); font-weight: 500; }
+    .wa-meta { font-size: 11px; color: var(--text-3); margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+    .wa-meta .i { color: var(--success); width: 13px; height: 13px; }
+
+    @media (max-width: 1280px) {
+      .dz-tail { display: none; }
+      .dm { grid-template-columns: 196px minmax(0, 1fr); }
+      .dm .table th:nth-child(3), .dm .table td:nth-child(3) { display: none; }
+    }
+    @media (max-width: 900px) {
+      .dm { grid-template-columns: 1fr; }
+      .dm-side { border-right: 0; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; }
+      .dm-side .ft-label, .dm-side .fn-children, .dm-side .side-sep, .dm-side .wait { display: none; }
+      .dm-side .fnode { width: auto; }
+      .pv { grid-template-columns: 1fr; }
+      .pv-left { position: static; }
+    }
+    @media (max-width: 768px) {
+      .dropzone { flex-wrap: wrap; }
+      .dm-toolbar .input-group { max-width: none; width: 100%; }
+    }
+  </style>
+</head>
+<body data-page="documents" data-crumb="Documents">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Documents</h1>
+            <p class="page-sub">Every file linked to a client, lead or task <span class="sync-note">· <span class="dot dot-success"></span>Statements synced from MF Box · 10:42</span></p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" data-open-drawer="drawer-request"><svg class="i"><use href="#i-send"/></svg>Request from client</button>
+            <button class="btn btn-primary" id="btn-upload"><svg class="i"><use href="#i-upload"/></svg>Upload</button>
+          </div>
+        </div>
+
+        <!-- Storage / compliance strip -->
+        <div class="grid-4 doc-stats">
+          <div class="stat">
+            <div class="stat-label"><svg class="i"><use href="#i-file"/></svg>Documents</div>
+            <div class="stat-value">8,412</div>
+            <div class="stat-meta"><span><span class="delta-up">+126</span> this week · 1,284 clients covered</span></div>
+          </div>
+          <a class="stat stat-warning" href="#" data-filter="expiring">
+            <div class="stat-label"><svg class="i"><use href="#i-clock"/></svg>Expiring in 30 days</div>
+            <div class="stat-value">17</div>
+            <div class="stat-meta">6 KYC · 7 mandates · 4 policies</div>
+          </a>
+          <a class="stat" href="#" data-filter="pending">
+            <div class="stat-label"><svg class="i"><use href="#i-inbox-in"/></svg>Pending client uploads</div>
+            <div class="stat-value">9</div>
+            <div class="stat-meta"><span><span class="text-danger">2 waiting over 7 days</span> · auto-reminders on</span></div>
+          </a>
+          <div class="stat">
+            <div class="stat-label"><svg class="i"><use href="#i-layers"/></svg>Storage</div>
+            <div class="stat-value">12.4 GB <small>of 50 GB</small></div>
+            <div class="progress"><span style="width:24.8%"></span></div>
+            <div class="stat-meta mt-1">Encrypted at rest · 25% used</div>
+          </div>
+        </div>
+
+        <!-- File manager -->
+        <div class="dm">
+          <!-- Folder tree -->
+          <nav class="dm-side" aria-label="Folders">
+            <button class="fnode is-active"><svg class="i"><use href="#i-file"/></svg><span class="fn-name">All documents</span><span class="fn-count">8,412</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-clock"/></svg><span class="fn-name">Recent</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-star"/></svg><span class="fn-name">Starred</span><span class="fn-count">23</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-users"/></svg><span class="fn-name">Shared with me</span><span class="fn-count">41</span></button>
+
+            <div class="ft-label">Folders</div>
+            <button class="fnode" aria-expanded="true" data-toggle="fn-clients"><svg class="i caret"><use href="#i-chevron-right"/></svg><svg class="i"><use href="#i-folder"/></svg><span class="fn-name">Clients</span><span class="fn-count">1,284</span></button>
+            <div class="fn-children" id="fn-clients">
+              <button class="fnode"><svg class="i"><use href="#i-folder"/></svg><span class="fn-name">Verma Family</span><span class="fn-count">42</span></button>
+              <button class="fnode"><svg class="i"><use href="#i-folder"/></svg><span class="fn-name">Suresh Iyer</span><span class="fn-count">18</span></button>
+              <button class="fnode"><svg class="i"><use href="#i-folder"/></svg><span class="fn-name">Farhan Qureshi</span><span class="fn-count">27</span></button>
+              <button class="fnode"><svg class="i"><use href="#i-folder"/></svg><span class="fn-name">Meera Joshi</span><span class="fn-count">21</span></button>
+              <a class="fn-more" href="07-clients-list.html">+ 1,280 more clients</a>
+            </div>
+            <button class="fnode"><svg class="i"><use href="#i-shield"/></svg><span class="fn-name">KYC &amp; identity</span><span class="fn-count">1,926</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-edit"/></svg><span class="fn-name">Application forms</span><span class="fn-count">864</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-repeat"/></svg><span class="fn-name">Mandates</span><span class="fn-count">512</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-briefcase"/></svg><span class="fn-name">Proposals</span><span class="fn-count">238</span></button>
+            <button class="fnode" title="Synced from MF Box"><svg class="i"><use href="#i-refresh"/></svg><span class="fn-name">Statements</span><span class="dot dot-success" title="Synced from MF Box" style="width:6px;height:6px"></span><span class="fn-count">3,604</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-copy"/></svg><span class="fn-name">Templates</span><span class="fn-count">24</span></button>
+            <button class="fnode"><svg class="i"><use href="#i-note"/></svg><span class="fn-name">Compliance &amp; SOPs</span><span class="fn-count">31</span></button>
+            <div class="side-sep"></div>
+            <button class="fnode"><svg class="i"><use href="#i-trash"/></svg><span class="fn-name">Trash</span><span class="fn-count">14</span></button>
+
+            <div class="wait">
+              <div class="wait-head"><svg class="i i-sm"><use href="#i-inbox-in"/></svg>Waiting on clients<span class="fn-count">9</span></div>
+              <div class="wait-item"><svg class="i i-sm"><use href="#i-whatsapp"/></svg><div class="w-txt"><b>Nikhil Shah</b><span>Address proof</span></div><span class="w-age overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>9d</span></div>
+              <div class="wait-item"><svg class="i i-sm"><use href="#i-whatsapp"/></svg><div class="w-txt"><b>Deepak Agarwal</b><span>Cancelled cheque</span></div><span class="w-age">3d</span></div>
+              <div class="wait-item"><svg class="i i-sm"><use href="#i-mail"/></svg><div class="w-txt"><b>Meera Joshi</b><span>Nominee form</span></div><span class="w-age">1d</span></div>
+              <a class="wait-foot" href="#" data-toast="Reminders sent to 9 clients on WhatsApp"><svg class="i i-sm"><use href="#i-bell"/></svg>Remind all 9</a>
+            </div>
+          </nav>
+
+          <!-- Main panel -->
+          <section class="dm-main">
+            <div class="dm-head">
+              <div class="dm-path"><b>All documents</b><span>· 8,412 files</span></div>
+              <span class="badge badge-neutral ml-auto"><svg class="i"><use href="#i-lock"/></svg>You see files for Andheri + your own clients</span>
+            </div>
+
+            <div class="dm-toolbar">
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search name, client, PAN or text inside scans"></label>
+              <select class="select" aria-label="File type"><option>All types</option><option>PDF</option><option>Images</option><option>Spreadsheets</option></select>
+              <select class="select" aria-label="Linked to"><option>Linked to: any</option><option>Clients</option><option>Leads</option><option>Tasks</option><option>Opportunities</option><option>Not linked</option></select>
+              <div class="segmented" data-segmented data-view-switch>
+                <button aria-pressed="false" data-view="grid" title="Grid view"><svg class="i i-sm"><use href="#i-grid"/></svg>Grid</button>
+                <button aria-pressed="true" data-view="list" title="List view"><svg class="i i-sm"><use href="#i-list"/></svg>List</button>
+              </div>
+            </div>
+
+            <div class="dropzone" id="dropzone">
+              <span class="dz-icon"><svg class="i"><use href="#i-upload"/></svg></span>
+              <span><b>Drop files here</b> or <a href="#" id="dz-browse">browse</a> <span class="dz-sep">·</span> PDF, JPG, PNG up to 25 MB<span class="dz-tail"> <span class="dz-sep">·</span> virus-scanned and OCR-searchable</span></span>
+              <span class="dz-mask"><svg class="i i-sm"><use href="#i-shield"/></svg>Aadhaar numbers are auto-masked</span>
+            </div>
+
+            <div class="quick">
+              <span class="chip">Uploaded: <b>last 14 days</b><button class="chip-remove" aria-label="Remove filter"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+              <button class="chip chip-ghost"><svg class="i i-sm"><use href="#i-clock"/></svg>Expiring in 30 days · 17</button>
+              <button class="chip chip-ghost"><svg class="i i-sm"><use href="#i-link"/></svg>Shared externally</button>
+              <button class="chip chip-ghost"><svg class="i i-sm"><use href="#i-alert"/></svg>Not linked to a record</button>
+              <button class="chip chip-ghost"><svg class="i i-sm"><use href="#i-plus"/></svg>Add filter</button>
+            </div>
+
+            <!-- LIST VIEW -->
+            <div class="dm-table is-active" data-tab-panel="list" data-tab-scope="view">
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr>
+                    <th><span class="th-name"><label class="check"><input type="checkbox" aria-label="Select all"></label><span class="th-sort">Name</span></span></th>
+                    <th>Linked to</th>
+                    <th>Category</th>
+                    <th><span class="th-sort is-asc">Uploaded</span></th>
+                    <th>Expiry</th>
+                    <th>Access</th>
+                    <th aria-label="Actions"></th>
+                  </tr></thead>
+                  <tbody>
+                    <tr class="is-selected">
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Verma Family – Portfolio statement Q2 FY27.pdf</a><div class="doc-sub"><svg class="i star-on"><use href="#i-star"/></svg>412 KB · v3 · from MF Box</div></div></div></td>
+                      <td><a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Rahul Verma</span></a></td>
+                      <td><span class="tag">Statements</span></td>
+                      <td><div class="when">14 Nov</div><div class="up"><span class="avatar avatar-xs">NK</span>Neha Kapoor</div></td>
+                      <td><span class="exp exp-none">No expiry</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Suresh Iyer – KYC (PAN, address proof).pdf</a><div class="doc-sub"><span class="mask-badge"><svg class="i"><use href="#i-shield"/></svg>PAN masked</span> · 1.8 MB · 3 pages</div></div></div></td>
+                      <td><a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Suresh Iyer</span></a></td>
+                      <td><span class="tag">KYC &amp; identity</span></td>
+                      <td><div class="when">08 Nov</div><div class="up"><span class="avatar avatar-xs a4">PN</span>Priya Nair</div></td>
+                      <td><span class="exp exp-warn"><svg class="i i-sm"><use href="#i-alert"/></svg>KYC expires 02 Dec</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Investment proposal – Karan Malhotra.pdf</a><div class="doc-sub">964 KB · v2 · opened 2× by lead</div></div></div></td>
+                      <td><a class="rec rec-lead" href="05-lead-create.html"><svg class="i"><use href="#i-user-plus"/></svg><span>Karan Malhotra</span></a></td>
+                      <td><span class="tag">Proposals</span></td>
+                      <td><div class="when">13 Nov</div><div class="up"><span class="avatar avatar-xs">NK</span>Neha Kapoor</div></td>
+                      <td><span class="exp exp-ok">Link expires 20 Nov</span></td>
+                      <td><span class="access" title="Everyone in the Andheri team"><svg class="i"><use href="#i-users"/></svg>Team</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">NACH mandate – Farhan Qureshi.pdf</a><div class="doc-sub">288 KB · eSigned · ₹1,00,000/mo</div></div></div></td>
+                      <td><a class="rec rec-task" href="11-task-detail.html"><svg class="i"><use href="#i-check-square"/></svg><span>Bank mandate – Farhan Q.</span></a></td>
+                      <td><span class="tag">Mandates</span></td>
+                      <td><div class="when">12 Nov</div><div class="up"><span class="avatar avatar-xs a5">AD</span>Arjun Desai</div></td>
+                      <td><span class="exp exp-ok">Valid till 2036</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-img">JPG</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Pooja Bansal – Address proof.jpg</a><div class="doc-sub"><span class="mask-badge"><svg class="i"><use href="#i-shield"/></svg>Aadhaar masked</span> · 640 KB · from client</div></div></div></td>
+                      <td><a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Pooja Bansal</span></a></td>
+                      <td><span class="tag">KYC &amp; identity</span></td>
+                      <td><div class="when">11 Nov</div><div class="up"><span class="avatar avatar-xs a3">PB</span>Client link</div></td>
+                      <td><span class="exp exp-ok">Verified · valid</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-xls">XLS</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Harish Patel Family – Asset allocation.xlsx</a><div class="doc-sub">86 KB · review on 18 Nov</div></div></div></td>
+                      <td><a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-users"/></svg><span>Harish Patel Family</span></a></td>
+                      <td><span class="tag">Proposals</span></td>
+                      <td><div class="when">10 Nov</div><div class="up"><span class="avatar avatar-xs a2">SI</span>Sneha Iyer</div></td>
+                      <td><span class="exp exp-none">No expiry</span></td>
+                      <td><span class="access" title="Everyone in the Andheri team"><svg class="i"><use href="#i-users"/></svg>Team</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Term insurance policy – Meera Joshi.pdf</a><div class="doc-sub">2.4 MB · Policy no. ••••4417</div></div></div></td>
+                      <td><a class="rec" href="12-opportunities.html"><svg class="i"><use href="#i-target"/></svg><span>Life insurance renewal</span></a></td>
+                      <td><span class="tag">Application forms</span></td>
+                      <td><div class="when">09 Nov</div><div class="up"><span class="avatar avatar-xs">RM</span>Rohan Mehta</div></td>
+                      <td><span class="exp exp-warn"><svg class="i i-sm"><use href="#i-alert"/></svg>Renews 28 Nov</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Nikhil Shah – KYC (PAN, address proof).pdf</a><div class="doc-sub"><span class="mask-badge"><svg class="i"><use href="#i-shield"/></svg>PAN masked</span> · 1.1 MB · 2 pages</div></div></div></td>
+                      <td><a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Nikhil Shah</span></a></td>
+                      <td><span class="tag">KYC &amp; identity</span></td>
+                      <td><div class="when">07 Nov</div><div class="up"><span class="avatar avatar-xs a5">IS</span>Imran Sheikh</div></td>
+                      <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>KYC expired 10 Nov</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Nominee form – Anjali Verma.pdf</a><div class="doc-sub">344 KB · pre-filled · to be signed this week</div></div></div></td>
+                      <td><a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Anjali Verma</span></a></td>
+                      <td><span class="tag">Application forms</span></td>
+                      <td><div class="when">06 Nov</div><div class="up"><span class="avatar avatar-xs">NK</span>Neha Kapoor</div></td>
+                      <td><span class="exp exp-none">No expiry</span></td>
+                      <td><span class="access" title="Only the client's RM and Ops can open this"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-pdf">PDF</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">Term insurance quote – Ritu Saxena.pdf</a><div class="doc-sub">720 KB · 3 insurer options</div></div></div></td>
+                      <td><a class="rec rec-lead" href="05-lead-create.html"><svg class="i"><use href="#i-user-plus"/></svg><span>Ritu Saxena</span></a></td>
+                      <td><span class="tag">Proposals</span></td>
+                      <td><div class="when">05 Nov</div><div class="up"><span class="avatar avatar-xs a2">SI</span>Sneha Iyer</div></td>
+                      <td><span class="exp exp-ok">Quote valid to 05 Dec</span></td>
+                      <td><span class="access" title="Everyone in the Andheri team"><svg class="i"><use href="#i-users"/></svg>Team</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                    <tr>
+                      <td><div class="doc"><label class="ft-sel"><span class="ft ft-doc">DOC</span><span class="check"><input type="checkbox" aria-label="Select"></span></label><div class="doc-txt"><a class="doc-name" href="#" data-open-drawer="drawer-preview">SOP – Redemption request checklist.docx</a><div class="doc-sub">58 KB · approved by owner</div></div></div></td>
+                      <td><span class="rec rec-firm"><svg class="i"><use href="#i-building"/></svg><span>Firm-wide</span></span></td>
+                      <td><span class="tag">Compliance &amp; SOPs</span></td>
+                      <td><div class="when">02 Nov</div><div class="up"><span class="avatar avatar-xs a5">RS</span>Rajesh Sharma</div></td>
+                      <td><span class="exp exp-ok">Review Jan 2027</span></td>
+                      <td><span class="access"><svg class="i"><use href="#i-globe"/></svg>All staff</span></td>
+                      <td class="act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Preview" data-open-drawer="drawer-preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Download (watermarked)" data-dl><svg class="i"><use href="#i-download"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Share secure link" data-share><svg class="i"><use href="#i-link"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="dm-foot"><select class="select" aria-label="Rows per page"><option>20</option><option>50</option></select> rows · 1–11 of 214 (filtered from 8,412)
+                <div class="pg-btns"><button class="pg-btn" aria-label="Previous"><svg class="i"><use href="#i-chevron-left"/></svg></button><button class="pg-btn is-active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><span class="faint">…</span><button class="pg-btn">20</button><button class="pg-btn" aria-label="Next"><svg class="i"><use href="#i-chevron-right"/></svg></button></div>
+              </div>
+            </div>
+
+            <!-- GRID VIEW -->
+            <div data-tab-panel="grid" data-tab-scope="view">
+              <div class="fgrid">
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-pdf">PDF</span><div class="paper"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                  <div class="fbody"><div class="fname">Verma Family – Portfolio statement Q2 FY27.pdf</div><div class="fmeta"><span>14 Nov · 412 KB</span><span class="access"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></div><div><span class="rec"><svg class="i"><use href="#i-user"/></svg><span>Rahul Verma</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-pdf">PDF</span><span class="badge badge-dot badge-warning fexp">Expires 02 Dec</span><div class="paper"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                  <div class="fbody"><div class="fname">Suresh Iyer – KYC (PAN, address proof).pdf</div><div class="fmeta"><span>08 Nov · 1.8 MB</span><span class="access"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></div><div><span class="rec"><svg class="i"><use href="#i-user"/></svg><span>Suresh Iyer</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-pdf">PDF</span><div class="paper"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                  <div class="fbody"><div class="fname">Investment proposal – Karan Malhotra.pdf</div><div class="fmeta"><span>13 Nov · 964 KB</span><span class="access"><svg class="i"><use href="#i-users"/></svg>Team</span></div><div><span class="rec rec-lead"><svg class="i"><use href="#i-user-plus"/></svg><span>Karan Malhotra</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-pdf">PDF</span><div class="paper"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                  <div class="fbody"><div class="fname">NACH mandate – Farhan Qureshi.pdf</div><div class="fmeta"><span>12 Nov · 288 KB</span><span class="access"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></div><div><span class="rec rec-task"><svg class="i"><use href="#i-check-square"/></svg><span>Bank mandate – Farhan Q.</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-img">JPG</span><span class="badge badge-dot badge-success fexp">Verified</span><div class="photo"><svg class="i i-lg"><use href="#i-image"/></svg></div></div>
+                  <div class="fbody"><div class="fname">Pooja Bansal – Address proof.jpg</div><div class="fmeta"><span>11 Nov · 640 KB</span><span class="access"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></div><div><span class="rec"><svg class="i"><use href="#i-user"/></svg><span>Pooja Bansal</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-xls">XLS</span><div class="sheet"></div></div>
+                  <div class="fbody"><div class="fname">Harish Patel Family – Asset allocation.xlsx</div><div class="fmeta"><span>10 Nov · 86 KB</span><span class="access"><svg class="i"><use href="#i-users"/></svg>Team</span></div><div><span class="rec"><svg class="i"><use href="#i-users"/></svg><span>Harish Patel Family</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-pdf">PDF</span><span class="badge badge-dot badge-warning fexp">Due 28 Nov</span><div class="paper"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                  <div class="fbody"><div class="fname">Term insurance policy – Meera Joshi.pdf</div><div class="fmeta"><span>09 Nov · 2.4 MB</span><span class="access"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></div><div><span class="rec"><svg class="i"><use href="#i-target"/></svg><span>Life insurance renewal</span></span></div></div>
+                </div>
+                <div class="fcard" data-open-drawer="drawer-preview">
+                  <div class="fthumb"><span class="ft ft-pdf">PDF</span><span class="badge badge-dot badge-danger fexp"><svg class="i"><use href="#i-clock"/></svg>Expired</span><div class="paper"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                  <div class="fbody"><div class="fname">Nikhil Shah – KYC (PAN, address proof).pdf</div><div class="fmeta"><span>07 Nov · 1.1 MB</span><span class="access"><svg class="i"><use href="#i-lock"/></svg>RM + Ops</span></div><div><span class="rec"><svg class="i"><use href="#i-user"/></svg><span>Nikhil Shah</span></span></div></div>
+                </div>
+              </div>
+              <div class="dm-foot">Showing 8 of 214 · newest first<button class="btn btn-secondary btn-sm ml-auto">Load more</button></div>
+            </div>
+          </section>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ Preview drawer ============ -->
+  <aside class="drawer drawer-wide" id="drawer-preview" aria-label="Document preview">
+    <div class="drawer-header">
+      <span class="ft ft-pdf">PDF</span>
+      <div style="min-width:0">
+        <div class="pv-head-title">Verma Family – Portfolio statement Q2 FY27.pdf</div>
+        <div class="drawer-sub">v3 · 412 KB · 4 pages · Statements · <span class="text-success">Synced from MF Box</span></div>
+      </div>
+      <div class="ml-auto row gap-1">
+        <button class="btn btn-ghost btn-icon btn-sm" title="Star"><svg class="i star-on"><use href="#i-star"/></svg></button>
+        <button class="btn btn-ghost btn-icon btn-sm" title="Open full screen"><svg class="i"><use href="#i-external"/></svg></button>
+        <button class="btn btn-ghost btn-icon btn-sm" title="More"><svg class="i"><use href="#i-more-h"/></svg></button>
+        <button class="btn btn-ghost btn-icon" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button>
+      </div>
+    </div>
+    <div class="drawer-body">
+      <div class="pv">
+        <!-- left: mocked statement page -->
+        <div class="pv-left">
+          <div class="pv-stage">
+            <div class="paper-lg" aria-label="Statement page 1 preview">
+              <div class="pp-head">
+                <span class="pp-logo">SW</span>
+                <div><div class="pp-firm">Sharma Wealth Partners</div><div>ARN-104512</div></div>
+                <div class="pp-title"><b>Portfolio statement</b>As on 31 Oct 2026</div>
+              </div>
+              <div class="pp-inv">
+                <div><b>Rahul Verma</b>Family Head · Verma Family<br>PAN ABCPV••••K</div>
+                <div style="text-align:right">RM: Neha Kapoor<br>Andheri branch<br>+91 98••• ••210</div>
+              </div>
+              <div class="pp-sum">
+                <div>Invested<b>₹98.4 L</b></div>
+                <div>Current value<b>₹1.24 Cr</b></div>
+                <div>XIRR<b>13.8%</b></div>
+              </div>
+              <div class="pp-alloc"><span style="width:64.8%"></span><span style="width:24.1%"></span><span style="width:11.1%"></span></div>
+              <div class="pp-legend"><span><i style="background:var(--chart-1)"></i>Equity 64.8%</span><span><i style="background:var(--chart-2)"></i>Debt 24.1%</span><span><i style="background:var(--chart-4)"></i>Gold 11.1%</span></div>
+              <table class="pp-table">
+                <thead><tr><th>Scheme</th><th class="r">Value (₹)</th></tr></thead>
+                <tbody>
+                  <tr><td>Flexi Cap Fund – Direct Growth</td><td class="r">38,42,600</td></tr>
+                  <tr><td>Large &amp; Mid Cap Fund – Direct</td><td class="r">27,15,300</td></tr>
+                  <tr><td>Corporate Bond Fund – Direct</td><td class="r">21,36,900</td></tr>
+                  <tr><td>ELSS Tax Saver – Direct Growth</td><td class="r">14,80,200</td></tr>
+                  <tr><td>Gold ETF Fund of Fund</td><td class="r">13,79,500</td></tr>
+                  <tr><td>Liquid Fund – Direct Growth</td><td class="r">8,52,000</td></tr>
+                </tbody>
+                <tfoot><tr><td>Total</td><td class="r">1,24,06,500</td></tr></tfoot>
+              </table>
+              <div class="pp-foot"><span>Generated from MF Box · 14 Nov 2026</span><span>Page 1 of 4</span></div>
+              <div class="watermark" aria-hidden="true">
+                <span>Neha Kapoor · 14 Nov 2026 10:12 · Confidential</span>
+                <span>Neha Kapoor · 14 Nov 2026 10:12 · Confidential</span>
+                <span>Neha Kapoor · 14 Nov 2026 10:12 · Confidential</span>
+              </div>
+            </div>
+          </div>
+          <div class="pv-thumbs">
+            <span class="is-active"><i></i><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i><i></i></span><span><i></i><i></i></span>
+          </div>
+          <div class="pv-ctrl">
+            <button class="btn btn-ghost btn-icon btn-sm" aria-label="Previous page"><svg class="i"><use href="#i-chevron-left"/></svg></button>
+            <button class="btn btn-ghost btn-icon btn-sm" aria-label="Next page"><svg class="i"><use href="#i-chevron-right"/></svg></button>
+            <span class="pages">Page 1 / 4</span>
+            <button class="btn btn-ghost btn-sm">100%<svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+          </div>
+          <div class="pv-note"><svg class="i i-sm"><use href="#i-shield"/></svg><span>PAN and mobile are masked in previews and shared links. Downloads carry a watermark with your name and time.</span></div>
+        </div>
+
+        <!-- right: details -->
+        <div>
+          <div class="sec">
+            <div class="sec-title">Details</div>
+            <dl class="kv">
+              <dt>Category</dt><dd><span class="tag">Statements</span><span class="fn-sync">MF Box</span></dd>
+              <dt>Uploaded by</dt><dd><span class="avatar avatar-xs">NK</span>Neha Kapoor · 14 Nov, 09:58</dd>
+              <dt>Access</dt><dd><svg class="i i-sm faint"><use href="#i-lock"/></svg>RM + Ops only <a href="#" class="text-sm">Change</a></dd>
+              <dt>Expiry</dt><dd><span class="faint fw-500">No expiry</span></dd>
+              <dt>Retention</dt><dd>8 years (firm policy) · until Nov 2034</dd>
+              <dt>Tags</dt><dd><span class="tag">Q2 FY27</span><span class="tag">Portfolio review</span></dd>
+            </dl>
+          </div>
+
+          <div class="sec">
+            <div class="sec-title">Linked records<a href="#">+ Link</a></div>
+            <div class="recs">
+              <a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Rahul Verma · Family Head</span></a>
+              <a class="rec" href="08-client-360.html"><svg class="i"><use href="#i-user"/></svg><span>Anjali Verma</span></a>
+              <a class="rec rec-task" href="11-task-detail.html"><svg class="i"><use href="#i-check-square"/></svg><span>Portfolio review – Verma Family</span></a>
+              <a class="rec" href="14-meeting-detail.html"><svg class="i"><use href="#i-calendar"/></svg><span>Meeting · today, 14 Nov, 11:00</span></a>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-title">Version history<a href="#">Compare</a></div>
+            <div class="ver is-current">
+              <span class="ver-n">v3</span>
+              <div><div class="ver-t">Regenerated for today's review</div><div class="ver-m">Neha Kapoor · 14 Nov, 09:58 · 412 KB</div></div>
+              <span class="badge badge-dot badge-success">Current</span>
+            </div>
+            <div class="ver">
+              <span class="ver-n">v2</span>
+              <div><div class="ver-t">Added Anjali Verma's folios</div><div class="ver-m">Rohan Mehta · 12 Nov, 16:20 · 398 KB</div></div>
+              <button class="btn btn-ghost btn-sm" data-toast="v2 restored as v4. v3 is kept in history"><svg class="i i-sm"><use href="#i-undo"/></svg>Restore</button>
+            </div>
+            <div class="ver">
+              <span class="ver-n">v1</span>
+              <div><div class="ver-t">Generated from MF Box</div><div class="ver-m">System · 10 Nov, 07:00 · 371 KB</div></div>
+              <button class="btn btn-ghost btn-sm" data-toast="v1 restored as v4. v3 is kept in history"><svg class="i i-sm"><use href="#i-undo"/></svg>Restore</button>
+            </div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-title">Access log<a href="#">Export</a></div>
+            <div class="log">
+              <div class="log-row"><span class="lg-ic"><svg class="i"><use href="#i-eye"/></svg></span><span>Viewed by <b>Priya Nair</b></span><time>10:12</time></div>
+              <div class="log-row"><span class="lg-ic lg-ext"><svg class="i"><use href="#i-external"/></svg></span><span><b>Rahul Verma</b> opened shared link</span><time>10:07</time></div>
+              <div class="log-row"><span class="lg-ic"><svg class="i"><use href="#i-download"/></svg></span><span>Downloaded (watermarked) by <b>Neha Kapoor</b></span><time>10:05</time></div>
+              <div class="log-row"><span class="lg-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span>Link sent on WhatsApp · expires 21 Nov</span><time>10:01</time></div>
+              <div class="log-row"><span class="lg-ic"><svg class="i"><use href="#i-eye"/></svg></span><span>Viewed by <b>Rohan Mehta</b></span><time>Yest. 18:40</time></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <span class="faint text-sm row gap-1"><svg class="i i-sm"><use href="#i-shield"/></svg>Every view and download is logged</span>
+      <span class="spacer"></span>
+      <button class="btn btn-secondary" data-share><svg class="i"><use href="#i-link"/></svg>Share secure link</button>
+      <button class="btn btn-primary" data-dl><svg class="i"><use href="#i-download"/></svg>Download</button>
+    </div>
+  </aside>
+
+  <!-- ============ Request from client drawer ============ -->
+  <aside class="drawer" id="drawer-request" aria-label="Request documents from client">
+    <div class="drawer-header"><div><div class="drawer-title">Request documents from client</div><div class="drawer-sub">The client gets a secure upload link. No login needed.</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Client <span class="req">*</span></label>
+          <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" value="Suresh Iyer · BDKPI••••R · +91 97••• ••356"></label></div>
+        <div class="field span-2"><label class="label">Documents needed <span class="req">*</span></label>
+          <div class="choice-group">
+            <button class="choice" aria-pressed="true"><svg class="i i-sm"><use href="#i-check"/></svg>PAN card</button>
+            <button class="choice" aria-pressed="true"><svg class="i i-sm"><use href="#i-check"/></svg>Address proof</button>
+            <button class="choice" aria-pressed="false">Cancelled cheque</button>
+            <button class="choice" aria-pressed="false">Nominee form</button>
+            <button class="choice" aria-pressed="false">Bank statement</button>
+            <button class="choice" aria-pressed="false">FATCA declaration</button>
+          </div>
+          <div class="help">Files land in <b>Suresh Iyer › KYC &amp; identity</b> and a task is created for you when they arrive.</div>
+        </div>
+        <div class="field"><label class="label">Send via</label>
+          <div class="choice-group" data-single>
+            <button class="choice" aria-pressed="true"><svg class="i i-sm"><use href="#i-whatsapp"/></svg>WhatsApp</button>
+            <button class="choice" aria-pressed="false"><svg class="i i-sm"><use href="#i-mail"/></svg>Email</button>
+          </div></div>
+        <div class="field"><label class="label">Link expires</label><select class="select"><option>In 7 days (21 Nov)</option><option>In 3 days</option><option>In 14 days</option></select></div>
+        <div class="field span-2"><label class="label">Message preview</label>
+          <div class="wa-preview">
+            <div class="wa-bubble">Hi Suresh, your KYC is due for renewal on 02 Dec. Please upload your <b>PAN card</b> and <b>address proof</b> here: <span class="lnk">swp.mfbox.in/u/7KQ2xP</span><br>The link expires on 21 Nov. Thank you, Neha Kapoor, Sharma Wealth Partners</div>
+            <div class="wa-meta"><svg class="i"><use href="#i-whatsapp"/></svg>Approved WhatsApp template · auto-reminder after 3 days</div>
+          </div></div>
+      </div>
+      <div class="banner banner-info mt-4"><svg class="i"><use href="#i-shield"/></svg><span>We never ask for Aadhaar. If a client uploads one, the number is masked automatically before it is stored.</span></div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to send</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" id="btn-send-request"><svg class="i"><use href="#i-send"/></svg>Send request</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      // Full names as tooltips on truncated cells
+      document.querySelectorAll('.doc-name, .fname, .rec span, .fn-name').forEach(function (el) { el.title = el.textContent; });
+      if (new URLSearchParams(location.search).get('view') === 'grid') { document.querySelectorAll('[data-view-switch] button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-view') === 'grid' ? 'true' : 'false'); }); document.querySelectorAll('[data-tab-panel][data-tab-scope="view"]').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-tab-panel') === 'grid'); }); }
+      // Grid | List view switch
+      document.querySelectorAll('[data-view-switch] button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = b.getAttribute('data-view');
+          document.querySelectorAll('[data-tab-panel][data-tab-scope="view"]').forEach(function (p) { p.classList.toggle('is-active', p.getAttribute('data-tab-panel') === v); });
+        });
+      });
+      // Folder tree: select + expand
+      document.querySelectorAll('.fnode').forEach(function (n) {
+        n.addEventListener('click', function () {
+          var t = n.getAttribute('data-toggle');
+          if (t) { var c = document.getElementById(t); var open = n.getAttribute('aria-expanded') === 'true'; n.setAttribute('aria-expanded', open ? 'false' : 'true'); c.hidden = open; }
+          document.querySelectorAll('.fnode').forEach(function (x) { x.classList.remove('is-active'); });
+          n.classList.add('is-active');
+          var name = n.querySelector('.fn-name').textContent, cnt = n.querySelector('.fn-count');
+          document.querySelector('.dm-path').innerHTML = '<b>' + name + '</b><span>' + (cnt ? '· ' + cnt.textContent + ' files' : '') + '</span>';
+        });
+      });
+      // Multi-select chips in the request drawer
+      document.querySelectorAll('.choice-group:not([data-single]) .choice').forEach(function (c) {
+        c.addEventListener('click', function () { c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); });
+      });
+      // Row selection opens the preview
+      document.querySelectorAll('.dm-table tbody tr').forEach(function (tr) {
+        tr.addEventListener('click', function (e) {
+          if (e.target.closest('a, button, label')) return;
+          document.querySelectorAll('.dm-table tbody tr').forEach(function (x) { x.classList.remove('is-selected'); });
+          tr.classList.add('is-selected'); AK.openDrawer('drawer-preview');
+        });
+      });
+      // Actions
+      document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-dl]')) { e.stopPropagation(); AK.toast('Downloading with watermark “Neha Kapoor · 14 Nov 2026”', { icon: 'download', undo: false }); }
+        if (e.target.closest('[data-share]')) { e.stopPropagation(); AK.toast('Secure link copied · expires in 7 days · PAN masked', { icon: 'link', undo: false }); }
+        var t = e.target.closest('[data-toast]'); if (t) { e.preventDefault(); AK.toast(t.getAttribute('data-toast')); }
+        var f = e.target.closest('[data-filter]'); if (f) { e.preventDefault(); AK.toast(f.getAttribute('data-filter') === 'expiring' ? 'Showing 17 documents expiring in the next 30 days' : 'Showing 9 pending client upload requests', { icon: 'filter', undo: false }); }
+      });
+      var dz = document.getElementById('dropzone');
+      function pulse() { dz.classList.add('is-hot'); setTimeout(function () { dz.classList.remove('is-hot'); }, 1200); }
+      document.getElementById('btn-upload').addEventListener('click', function () { pulse(); AK.toast('Choose files to upload, or drop them on the page', { icon: 'upload', undo: false }); });
+      document.getElementById('dz-browse').addEventListener('click', function (e) { e.preventDefault(); pulse(); });
+      ['dragenter', 'dragover'].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('is-hot'); }); });
+      ['dragleave', 'drop'].forEach(function (ev) { document.addEventListener(ev, function (e) { e.preventDefault(); if (ev === 'dragleave' && e.relatedTarget) return; dz.classList.remove('is-hot'); if (ev === 'drop') { AK.toast('Uploading 1 file · scanning and masking Aadhaar numbers', { icon: 'upload', undo: false }); } }); });
+      document.getElementById('btn-send-request').addEventListener('click', function () { AK.closeDrawer('drawer-request'); AK.toast('Upload link sent to Suresh Iyer on WhatsApp'); });
+    })();
+  </script>
+</body>
+</html>

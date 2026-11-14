@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- 09 Tasks list: page-specific styles (tokens only) ---- */
+    .sync-note { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--text-3); margin-left: var(--sp-2); }
+    .page-sub b { color: var(--danger); font-weight: 600; }
+
+    /* Saved-view pills */
+    .views { display: flex; align-items: center; gap: 6px; margin: calc(var(--sp-1) * -1) 0 var(--sp-4); flex-wrap: wrap; }
+    .views-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin-right: var(--sp-1); }
+    .view-pill { height: 30px; padding: 0 12px; border-radius: var(--r-full); border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+    .view-pill:hover { border-color: var(--border-strong); color: var(--text); }
+    .view-pill.is-active { background: var(--primary-soft); border-color: transparent; color: var(--primary-text); font-weight: 600; }
+    .view-pill .n { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: var(--r-full); line-height: 16px; background: var(--surface-2); color: var(--text-3); }
+    .view-pill .n.is-danger { background: var(--danger-soft); color: var(--danger); }
+    .view-pill .i { width: 14px; height: 14px; }
+    .view-add { color: var(--text-3); border-style: dashed; }
+
+    /* Toolbar extras */
+    .switch-label { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; padding: 0 var(--sp-2); white-space: nowrap; }
+    .tb-divider { width: 1px; height: 24px; background: var(--border); margin: 0 2px; }
+    .btn .btn-meta { color: var(--text-3); font-weight: 500; }
+    .chips .chip-clear { font-size: 12px; font-weight: 500; align-self: center; margin-left: 2px; }
+
+    /* Popover panels */
+    .menu .check-item { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 10px; border-radius: 6px; font-size: 13.5px; color: var(--text); cursor: pointer; }
+    .menu .check-item:hover { background: var(--surface-2); }
+    .menu .check-item.is-locked { color: var(--text-3); cursor: default; }
+    .menu .check-item .i { margin-left: auto; color: var(--text-3); }
+    .menu-item .i-check { margin-left: auto; color: var(--primary); visibility: hidden; }
+    .menu-item.is-current .i-check { visibility: visible; }
+    .menu-item.is-current { font-weight: 600; }
+    .filter-panel { width: 340px; padding: 0; }
+    .filter-panel .fp-head { display: flex; align-items: center; padding: 12px 14px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+    .filter-panel .fp-body { padding: 14px; display: grid; gap: 12px; }
+    .filter-panel .fp-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 10px 14px; border-top: 1px solid var(--border); background: var(--surface-2); border-radius: 0 0 var(--r-md) var(--r-md); }
+    .filter-panel .select, .filter-panel .input { height: 32px; font-size: 13px; }
+    .pop-left { left: 0; right: auto; }
+    .status-pop { top: calc(100% + 4px); }
+    .status-pop .menu { min-width: 196px; }
+
+    /* Bulk bar */
+    .bulk-bar .bulk-count { font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+    .bulk-bar .bulk-sep { width: 1px; height: 20px; background: currentColor; opacity: .2; }
+    .bulk-bar .btn { height: 30px; padding: 0 10px; font-size: 13px; }
+    .bulk-bar .bulk-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .bulk-bar .bulk-link { color: inherit; opacity: .75; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; background: none; border: 0; padding: 0 8px; }
+
+    /* Task table */
+    .tt .person-name { overflow: visible; }
+    .tt th.c-check, .tt td.c-check { position: sticky; left: 0; width: 44px; min-width: 44px; max-width: 44px; padding-right: 0; }
+    .tt th.c-title, .tt td.c-title { position: sticky; left: 44px; min-width: 296px; max-width: 296px; box-shadow: inset -1px 0 0 var(--border); }
+    .tt th.c-act, .tt td.c-act { position: sticky; right: 0; width: 112px; min-width: 112px; text-align: right; }
+    .tt th.c-act, .tt td.c-act { box-shadow: inset 1px 0 0 var(--border); }
+    .tt th.c-check, .tt th.c-title, .tt th.c-act { z-index: 3; }
+    .tt td.c-check, .tt td.c-title, .tt td.c-act { z-index: 2; background: var(--surface); }
+    .tt tbody tr:hover td.c-check, .tt tbody tr:hover td.c-title, .tt tbody tr:hover td.c-act,
+    .tt tbody tr.is-hover td { background: var(--surface-2); }
+    .tt tbody tr.is-selected td.c-check, .tt tbody tr.is-selected td.c-title, .tt tbody tr.is-selected td.c-act {
+      background: linear-gradient(var(--primary-soft), var(--primary-soft)), var(--surface); }
+    .tt tbody tr.is-hover .row-actions { opacity: 1; }
+    .tt td.c-title .cell-title { display: block; overflow: hidden; text-overflow: ellipsis; max-width: 268px; color: var(--text); }
+    .tt td.c-title a.cell-title:hover { color: var(--primary-text); text-decoration: none; }
+    .tt td.c-title .cell-sub { display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; max-width: 268px; }
+    .tt td { height: 56px; }
+    .tt .cell-sub { margin-top: 1px; }
+    .tt .muted-cell { color: var(--text-2); }
+    .tt .done-title { color: var(--text-3) !important; text-decoration: line-through; }
+    .status-btn { border: 0; padding: 0; background: none; display: inline-flex; align-items: center; gap: 2px; border-radius: var(--r-full); }
+    .status-btn .badge { padding-right: 6px; }
+    .status-btn .badge .i { width: 12px; height: 12px; opacity: .7; }
+    .status-btn:hover .badge { box-shadow: inset 0 0 0 1px currentColor; }
+    .status-btn.is-open .badge { box-shadow: 0 0 0 3px var(--primary-soft-2); }
+    .for-cell { display: inline-flex; align-items: center; gap: 8px; }
+    .for-type { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border-radius: var(--r-sm); font-size: 11px; font-weight: 600; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); }
+    .for-type .i { width: 12px; height: 12px; }
+    .for-type.ft-lead { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+    .for-type.ft-family { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+    .for-cell a { color: var(--text); font-weight: 500; }
+    .for-cell a:hover { color: var(--primary-text); }
+    .bot-avatar .i { width: 12px; height: 12px; }
+    .cat-cell { color: var(--text-2); }
+    .tt .grp td { height: 36px; background: var(--surface-2); padding: 0; }
+    .tt .grp .grp-label { position: sticky; left: 0; display: inline-flex; align-items: center; gap: 8px; padding: 0 var(--sp-4); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-2); }
+    .tt .grp .grp-label .tab-count { font-size: 11px; background: var(--surface); border: 1px solid var(--border); color: var(--text-3); padding: 0 6px; border-radius: var(--r-full); letter-spacing: 0; line-height: 16px; }
+    .table-card { position: relative; }
+    .table-hint { font-size: var(--fs-sm); color: var(--text-3); display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Collaborations empty state */
+    .empty-card { padding: var(--sp-6) var(--sp-6) var(--sp-8); }
+    .empty-card .empty-title { font-size: var(--fs-lg); line-height: 28px; }
+    .empty-card .empty-text { max-width: 460px; font-size: 14px; }
+    .empty-steps.with-arrows { grid-template-columns: minmax(0,220px) 40px minmax(0,220px) 40px minmax(0,220px); gap: var(--sp-4); align-items: start; }
+    .step-arrow { color: var(--border-strong); display: grid; place-items: center; height: 56px; }
+    .step-arrow .i { width: 22px; height: 22px; }
+    .step-icon { width: 56px; height: 56px; border-radius: var(--r-lg); display: grid; place-items: center; background: var(--primary-soft); color: var(--primary-text); position: relative; margin-bottom: 6px; }
+    .step-icon .i { width: 24px; height: 24px; }
+    .step-icon .step-num { position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); font-size: 11px; font-weight: 700; display: grid; place-items: center; color: var(--text-2); }
+    .empty-step b { font-size: 14px; }
+    .empty-step span { font-size: 12.5px; line-height: 18px; }
+    .collab-foot { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); margin-top: var(--sp-4); font-size: 12.5px; color: var(--text-3); }
+
+    @media (max-width: 1280px) {
+      .toolbar .input-group { width: 264px; }
+    }
+    @media (max-width: 768px) {
+      .tt th.c-title, .tt td.c-title { min-width: 220px; max-width: 220px; }
+      .tt td.c-title .cell-title, .tt td.c-title .cell-sub { max-width: 196px; }
+      .empty-steps.with-arrows { grid-template-columns: 1fr; }
+      .step-arrow { transform: rotate(90deg); height: 28px; }
+      .bulk-bar { flex-wrap: wrap; }
+      .sync-note { display: none; }
+    }
+  </style>
+</head>
+<body data-page="tasks" data-crumb="Tasks">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- Page head -->
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Tasks</h1>
+            <p class="page-sub">Follow-ups for clients, families and leads · <b>5 overdue</b>
+              <span class="sync-note"><span class="dot dot-success"></span>Synced from MF Box · 10:42</span></p>
+          </div>
+          <div class="page-actions">
+            <a class="btn btn-secondary" href="20-settings.html"><svg class="i"><use href="#i-sliders"/></svg>Configurations</a>
+            <a class="btn btn-primary" href="10-task-create.html?open=drawer-task" title="Create task (C)"><svg class="i"><use href="#i-plus"/></svg>Create task</a>
+          </div>
+        </div>
+
+        <!-- Visibility tabs -->
+        <div class="tabs" data-tabs="vis" role="tablist">
+          <button class="tab" data-tab="list" data-scope="mine" role="tab">My Tasks <span class="count">12</span></button>
+          <button class="tab" data-tab="collab" role="tab">Collaborations <span class="count">3</span></button>
+          <button class="tab is-active" data-tab="list" data-scope="team" role="tab">My Team Tasks <span class="count">48</span></button>
+        </div>
+
+        <!-- ============ LIST PANEL (My Tasks / My Team Tasks) ============ -->
+        <section class="is-active" data-tab-panel="list" data-tab-scope="vis">
+
+          <!-- Saved views -->
+          <div class="views" id="views">
+            <span class="views-label">Views</span>
+            <button class="view-pill is-active" data-view="all">All open</button>
+            <button class="view-pill" data-view="overdue"><svg class="i"><use href="#i-clock"/></svg>Overdue <span class="n is-danger">5</span></button>
+            <button class="view-pill" data-view="week">Due this week</button>
+            <button class="view-pill" data-view="high">High priority</button>
+            <button class="view-pill" data-view="wait">Waiting on client</button>
+            <button class="view-pill view-add" onclick="AK.toast('Current filters, sort and columns saved as a new view', {undo:false, icon:'star'})"><svg class="i"><use href="#i-plus"/></svg>Save view</button>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" id="q" placeholder="Search by title, client, PAN or mobile" aria-label="Search tasks"></label>
+              <div class="popover-wrap">
+                <button class="btn btn-secondary" data-popover="pop-filter"><svg class="i"><use href="#i-filter"/></svg>Filters <span class="filter-count">2</span></button>
+                <div class="popover pop-left" id="pop-filter">
+                  <div class="menu filter-panel">
+                    <div class="fp-head">Filters<span class="ml-auto text-sm faint">2 active</span></div>
+                    <div class="fp-body">
+                      <div class="field"><label class="label">Assignee</label><select class="select"><option>My team (8 people)</option><option>Only me</option><option>Rohan Mehta</option><option>Sneha Iyer</option></select></div>
+                      <div class="field"><label class="label">Due date</label><select class="select"><option>On or before 30 Nov 2026</option><option>Overdue</option><option>This week</option><option>Any time</option></select></div>
+                      <div class="field"><label class="label">Status</label><select class="select"><option>Any open status</option><option>Pending</option><option>In progress</option><option>On hold</option></select></div>
+                      <div class="field"><label class="label">Category</label><select class="select"><option>All categories</option><option>Proposal: Investment Proposal</option><option>Transaction Proposal: SIP</option><option>Transaction Proposal: Redemption</option><option>KYC update</option><option>Nomination update</option><option>Portfolio review</option><option>Bank mandate</option><option>Complaint follow-up</option></select></div>
+                      <div class="field"><label class="label">Source</label><select class="select"><option>Any source</option><option>Manual</option><option>AI</option><option>MF Box auto</option><option>Workflow</option></select></div>
+                    </div>
+                    <div class="fp-foot"><button class="btn btn-ghost btn-sm">Clear all</button><button class="btn btn-primary btn-sm" onclick="document.getElementById('pop-filter').classList.remove('is-open')">Apply</button></div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-ghost" id="reset"><svg class="i"><use href="#i-x"/></svg>Reset</button>
+            </div>
+            <div class="toolbar-right">
+              <label class="switch-label"><span class="switch"><input type="checkbox" id="show-done"><span></span></span>Show done tasks</label>
+              <span class="tb-divider"></span>
+              <div class="popover-wrap">
+                <button class="btn btn-secondary" data-popover="pop-group"><svg class="i"><use href="#i-layers"/></svg>Group by <span class="btn-meta" id="group-label">None</span><svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+                <div class="popover" id="pop-group">
+                  <div class="menu">
+                    <div class="menu-label">Group rows by</div>
+                    <button class="menu-item is-current" data-group="none">None<svg class="i i-check"><use href="#i-check"/></svg></button>
+                    <button class="menu-item" data-group="status">Status<svg class="i i-check"><use href="#i-check"/></svg></button>
+                    <button class="menu-item" data-group="assignee">Assignee<svg class="i i-check"><use href="#i-check"/></svg></button>
+                    <button class="menu-item" data-group="due">Due date<svg class="i i-check"><use href="#i-check"/></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div class="popover-wrap">
+                <button class="btn btn-secondary" data-popover="pop-cols"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+                <div class="popover" id="pop-cols">
+                  <div class="menu" id="col-menu" style="min-width:220px">
+                    <div class="menu-label">Show columns</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active filter chips -->
+          <div class="chips">
+            <span class="chip">Assignee: <b>My team (8)</b><button class="chip-remove" aria-label="Remove filter"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <span class="chip">Due date: <b>on or before 30 Nov 2026</b><button class="chip-remove" aria-label="Remove filter"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <a href="#" class="chip-clear">Clear all</a>
+          </div>
+
+          <!-- Bulk bar -->
+          <div class="bulk-bar" id="bulk">
+            <span class="bulk-count"><svg class="i"><use href="#i-check-square"/></svg><span id="bulk-n">2</span> selected</span>
+            <span class="bulk-sep"></span>
+            <button class="btn btn-ghost" data-bulk="Marked as done"><svg class="i"><use href="#i-check"/></svg>Mark done</button>
+            <button class="btn btn-ghost" data-bulk="Reassigned to Sneha Iyer"><svg class="i"><use href="#i-user"/></svg>Reassign</button>
+            <button class="btn btn-ghost" data-bulk="Due date moved to 16 Nov 2026"><svg class="i"><use href="#i-calendar"/></svg>Change due date</button>
+            <button class="btn btn-ghost" data-bulk="Deleted"><svg class="i"><use href="#i-trash"/></svg>Delete</button>
+            <div class="bulk-right">
+              <button class="bulk-link" onclick="AK.toast('All 48 team tasks selected', {undo:false})">Select all 48</button>
+              <button class="btn btn-ghost btn-icon btn-sm" id="bulk-clear" title="Clear selection"><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table tt" id="tt">
+                <thead><tr>
+                  <th class="c-check"><label class="check"><input type="checkbox" id="check-all" aria-label="Select all"></label></th>
+                  <th class="c-title" data-col="title"><span class="th-sort">Title</span></th>
+                  <th data-col="status"><span class="th-sort">Status</span></th>
+                  <th data-col="priority"><span class="th-sort">Priority</span></th>
+                  <th data-col="due"><span class="th-sort is-asc">Due date</span></th>
+                  <th data-col="age" class="num"><span class="th-sort">Age (days)</span></th>
+                  <th data-col="last"><span class="th-sort">Last acted on</span></th>
+                  <th data-col="by">Created by</th>
+                  <th data-col="for">Created for</th>
+                  <th data-col="fh">Family head</th>
+                  <th data-col="source">Source</th>
+                  <th data-col="category">Category</th>
+                  <th data-col="assignee">Assignee</th>
+                  <th class="c-act"><span class="sr-only" style="position:absolute;left:-9999px">Actions</span></th>
+                </tr></thead>
+                <tbody id="tbody"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <select class="select" aria-label="Rows per page"><option>12</option><option>25</option><option>50</option></select>
+              <span>rows · <b class="tnum" id="pg-range" style="color:var(--text);font-weight:600">1–12</b> of <span id="pg-total">48</span></span>
+              <span class="table-hint" style="margin-left:var(--sp-4)"><svg class="i i-sm"><use href="#i-info"/></svg>Scroll sideways for more columns · Title and actions stay pinned</span>
+              <div class="pg-btns">
+                <button class="pg-btn" aria-label="First page"><svg class="i"><use href="#i-chevrons-left"/></svg></button>
+                <button class="pg-btn" aria-label="Previous page"><svg class="i"><use href="#i-chevron-left"/></svg></button>
+                <button class="pg-btn is-active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><button class="pg-btn">4</button>
+                <button class="pg-btn" aria-label="Next page"><svg class="i"><use href="#i-chevron-right"/></svg></button>
+                <button class="pg-btn" aria-label="Last page"><svg class="i"><use href="#i-chevrons-right"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shared floating menus (moved into the clicked cell by script) -->
+          <div class="popover status-pop pop-left" id="pop-status">
+            <div class="menu">
+              <div class="menu-label">Change status</div>
+              <button class="menu-item" data-set-status="pending"><span class="dot dot-warning"></span>Pending<svg class="i i-check"><use href="#i-check"/></svg><span class="menu-hint" style="margin-left:6px">1</span></button>
+              <button class="menu-item" data-set-status="progress"><span class="dot"></span>In progress<svg class="i i-check"><use href="#i-check"/></svg><span class="menu-hint" style="margin-left:6px">2</span></button>
+              <button class="menu-item" data-set-status="hold"><span class="dot dot-neutral"></span>On hold<svg class="i i-check"><use href="#i-check"/></svg><span class="menu-hint" style="margin-left:6px">3</span></button>
+              <button class="menu-item" data-set-status="done"><span class="dot dot-success"></span>Done<svg class="i i-check"><use href="#i-check"/></svg><span class="menu-hint" style="margin-left:6px">4</span></button>
+            </div>
+          </div>
+          <div class="popover" id="pop-row">
+            <div class="menu">
+              <a class="menu-item" href="11-task-detail.html"><svg class="i"><use href="#i-eye"/></svg>Open task</a>
+              <button class="menu-item" data-row-act="Activity logged on task"><svg class="i"><use href="#i-activity"/></svg>Log activity</button>
+              <button class="menu-item" data-row-act="Task duplicated"><svg class="i"><use href="#i-copy"/></svg>Duplicate</button>
+              <button class="menu-item" data-row-act="Reassigned to Rohan Mehta"><svg class="i"><use href="#i-user"/></svg>Reassign</button>
+              <button class="menu-item" data-row-act="Link copied" ><svg class="i"><use href="#i-link"/></svg>Copy link</button>
+              <div class="menu-sep"></div>
+              <button class="menu-item is-danger" data-row-act="Task deleted"><svg class="i"><use href="#i-trash"/></svg>Delete</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ COLLABORATIONS PANEL (friendly empty state) ============ -->
+        <section data-tab-panel="collab" data-tab-scope="vis">
+          <div class="card empty-card">
+            <div class="row" style="justify-content:center;margin-bottom:var(--sp-4)"><span class="wire-note"><svg class="i i-sm"><use href="#i-info"/></svg>Empty-state preview · your 3 collaborations are all done</span></div>
+            <div class="empty" style="padding:var(--sp-4) 0 0">
+              <div class="empty-title">Manage collaborations here</div>
+              <div class="empty-text">Tasks where a teammate adds you as a collaborator show up here. Comment, attach files and follow progress without owning the task.</div>
+              <div class="empty-steps with-arrows">
+                <div class="empty-step">
+                  <div class="step-icon"><svg class="i"><use href="#i-file"/></svg><span class="step-num">1</span></div>
+                  <b>Create a task</b>
+                  <span>Add a title, due date and assignee from the <a href="10-task-create.html?open=drawer-task">create drawer</a>.</span>
+                </div>
+                <div class="step-arrow"><svg class="i"><use href="#i-arrow-right"/></svg></div>
+                <div class="empty-step">
+                  <div class="step-icon"><svg class="i"><use href="#i-user-plus"/></svg><span class="step-num">2</span></div>
+                  <b>Assign &amp; collaborate</b>
+                  <span>Add collaborators so everyone knows what is next. They get an in-app and WhatsApp nudge.</span>
+                </div>
+                <div class="step-arrow"><svg class="i"><use href="#i-arrow-right"/></svg></div>
+                <div class="empty-step">
+                  <div class="step-icon"><svg class="i"><use href="#i-check-square"/></svg><span class="step-num">3</span></div>
+                  <b>Track progress</b>
+                  <span>Tasks show up here. Work through them until they are done; every change is logged.</span>
+                </div>
+              </div>
+              <div class="row gap-2">
+                <a class="btn btn-primary" href="10-task-create.html?open=drawer-task"><svg class="i"><use href="#i-plus"/></svg>Create task</a>
+                <button class="btn btn-secondary" id="collab-done"><svg class="i"><use href="#i-eye"/></svg>Show done tasks</button>
+              </div>
+              <div class="collab-foot"><svg class="i i-sm"><use href="#i-play"/></svg><a href="#" data-ak="tutorial">Watch the 60-second tutorial</a><span>·</span><span>Press <span class="kbd">C</span> to create a task from anywhere</span></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var PEOPLE = {
+      NK: ['Neha Kapoor', ''], RM: ['Rohan Mehta', 'a2'], SI: ['Sneha Iyer', 'a3'], AG: ['Aman Gupta', 'a4'],
+      VR: ['Vikram Rao', 'a5'], PN: ['Priya Nair', 'a4'], AD: ['Arjun Desai', 'a2'], KM: ['Kavya Menon', 'a3'],
+      IS: ['Imran Sheikh', 'a5'], BOT: ['Automation', 'a5']
+    };
+    var STATUS = { pending: ['Pending', 'badge-warning'], progress: ['In progress', 'badge-info'], hold: ['On hold', 'badge-neutral'], done: ['Done', 'badge-success'] };
+    var PRIO = { high: ['High', 'prio-high'], med: ['Medium', 'prio-med'], low: ['Low', 'prio-low'] };
+    var FOR = { client: ['Client', 'user', '08-client-360.html', ''], family: ['Family head', 'users', '08-client-360.html', 'ft-family'], lead: ['Lead', 'user-plus', '05-lead-create.html', 'ft-lead'] };
+    var SRC = {
+      manual: '<span class="badge badge-neutral"><svg class="i"><use href="#i-edit"/></svg>Manual</span>',
+      ai: '<span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI</span>',
+      mfbox: '<span class="badge badge-neutral"><svg class="i"><use href="#i-refresh"/></svg>MF Box auto</span>',
+      workflow: '<span class="badge badge-neutral"><svg class="i"><use href="#i-workflow"/></svg>Workflow</span>'
+    };
+
+    // Sorted by due date (ascending). dk: over | today | week | later | done
+    var T = [
+      { t: 'Redemption request – Anjali Verma', cat: 'Transaction Proposal: Redemption', st: 'hold', pr: 'med', due: '10 Nov 2026', dk: 'over', ds: '4 days overdue', age: 15, last: '03 Nov 2026', ls: 'Waiting on client', by: 'RM', ft: 'client', fn: 'Anjali Verma', fh: 'Rahul Verma', src: 'manual', as: 'RM', wait: 1 },
+      { t: 'Nomination update – Meera Joshi', cat: 'Nomination update', st: 'pending', pr: 'med', due: '11 Nov 2026', dk: 'over', ds: '3 days overdue', age: 12, last: '06 Nov 2026', ls: 'Email · form sent', by: 'NK', ft: 'client', fn: 'Meera Joshi', fh: 'Meera Joshi', src: 'manual', as: 'SI', sel: 1 },
+      { t: 'KYC update – Suresh Iyer', cat: 'KYC update', st: 'pending', pr: 'high', due: '12 Nov 2026', dk: 'over', ds: '2 days overdue', age: 9, last: '10 Nov 2026', ls: 'Call · no answer', by: 'NK', ft: 'client', fn: 'Suresh Iyer', fh: 'Suresh Iyer', src: 'mfbox', as: 'PN' },
+      { t: 'Lumpsum proposal from FD maturity – Farhan Qureshi', cat: 'Proposal: Investment Proposal', st: 'progress', pr: 'high', due: '13 Nov 2026', dk: 'over', ds: '1 day overdue', age: 6, last: '14 Nov 2026', ls: 'WhatsApp · today', by: 'RM', ft: 'client', fn: 'Farhan Qureshi', fh: 'Farhan Qureshi', src: 'ai', as: 'RM', sel: 1 },
+      { t: 'Bank mandate renewal – Deepak Agarwal', cat: 'Bank mandate', st: 'pending', pr: 'med', due: '13 Nov 2026', dk: 'over', ds: '1 day overdue', age: 8, last: '09 Nov 2026', ls: 'Email sent', by: 'BOT', ft: 'client', fn: 'Deepak Agarwal', fh: 'Deepak Agarwal', src: 'mfbox', as: 'PN' },
+      { t: 'Quarterly portfolio review – Verma Family', cat: 'Portfolio review', st: 'progress', pr: 'high', due: '14 Nov 2026', dk: 'today', ds: 'Today, 11:00 AM', age: 4, last: '14 Nov 2026', ls: 'Meeting held · outcome pending', by: 'BOT', ft: 'family', fn: 'Rahul Verma', fh: 'Rahul Verma', src: 'workflow', as: 'NK', pop: 1 },
+      { t: 'Call back – Karan Malhotra (₹5,00,000 SIP)', cat: 'Transaction Proposal: SIP', st: 'pending', pr: 'high', due: '14 Nov 2026', dk: 'today', ds: 'Today, 3:30 PM', age: 2, last: '14 Nov 2026', ls: 'Call · interested', by: 'SI', ft: 'lead', fn: 'Karan Malhotra', fh: '', src: 'manual', as: 'NK' },
+      { t: 'SIP top-up proposal – Suresh Iyer', cat: 'Transaction Proposal: SIP', st: 'progress', pr: 'high', due: '16 Nov 2026', dk: 'week', ds: 'in 2 days', age: 5, last: '14 Nov 2026', ls: 'MF Box · SIP registered', by: 'VR', ft: 'client', fn: 'Suresh Iyer', fh: 'Suresh Iyer', src: 'manual', as: 'NK' },
+      { t: 'Inactive client check-in – Pooja Bansal', cat: 'Portfolio review', st: 'pending', pr: 'low', due: '16 Nov 2026', dk: 'week', ds: 'in 2 days', age: 1, last: '', ls: 'Not acted yet', by: 'BOT', ft: 'client', fn: 'Pooja Bansal', fh: 'Pooja Bansal', src: 'ai', as: 'KM' },
+      { t: 'Dividend not credited – Lakshmi Narayanan', cat: 'Complaint follow-up', st: 'progress', pr: 'high', due: '17 Nov 2026', dk: 'week', ds: 'in 3 days', age: 3, last: '13 Nov 2026', ls: 'RTA ticket raised', by: 'AD', ft: 'client', fn: 'Lakshmi Narayanan', fh: 'Lakshmi Narayanan', src: 'manual', as: 'AD', hover: 1 },
+      { t: 'Term insurance quote – Ritu Saxena', cat: 'Proposal: Investment Proposal', st: 'hold', pr: 'med', due: '18 Nov 2026', dk: 'week', ds: 'in 4 days', age: 5, last: '11 Nov 2026', ls: 'Waiting on client', by: 'IS', ft: 'lead', fn: 'Ritu Saxena', fh: '', src: 'manual', as: 'IS', wait: 1 },
+      { t: 'SIP registration – Sameer Khan', cat: 'Transaction Proposal: SIP', st: 'pending', pr: 'med', due: '19 Nov 2026', dk: 'week', ds: 'in 5 days', age: 1, last: '13 Nov 2026', ls: 'Website lead assigned', by: 'BOT', ft: 'lead', fn: 'Sameer Khan', fh: '', src: 'workflow', as: 'SI' },
+      { t: 'Nomination update – Rahul Verma', cat: 'Nomination update', st: 'done', pr: 'low', due: '12 Nov 2026', dk: 'done', ds: 'Done on 12 Nov', age: 5, last: '12 Nov 2026', ls: 'Marked done', by: 'NK', ft: 'client', fn: 'Rahul Verma', fh: 'Rahul Verma', src: 'manual', as: 'SI', done: 1 },
+      { t: 'Address change – Lakshmi Narayanan', cat: 'KYC update', st: 'done', pr: 'low', due: '13 Nov 2026', dk: 'done', ds: 'Done on 13 Nov', age: 7, last: '13 Nov 2026', ls: 'Marked done', by: 'RM', ft: 'client', fn: 'Lakshmi Narayanan', fh: 'Lakshmi Narayanan', src: 'manual', as: 'PN', done: 1 }
+    ];
+
+    function ini(k) { return k === 'BOT' ? '<svg class="i"><use href="#i-zap"/></svg>' : k; }
+    function person(k, size) {
+      var p = PEOPLE[k];
+      return '<span class="person"><span class="avatar ' + (size || 'avatar-sm') + ' ' + p[1] + (k === 'BOT' ? ' bot-avatar' : '') + '">' + ini(k) + '</span><span class="person-name' + (k === 'BOT' ? ' muted' : '') + '">' + p[0] + '</span></span>';
+    }
+    function initials(name) { return name.split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2); }
+    function statusBtn(st) {
+      var s = STATUS[st];
+      return '<span class="popover-wrap"><button class="status-btn" title="Change status"><span class="badge badge-dot ' + s[1] + '">' + s[0] + '<svg class="i"><use href="#i-chevron-down"/></svg></span></button></span>';
+    }
+    function dueCell(r) {
+      if (r.dk === 'over') return '<span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>' + r.due + '</span><div class="cell-sub" style="color:var(--danger)">' + r.ds + '</div>';
+      if (r.dk === 'today') return '<span class="due-today"><svg class="i i-sm"><use href="#i-clock"/></svg>' + r.due + '</span><div class="cell-sub">' + r.ds + '</div>';
+      return '<span class="tnum">' + r.due + '</span><div class="cell-sub">' + r.ds + '</div>';
+    }
+    function row(r, i) {
+      var f = FOR[r.ft];
+      var mine = (r.as === 'NK' || r.by === 'NK') ? 1 : 0;
+      return '<tr data-i="' + i + '" data-st="' + r.st + '" data-dk="' + r.dk + '" data-pr="' + r.pr + '" data-as="' + r.as + '" data-mine="' + mine + '"' +
+        (r.wait ? ' data-wait="1"' : '') + (r.done ? ' data-done="1"' : '') + ' class="' + (r.sel ? 'is-selected ' : '') + (r.hover ? 'is-hover' : '') + '">' +
+        '<td class="c-check"><label class="check"><input type="checkbox"' + (r.sel ? ' checked' : '') + ' aria-label="Select task"></label></td>' +
+        '<td class="c-title"><a class="cell-title' + (r.done ? ' done-title' : '') + '" href="11-task-detail.html" title="' + r.t + '">' + r.t + '</a><div class="cell-sub"><svg class="i i-sm"><use href="#i-tag"/></svg>' + r.cat + '</div></td>' +
+        '<td>' + statusBtn(r.st) + '</td>' +
+        '<td><span class="prio ' + PRIO[r.pr][1] + '">' + PRIO[r.pr][0] + '</span></td>' +
+        '<td>' + dueCell(r) + '</td>' +
+        '<td class="num">' + (r.age > 7 && !r.done ? '<span class="age-hot">' + r.age + '</span>' : r.age) + '</td>' +
+        '<td>' + (r.last ? '<span class="tnum">' + r.last + '</span>' : '<span class="faint">—</span>') + '<div class="cell-sub">' + r.ls + '</div></td>' +
+        '<td>' + person(r.by, 'avatar-xs') + '</td>' +
+        '<td><span class="for-cell"><span class="for-type ' + f[3] + '"><svg class="i"><use href="#i-' + f[1] + '"/></svg>' + f[0] + '</span><a href="' + f[2] + '">' + r.fn + '</a></span></td>' +
+        '<td>' + (r.fh ? '<span class="person"><span class="avatar avatar-xs a5">' + initials(r.fh) + '</span><span class="muted-cell">' + r.fh + '</span></span>' : '<span class="faint">—</span>') + '</td>' +
+        '<td>' + SRC[r.src] + '</td>' +
+        '<td class="cat-cell">' + r.cat + '</td>' +
+        '<td>' + person(r.as) + '</td>' +
+        '<td class="c-act"><span class="row-actions">' +
+          '<a class="btn btn-ghost btn-icon btn-sm" href="11-task-detail.html" title="View"><svg class="i"><use href="#i-eye"/></svg></a>' +
+          '<a class="btn btn-ghost btn-icon btn-sm" href="10-task-create.html?open=drawer-task" title="Edit"><svg class="i"><use href="#i-edit"/></svg></a>' +
+          '<span class="popover-wrap"><button class="btn btn-ghost btn-icon btn-sm row-more" title="More"><svg class="i"><use href="#i-more-h"/></svg></button></span>' +
+        '</span></td></tr>';
+    }
+
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = T.map(row).join('');
+    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+
+    /* ---- Status popover (one shared menu, moved into the clicked cell) ---- */
+    var popStatus = document.getElementById('pop-status');
+    var popRow = document.getElementById('pop-row');
+    var currentRow = null;
+    function markCurrent(st) {
+      popStatus.querySelectorAll('[data-set-status]').forEach(function (b) { b.classList.toggle('is-current', b.getAttribute('data-set-status') === st); });
+    }
+    function openStatus(btn) {
+      var wrap = btn.parentNode, tr = btn.closest('tr');
+      document.querySelectorAll('.status-btn.is-open').forEach(function (b) { b.classList.remove('is-open'); });
+      var reopen = !(popStatus.parentNode === wrap && popStatus.classList.contains('is-open'));
+      wrap.appendChild(popStatus);
+      popStatus.classList.toggle('is-open', reopen);
+      btn.classList.toggle('is-open', reopen);
+      currentRow = tr; markCurrent(tr.getAttribute('data-st'));
+    }
+    tbody.addEventListener('click', function (e) {
+      var sb = e.target.closest('.status-btn');
+      if (sb) { e.stopPropagation(); popRow.classList.remove('is-open'); openStatus(sb); return; }
+      var rm = e.target.closest('.row-more');
+      if (rm) {
+        e.stopPropagation(); popStatus.classList.remove('is-open');
+        var again = !(popRow.parentNode === rm.parentNode && popRow.classList.contains('is-open'));
+        rm.parentNode.appendChild(popRow); popRow.classList.toggle('is-open', again);
+        return;
+      }
+      var cb = e.target.closest('input[type=checkbox]');
+      if (cb) { cb.closest('tr').classList.toggle('is-selected', cb.checked); syncBulk(); }
+    });
+    popStatus.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-set-status]'); if (!b || !currentRow) return;
+      var st = b.getAttribute('data-set-status'), s = STATUS[st];
+      currentRow.setAttribute('data-st', st);
+      var badge = currentRow.querySelector('.status-btn .badge');
+      badge.className = 'badge badge-dot ' + s[1];
+      badge.firstChild.nodeValue = s[0];
+      popStatus.classList.remove('is-open');
+      currentRow.querySelector('.status-btn').classList.remove('is-open');
+      AK.toast('Status changed to <b>' + s[0] + '</b> · logged in activity');
+    });
+    popRow.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-row-act]'); if (!b) return;
+      popRow.classList.remove('is-open'); AK.toast(b.getAttribute('data-row-act'));
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.popover')) document.querySelectorAll('.status-btn.is-open').forEach(function (b) { b.classList.remove('is-open'); });
+    });
+    // Close row-level menus when the table scrolls sideways (they would float over pinned columns)
+    document.querySelector('.table-card .table-wrap').addEventListener('scroll', function () {
+      popStatus.classList.remove('is-open'); popRow.classList.remove('is-open');
+      document.querySelectorAll('.status-btn.is-open').forEach(function (b) { b.classList.remove('is-open'); });
+    }, { passive: true });
+    // Wireframe state: show the inline status menu open on the Verma Family row
+    var popTr = tbody.querySelector('tr[data-i="5"]');
+    if (popTr) openStatus(popTr.querySelector('.status-btn'));
+
+    /* ---- Bulk selection ---- */
+    var bulk = document.getElementById('bulk'), checkAll = document.getElementById('check-all');
+    function syncBulk() {
+      var n = tbody.querySelectorAll('tr:not(.hidden) td.c-check input:checked').length;
+      document.getElementById('bulk-n').textContent = n;
+      bulk.classList.toggle('hidden', n === 0);
+      var vis = tbody.querySelectorAll('tr:not(.hidden):not(.grp) td.c-check input').length;
+      checkAll.checked = n > 0 && n === vis; checkAll.indeterminate = n > 0 && n < vis;
+    }
+    checkAll.addEventListener('change', function () {
+      rows.forEach(function (r) { if (r.classList.contains('hidden')) return; var c = r.querySelector('td.c-check input'); c.checked = checkAll.checked; r.classList.toggle('is-selected', checkAll.checked); });
+      syncBulk();
+    });
+    function clearSel() { rows.forEach(function (r) { r.querySelector('td.c-check input').checked = false; r.classList.remove('is-selected'); }); syncBulk(); }
+    document.getElementById('bulk-clear').addEventListener('click', clearSel);
+    bulk.querySelectorAll('[data-bulk]').forEach(function (b) {
+      b.addEventListener('click', function () { var n = document.getElementById('bulk-n').textContent; AK.toast(b.getAttribute('data-bulk') + ' · ' + n + ' tasks'); clearSel(); });
+    });
+
+    /* ---- Filtering: tab scope + saved view + search + show done ---- */
+    var scope = 'team', view = 'all';
+    var showDone = document.getElementById('show-done'), q = document.getElementById('q');
+    var PRED = {
+      all: function () { return true; },
+      overdue: function (r) { return r.getAttribute('data-dk') === 'over'; },
+      week: function (r) { var d = r.getAttribute('data-dk'); return d === 'today' || d === 'week'; },
+      high: function (r) { return r.getAttribute('data-pr') === 'high'; },
+      wait: function (r) { return r.hasAttribute('data-wait'); }
+    };
+    function apply() {
+      var term = q.value.trim().toLowerCase(), shown = 0;
+      rows.forEach(function (r) {
+        var ok = PRED[view](r) && (showDone.checked || !r.hasAttribute('data-done')) && (scope === 'team' || r.getAttribute('data-mine') === '1') &&
+          (!term || r.textContent.toLowerCase().indexOf(term) > -1);
+        r.classList.toggle('hidden', !ok); if (ok) shown++;
+      });
+      document.getElementById('pg-range').textContent = shown ? '1–' + shown : '0';
+      var total = scope === 'team' ? 48 : 12;
+      document.getElementById('pg-total').textContent = (view === 'all' && !term) ? total : shown;
+      regroup(); syncBulk();
+    }
+    document.querySelectorAll('#views [data-view]').forEach(function (p) {
+      p.addEventListener('click', function () {
+        view = p.getAttribute('data-view');
+        document.querySelectorAll('#views [data-view]').forEach(function (x) { x.classList.toggle('is-active', x === p); });
+        apply();
+      });
+    });
+    showDone.addEventListener('change', apply);
+    q.addEventListener('input', apply);
+    document.getElementById('reset').addEventListener('click', function () {
+      q.value = ''; showDone.checked = false; view = 'all';
+      document.querySelectorAll('#views [data-view]').forEach(function (x) { x.classList.toggle('is-active', x.getAttribute('data-view') === 'all'); });
+      setGroup('none'); apply();
+    });
+    document.querySelectorAll('[data-tabs="vis"] .tab').forEach(function (t) {
+      t.addEventListener('click', function () { var s = t.getAttribute('data-scope'); if (s) { scope = s; apply(); } });
+    });
+    document.getElementById('collab-done').addEventListener('click', function () {
+      AK.toast('Showing 3 done collaborations', { undo: false, icon: 'eye' });
+    });
+
+    /* ---- Group by ---- */
+    var group = 'none';
+    var GROUPS = {
+      status: { key: function (r) { return r.getAttribute('data-st'); }, order: ['pending', 'progress', 'hold', 'done'], label: function (k) { return STATUS[k][0]; } },
+      assignee: { key: function (r) { return r.getAttribute('data-as'); }, order: Object.keys(PEOPLE), label: function (k) { return PEOPLE[k][0]; } },
+      due: { key: function (r) { return r.getAttribute('data-dk'); }, order: ['over', 'today', 'week', 'later', 'done'], label: function (k) { return { over: 'Overdue', today: 'Due today', week: 'Due this week', later: 'Later', done: 'Done' }[k]; } }
+    };
+    function regroup() {
+      tbody.querySelectorAll('tr.grp').forEach(function (g) { g.remove(); });
+      if (group === 'none') {
+        rows.forEach(function (r) { if (!r.classList.contains('hidden')) tbody.appendChild(r); });
+        rows.forEach(function (r) { if (r.classList.contains('hidden')) tbody.appendChild(r); });
+        return;
+      }
+      var G = GROUPS[group];
+      G.order.forEach(function (k) {
+        var members = rows.filter(function (r) { return G.key(r) === k; });
+        var vis = members.filter(function (r) { return !r.classList.contains('hidden'); }).length;
+        if (!vis) { members.forEach(function (r) { tbody.appendChild(r); }); return; }
+        var h = document.createElement('tr'); h.className = 'grp';
+        h.innerHTML = '<td colspan="14"><span class="grp-label">' + G.label(k) + ' <span class="tab-count">' + vis + '</span></span></td>';
+        tbody.appendChild(h);
+        members.forEach(function (r) { tbody.appendChild(r); });
+      });
+    }
+    function setGroup(g) {
+      group = g;
+      document.querySelectorAll('[data-group]').forEach(function (b) { b.classList.toggle('is-current', b.getAttribute('data-group') === g); });
+      document.getElementById('group-label').textContent = { none: 'None', status: 'Status', assignee: 'Assignee', due: 'Due date' }[g];
+      document.getElementById('pop-group').classList.remove('is-open');
+      regroup();
+    }
+    document.querySelectorAll('[data-group]').forEach(function (b) { b.addEventListener('click', function () { setGroup(b.getAttribute('data-group')); }); });
+
+    /* ---- Column chooser ---- */
+    var ths = Array.prototype.slice.call(document.querySelectorAll('#tt thead th'));
+    var colMenu = document.getElementById('col-menu');
+    ths.forEach(function (th, idx) {
+      var key = th.getAttribute('data-col'); if (!key) return;
+      var locked = key === 'title';
+      var lab = document.createElement('label');
+      lab.className = 'check-item' + (locked ? ' is-locked' : '');
+      lab.innerHTML = '<span class="check"><input type="checkbox" checked' + (locked ? ' disabled' : '') + '></span>' + th.textContent.trim() + (locked ? '<svg class="i i-sm"><use href="#i-lock"/></svg>' : '');
+      colMenu.appendChild(lab);
+      lab.querySelector('input').addEventListener('change', function (e) {
+        var show = e.target.checked;
+        th.style.display = show ? '' : 'none';
+        rows.forEach(function (r) { r.children[idx].style.display = show ? '' : 'none'; });
+      });
+    });
+    colMenu.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    /* ---- Keyboard: C = create task ---- */
+    document.addEventListener('keydown', function (e) {
+      var typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+      if (!typing && !e.ctrlKey && !e.metaKey && (e.key === 'c' || e.key === 'C')) location.href = '10-task-create.html?open=drawer-task';
+    });
+
+    apply();
+    syncBulk();
+
+    /* ---- Deep links for review: ?tab=collab|mine · ?scrollx=1 · ?group=status ---- */
+    var P = new URLSearchParams(location.search);
+    if (P.get('tab')) { var tb = document.querySelector('[data-tabs="vis"] .tab[' + (P.get('tab') === 'collab' ? 'data-tab="collab"' : 'data-scope="' + P.get('tab') + '"') + ']'); if (tb) setTimeout(function () { tb.click(); }, 40); }
+    if (P.get('group')) setGroup(P.get('group'));
+    if (P.get('scrollx')) window.addEventListener('load', function () { setTimeout(function () { var w = document.querySelector('.table-card .table-wrap'); w.scrollLeft = P.get('scrollx') === '1' ? w.scrollWidth : +P.get('scrollx'); }, 300); });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Client 360 · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Client 360: page-specific styles (tokens only) ---- */
+    .c360-head { padding: var(--sp-5) var(--sp-6) 0; }
+    .c360-top { display: flex; align-items: flex-start; gap: var(--sp-5); flex-wrap: wrap; }
+    .c360-id { display: flex; gap: var(--sp-4); align-items: flex-start; flex: 1 1 580px; min-width: 0; }
+    .c360-name { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.01em; margin: 0; }
+    .c360-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .c360-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: 8px; color: var(--text-2); font-size: 13px; }
+    .c360-meta span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .c360-meta .i { color: var(--text-3); width: 14px; height: 14px; }
+    .c360-contact { display: flex; gap: var(--sp-2); align-items: center; flex-wrap: wrap; margin-top: 12px; }
+    .c360-actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; margin-left: auto; }
+    .c360-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; margin: var(--sp-4) calc(-1 * var(--sp-6)) 0; padding: 10px var(--sp-6); border-top: 1px solid var(--border); background: var(--surface-2); border-radius: 0 0 var(--r-lg) var(--r-lg); font-size: 13px; color: var(--text-2); }
+    .c360-strip b { color: var(--text); font-weight: 600; }
+    .c360-strip .sep { width: 1px; height: 14px; background: var(--border-strong); }
+    .sync-note { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); }
+    .sync-note .i { width: 14px; height: 14px; color: var(--success); }
+
+    .stat-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-3); margin: var(--sp-4) 0 var(--sp-5); }
+    .stat .stat-value small { font-size: 14px; font-weight: 600; color: var(--text-3); margin-left: 2px; letter-spacing: 0; }
+    .src-tag { font-size: 11px; font-weight: 600; color: var(--text-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; line-height: 16px; margin-left: auto; }
+
+    .tl-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tl-head .tl-text { flex: 1; min-width: 0; }
+    .tl-when { font-size: 12px; color: var(--text-3); white-space: nowrap; margin-left: auto; }
+    .tl-attach { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 12.5px; color: var(--text-2); background: var(--surface); }
+    .tl-mfbox { margin-top: 8px; display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 24px; font-size: 12.5px; color: var(--text-2); padding: 8px 12px; background: var(--surface-2); border: 1px dashed var(--border-strong); border-radius: var(--r-md); }
+    .tl-mfbox b { display: block; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .tl-lock { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 10px 12px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); font-size: 13px; }
+
+    .mini-list .list-row { padding: 12px var(--sp-5); gap: 12px; }
+    .mini-list .list-row:hover { background: var(--surface-2); }
+    .mini-title { font-weight: 500; color: var(--text); font-size: 13.5px; }
+    .mini-title a { color: inherit; }
+    .mini-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .mini-right { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
+
+    .fam-bar { display: flex; height: 8px; border-radius: 6px; overflow: hidden; gap: 2px; margin: 4px 0 4px; }
+    .fam-bar span { display: block; height: 100%; }
+    .fam-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .fam-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .fam-sw { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+    .fam-row .num { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; font-size: 13.5px; text-align: right; }
+    .fam-row .num span { display: block; font-size: 11.5px; color: var(--text-3); font-weight: 500; }
+    .fam-row.is-current { background: var(--primary-soft); margin: 0 calc(-1 * var(--sp-3)); padding-left: var(--sp-3); padding-right: var(--sp-3); border-radius: var(--r-md); border-bottom-color: transparent; }
+
+    .cov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .cov-cell { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); }
+    .cov-cell .k { font-size: 12px; color: var(--text-3); }
+    .cov-cell .v { font-size: 13.5px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+    .hs-top { display: flex; align-items: center; gap: 14px; }
+    .hs-ring { --v: 82; width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(var(--success) calc(var(--v) * 1%), var(--surface-3) 0); display: grid; place-items: center; position: relative; flex: none; }
+    .hs-ring::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--surface); }
+    .hs-ring b { position: relative; z-index: 1; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .hs-factors { margin-top: 14px; display: flex; flex-direction: column; }
+    .hs-f { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 13px; color: var(--text-2); border-top: 1px solid var(--border); }
+    .hs-f .pts { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+    .hs-f .pts.plus { color: var(--success); }
+    .hs-f .pts.minus { color: var(--danger); }
+    .hs-f .pts.base { color: var(--text-3); }
+    .hs-f .i { width: 14px; height: 14px; flex: none; }
+
+    .ai-card { background: var(--ai-soft); border-color: transparent; }
+    .ai-card .card-header { border-bottom-color: color-mix(in srgb, var(--ai) 18%, transparent); }
+    .ai-card .card-header { flex-wrap: wrap; row-gap: 6px; }
+    .ai-card .card-title { color: var(--text); white-space: nowrap; }
+    .stat-meta { flex-wrap: wrap; }
+    .ai-item { background: var(--surface); border: 1px solid color-mix(in srgb, var(--ai) 22%, transparent); border-radius: var(--r-md); padding: 12px; }
+    .ai-item + .ai-item { margin-top: 10px; }
+    .ai-item-title { font-weight: 600; font-size: 13.5px; color: var(--text); line-height: 19px; }
+    .ai-item-why { font-size: 12.5px; color: var(--text-2); margin-top: 4px; line-height: 18px; }
+    .ai-item-act { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+    .ai-foot { font-size: 11.5px; color: var(--ai); display: flex; align-items: center; gap: 6px; margin-top: 12px; font-weight: 500; }
+    .btn-ai { background: var(--ai); color: var(--surface); border-color: transparent; }
+    .btn-ai:hover { filter: brightness(1.08); }
+
+    .kv { grid-template-columns: 112px 1fr; font-size: 13px; }
+    .sip-table td { height: 48px; }
+    .sip-table th { position: static; }
+    .kv dd .faint { font-weight: 400; }
+    .sec-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+
+    .new-menu { min-width: 220px; }
+    .tab-pane-head { display: flex; align-items: center; gap: var(--sp-3); margin-bottom: var(--sp-3); flex-wrap: wrap; }
+    .tab-pane-head .sec-title { font-size: 15px; font-weight: 600; }
+    .row-done td { color: var(--text-3); }
+    .row-done .cell-title { color: var(--text-2); text-decoration: line-through; text-decoration-color: var(--border-strong); }
+    .total-row td { background: var(--surface-2); font-weight: 600; }
+    .score { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ai); font-variant-numeric: tabular-nums; }
+    .doc-ic { width: 32px; height: 32px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); flex: none; }
+
+    @media (max-width: 1280px) {
+      .stat-row { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-2); }
+      .stat { padding: var(--sp-3); }
+      .stat-value { font-size: 22px; }
+      .sync-extra { display: none; }
+    }
+    @media (max-width: 1100px) { .stat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } .c360-actions { margin-left: 0; } }
+    @media (max-width: 768px) {
+      .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .c360-head { padding: var(--sp-4) var(--sp-4) 0; }
+      .c360-strip { margin: var(--sp-4) calc(-1 * var(--sp-4)) 0; padding: 10px var(--sp-4); }
+      .tl-mfbox { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body data-page="clients" data-crumb="Clients|Rahul Verma">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- ================= Header card ================= -->
+        <section class="card c360-head" aria-label="Client summary">
+          <div class="c360-top">
+            <div class="c360-id">
+              <span class="avatar avatar-xl">RV</span>
+              <div style="min-width:0">
+                <div class="row gap-3 wrap">
+                  <h1 class="c360-name">Rahul Verma</h1>
+                  <div class="c360-badges">
+                    <span class="badge badge-neutral"><svg class="i"><use href="#i-users"/></svg>Family head</span>
+                    <span class="badge badge-info badge-square">Tier A</span>
+                    <span class="badge badge-dot badge-success">Healthy · 82</span>
+                  </div>
+                </div>
+                <div class="c360-meta">
+                  <span><svg class="i"><use href="#i-key"/></svg><span class="mono">ABCPV••••K</span></span>
+                  <span><svg class="i"><use href="#i-phone"/></svg><span class="tnum">+91 98••• ••210</span></span>
+                  <span><svg class="i"><use href="#i-mail"/></svg>rahul.v••••@gmail.com</span>
+                  <span><svg class="i"><use href="#i-map-pin"/></svg>Mumbai</span>
+                </div>
+                <div class="c360-contact">
+                  <button class="btn btn-secondary btn-sm" onclick="AK.toast('Calling +91 98••• ••210 via click-to-call')"><svg class="i"><use href="#i-phone"/></svg>Call</button>
+                  <a class="btn btn-secondary btn-sm" href="15-inbox-whatsapp.html"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</a>
+                  <button class="btn btn-secondary btn-sm" onclick="AK.toast('Email composer opened')"><svg class="i"><use href="#i-mail"/></svg>Email</button>
+                  <span class="faint text-sm">Prefers WhatsApp · evenings</span>
+                </div>
+              </div>
+            </div>
+            <div class="c360-actions">
+              <button class="btn btn-secondary" data-open-drawer="drawer-log"><svg class="i"><use href="#i-activity"/></svg>Log activity</button>
+              <div class="popover-wrap">
+                <button class="btn btn-secondary" data-popover="pop-new"><svg class="i"><use href="#i-plus"/></svg>New<svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+                <div class="popover" id="pop-new">
+                  <div class="menu new-menu">
+                    <div class="menu-label">Create for Rahul Verma</div>
+                    <a class="menu-item" href="10-task-create.html"><svg class="i"><use href="#i-check-square"/></svg>Task<span class="menu-hint">T</span></a>
+                    <a class="menu-item" href="13-meetings.html"><svg class="i"><use href="#i-calendar"/></svg>Meeting<span class="menu-hint">M</span></a>
+                    <a class="menu-item" href="12-opportunities.html"><svg class="i"><use href="#i-target"/></svg>Opportunity<span class="menu-hint">O</span></a>
+                    <a class="menu-item" href="16-service-requests.html"><svg class="i"><use href="#i-life-buoy"/></svg>Service request<span class="menu-hint">S</span></a>
+                    <div class="menu-sep"></div>
+                    <button class="menu-item" onclick="AK.toast('Confidential note: visible to named people only')"><svg class="i"><use href="#i-lock"/></svg>Confidential note</button>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-primary" data-open-drawer="drawer-review"><svg class="i"><use href="#i-calendar"/></svg>Schedule review</button>
+              <button class="btn btn-ghost btn-icon" title="More" aria-label="More actions"><svg class="i"><use href="#i-more-h"/></svg></button>
+            </div>
+          </div>
+          <div class="c360-strip">
+            <span>Primary RM: <b>Neha Kapoor</b></span>
+            <span class="sep"></span>
+            <span>Sub-broker: <b>none</b></span>
+            <span class="sep"></span>
+            <span>Branch: <b>Andheri</b></span>
+            <span class="sep"></span>
+            <span>Client since <b>Jun 2014</b></span>
+            <span class="sync-note ml-auto"><svg class="i"><use href="#i-refresh"/></svg>Synced from MF Box · 10:42 <span class="faint sync-extra">· AUM, SIPs, transactions read-only</span></span>
+          </div>
+        </section>
+
+        <!-- ================= Stat tiles ================= -->
+        <div class="stat-row">
+          <div class="stat stat-info">
+            <div class="stat-label">AUM <span class="src-tag">MF Box</span></div>
+            <div class="stat-value">₹1.24 Cr</div>
+            <div class="stat-meta"><span class="delta-up row gap-1"><svg class="i i-sm"><use href="#i-trending-up"/></svg>14.2%</span> in 12 months</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Monthly SIP <span class="src-tag">MF Box</span></div>
+            <div class="stat-value">₹45,000</div>
+            <div class="stat-meta">6 active · next debit 20 Nov</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Family AUM</div>
+            <div class="stat-value">₹1.86 Cr</div>
+            <div class="stat-meta">Verma Family · 3 members</div>
+          </div>
+          <div class="stat stat-success">
+            <div class="stat-label">Last contacted</div>
+            <div class="stat-value">Today</div>
+            <div class="stat-meta">Review meeting · 11:00 AM · Neha</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Next review due</div>
+            <div class="stat-value">~14 Feb <small>2027</small></div>
+            <div class="stat-meta">Quarterly · today's review done</div>
+          </div>
+        </div>
+
+        <!-- ================= Tabs ================= -->
+        <div class="tabs" data-tabs="c360" role="tablist">
+          <button class="tab is-active" data-tab="overview">Overview</button>
+          <button class="tab" data-tab="activity">Activity <span class="count">50</span></button>
+          <button class="tab" data-tab="tasks">Tasks <span class="count">3</span></button>
+          <button class="tab" data-tab="opps">Opportunities <span class="count">2</span></button>
+          <button class="tab" data-tab="meetings">Meetings</button>
+          <button class="tab" data-tab="service">Service requests <span class="count">2</span></button>
+          <button class="tab" data-tab="docs">Documents</button>
+          <button class="tab" data-tab="family">Family <span class="count">3</span></button>
+        </div>
+
+        <!-- ================= OVERVIEW ================= -->
+        <div data-tab-panel="overview" data-tab-scope="c360" class="is-active">
+          <div class="split">
+            <!-- LEFT -->
+            <div class="stack">
+              <section class="card">
+                <div class="card-header">
+                  <div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-activity"/></svg></span>Interactions</div>
+                  <div class="card-actions">
+                    <div class="segmented" data-segmented>
+                      <button aria-pressed="true">All</button>
+                      <button>Calls</button>
+                      <button>Meetings</button>
+                      <button>WhatsApp</button>
+                      <button>MF Box</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="timeline">
+                    <div class="tl-item">
+                      <div class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>WhatsApp</b> sent by <b>Neha Kapoor</b> · statement asked for in the review</div><span class="tl-when">Today · 12:20 PM</span></div>
+                        <span class="tl-attach"><svg class="i i-sm"><use href="#i-paperclip"/></svg>Capital_Gains_FY2026-27_YTD_RVerma.pdf</span>
+                      </div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot is-warning"><svg class="i"><use href="#i-users"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>Visit / meeting</b>: <a href="14-meeting-detail.html">Portfolio review – Verma Family</a> with Rahul &amp; Anjali <span class="badge badge-dot badge-warning">Outcome pending</span></div><span class="tl-when">Today · 11:00 AM</span></div>
+                        <div class="tl-meta">Andheri office · 45 min · SIP top-up from Dec, Anjali's nomination form, capital-gains statement</div>
+                      </div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot is-success"><svg class="i"><use href="#i-check"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>Task done</b>: <a href="11-task-detail.html">Portfolio review prep – Verma Family</a> by <b>Neha Kapoor</b></div><span class="tl-when">13 Nov 2026 · 5:40 PM</span></div>
+                        <div class="tl-meta">Portfolio review · prep pack drafted from MF Box data</div>
+                      </div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot is-primary"><svg class="i"><use href="#i-repeat"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>New SIP registered</b> <span class="badge badge-neutral"><svg class="i"><use href="#i-refresh"/></svg>Auto · MF Box</span></div><span class="tl-when">10 Nov 2026 · 11:02 AM</span></div>
+                        <div class="tl-mfbox">
+                          <div>Scheme<b>Flexi Cap Fund – Direct Growth</b></div>
+                          <div>Amount<b>₹10,000 / month</b></div>
+                          <div>First debit<b>20 Nov 2026</b></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot is-primary"><svg class="i"><use href="#i-phone"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>Call</b> · outgoing · 12 min by <b>Neha Kapoor</b> <span class="badge badge-dot badge-warning">Follow-up</span></div><span class="tl-when">08 Nov 2026 · 6:40 PM</span></div>
+                        <div class="tl-comment">Confirmed the new ₹10,000 SIP. FD of ₹25 L matures on 2 Dec; Rahul wants to talk about it at the review. He also asked for a term cover quote for Anjali.</div>
+                      </div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>WhatsApp</b> sent by <b>Sneha Iyer</b> · client replied “Thanks, received”</div><span class="tl-when">05 Nov 2026 · 10:15 AM</span></div>
+                        <span class="tl-attach"><svg class="i i-sm"><use href="#i-paperclip"/></svg>SIP registration form – Flexi Cap.pdf</span>
+                      </div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot"><svg class="i"><use href="#i-arrow-down"/></svg></div>
+                      <div class="tl-body">
+                        <div class="tl-head"><div class="tl-text"><b>Redemption</b> ₹3,00,000 · Liquid fund <span class="badge badge-neutral"><svg class="i"><use href="#i-refresh"/></svg>Auto · MF Box</span></div><span class="tl-when">22 Oct 2026</span></div>
+                        <div class="tl-meta">Reason logged by RM: home renovation · health score −6</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <span class="faint text-sm row gap-1"><svg class="i i-sm"><use href="#i-lock"/></svg>Append-only trail · edits are kept as versions</span>
+                  <button class="btn btn-ghost btn-sm ml-auto" onclick="document.querySelector('[data-tab=activity]').click()">View all 50 activities<svg class="i i-sm"><use href="#i-arrow-right"/></svg></button>
+                </div>
+              </section>
+
+              <div class="grid-2">
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title">Open tasks <span class="badge badge-neutral">3</span></div>
+                    <div class="card-actions"><a class="btn btn-ghost btn-sm" href="10-task-create.html"><svg class="i"><use href="#i-plus"/></svg>Add</a></div>
+                  </div>
+                  <ul class="list-plain mini-list">
+                    <li class="list-row">
+                      <div style="min-width:0"><div class="mini-title truncate"><a href="11-task-detail.html">Bank mandate renewal – HDFC ••4410</a></div><div class="mini-sub"><span class="person"><span class="avatar avatar-xs a2">PN</span>Priya Nair</span></div></div>
+                      <div class="mini-right"><span class="badge badge-dot badge-warning">Pending</span><span class="overdue text-sm"><svg class="i i-sm"><use href="#i-clock"/></svg>13 Nov</span></div>
+                    </li>
+                    <li class="list-row">
+                      <div style="min-width:0"><div class="mini-title truncate"><a href="11-task-detail.html">SIP top-up proposal – Rahul Verma</a></div><div class="mini-sub"><span class="person"><span class="avatar avatar-xs">NK</span>Neha Kapoor</span></div></div>
+                      <div class="mini-right"><span class="badge badge-dot badge-info">In progress</span><span class="faint text-sm">Due 18 Nov</span></div>
+                    </li>
+                    <li class="list-row">
+                      <div style="min-width:0"><div class="mini-title truncate"><a href="11-task-detail.html">Portfolio review – Verma Family</a></div><div class="mini-sub"><span class="person"><span class="avatar avatar-xs">NK</span>Neha Kapoor</span></div></div>
+                      <div class="mini-right"><span class="badge badge-dot badge-info">In progress</span><span class="due-today text-sm">Due today</span></div>
+                    </li>
+                  </ul>
+                </section>
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title">Open opportunities <span class="badge badge-neutral">2</span></div>
+                    <div class="card-actions"><a class="btn btn-ghost btn-sm" href="12-opportunities.html"><svg class="i"><use href="#i-plus"/></svg>Add</a></div>
+                  </div>
+                  <ul class="list-plain mini-list">
+                    <li class="list-row">
+                      <div style="min-width:0"><div class="mini-title truncate"><a href="12-opportunities.html">SIP top-up</a></div><div class="mini-sub">MF-SIP · ₹10,000 → ₹15,000 from Dec</div></div>
+                      <div class="mini-right"><span class="fw-600 tnum">₹5,000/mo</span><span class="badge badge-dot badge-neutral">Requirements gathered</span></div>
+                    </li>
+                    <li class="list-row">
+                      <div style="min-width:0"><div class="mini-title truncate"><a href="12-opportunities.html">Term insurance – Anjali</a></div><div class="mini-sub"><span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI · 71</span>₹1 Cr cover</div></div>
+                      <div class="mini-right"><span class="fw-600 tnum">₹14,200/yr</span><span class="badge badge-dot badge-info">New</span></div>
+                    </li>
+                  </ul>
+                  <div class="card-footer"><span class="faint text-sm">Pipeline value</span><span class="ml-auto fw-600 tnum text-md">₹74,200 / yr</span></div>
+                </section>
+              </div>
+              <div class="grid-2">
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-repeat"/></svg></span>Active SIPs <span class="badge badge-neutral">6</span></div>
+                    <span class="sync-note ml-auto text-sm"><svg class="i"><use href="#i-refresh"/></svg>MF Box · 10:42</span>
+                  </div>
+                  <div class="card-body flush">
+                    <table class="table sip-table">
+                      <thead><tr><th>Scheme</th><th class="num">Amount</th><th>Date</th></tr></thead>
+                      <tbody>
+                        <tr><td><div class="cell-title">Flexi Cap Fund</div><div class="cell-sub">Equity · since Nov 2026</div></td><td class="num">₹10,000</td><td>20th</td></tr>
+                        <tr><td><div class="cell-title">Large Cap Fund</div><div class="cell-sub">Equity · since 2016</div></td><td class="num">₹10,000</td><td>5th</td></tr>
+                        <tr><td><div class="cell-title">Mid Cap Opportunities</div><div class="cell-sub">Equity · since 2019</div></td><td class="num">₹8,000</td><td>10th</td></tr>
+                        <tr><td><div class="cell-title">ELSS Tax Saver</div><div class="cell-sub">Equity · since 2015</div></td><td class="num">₹7,000</td><td>5th</td></tr>
+                        <tr><td><div class="cell-title">Balanced Advantage</div><div class="cell-sub">Hybrid · since 2021</div></td><td class="num">₹5,000</td><td>15th</td></tr>
+                        <tr><td><div class="cell-title">Short Duration Fund</div><div class="cell-sub">Debt · since 2022</div></td><td class="num">₹5,000</td><td>25th</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="card-footer"><span class="faint text-sm">0 bounces in 12 months</span><span class="ml-auto fw-600 tnum text-md">₹45,000 / mo</span></div>
+                </section>
+                <section class="card">
+                  <div class="card-header">
+                    <div class="card-title">Key details</div>
+                    <button class="btn btn-ghost btn-icon btn-sm ml-auto" title="Edit CRM fields" aria-label="Edit"><svg class="i"><use href="#i-edit"/></svg></button>
+                  </div>
+                  <div class="card-body">
+                    <dl class="kv">
+                      <dt>MF Box ID</dt><dd class="mono">MFB-0045821</dd>
+                      <dt>Date of birth</dt><dd>14 Mar 1979 <span class="faint">(47)</span></dd>
+                      <dt>Occupation</dt><dd>Senior Manager, private sector</dd>
+                      <dt>Tax status</dt><dd>Resident individual</dd>
+                      <dt>Risk profile</dt><dd>Moderately aggressive <div class="faint text-sm">Updated 21 Oct 2026</div></dd>
+                      <dt>KYC</dt><dd><span class="badge badge-dot badge-success">Verified (KRA)</span></dd>
+                      <dt>Nomination</dt><dd><span class="badge badge-dot badge-success">Complete · 9/9 folios</span></dd>
+                      <dt>Bank</dt><dd>HDFC Bank ••4410 <div class="text-sm text-warning">Mandate expiring</div></dd>
+                      <dt>Source</dt><dd>Referral · <a href="08-client-360.html">Suresh Iyer</a></dd>
+                      <dt>Language</dt><dd>Hindi, English</dd>
+                      <dt>Tags</dt><dd class="row gap-1 wrap"><span class="tag">HNI</span><span class="tag">Salaried</span><span class="tag">FD investor</span></dd>
+                    </dl>
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="stack">
+              <section class="card ai-card">
+                <div class="card-header">
+                  <div class="card-title"><span class="card-icon ci-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>AI suggestions</div>
+                  <span class="badge badge-ai ml-auto"><svg class="i"><use href="#i-lock"/></svg>Internal – not advice</span>
+                </div>
+                <div class="card-body" id="ai-list">
+                  <div class="ai-item">
+                    <div class="ai-item-title">FD of ₹25 L matures 2 Dec: consider a lumpsum discussion</div>
+                    <div class="ai-item-why">From the 08 Nov call note. Not covered in today's review; maturity is 18 days away.</div>
+                    <div class="ai-item-act">
+                      <a class="btn btn-sm btn-ai" href="12-opportunities.html"><svg class="i"><use href="#i-target"/></svg>Create opportunity</a>
+                      <button class="btn btn-sm btn-ghost" data-dismiss>Dismiss</button>
+                    </div>
+                  </div>
+                  <div class="ai-item">
+                    <div class="ai-item-title">Research signal: a held large-cap fund slipped to Q3 quartile</div>
+                    <div class="ai-item-why">AdvisorKhoj research · Rahul holds ₹18.4 L in it. Add to the review pack for discussion.</div>
+                    <div class="ai-item-act">
+                      <button class="btn btn-sm btn-secondary" onclick="AK.toast('Added to the next review pack')"><svg class="i"><use href="#i-file"/></svg>Add to review pack</button>
+                      <button class="btn btn-sm btn-ghost" data-dismiss>Dismiss</button>
+                    </div>
+                  </div>
+                  <div class="ai-foot"><svg class="i i-sm"><use href="#i-info"/></svg>AI drafts, a human approves. Never sent to the client automatically.</div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header">
+                  <div class="card-title">Family · Verma Family</div>
+                  <a class="btn btn-ghost btn-sm ml-auto" href="#" onclick="document.querySelector('[data-tab=family]').click();return false">View</a>
+                </div>
+                <div class="card-body">
+                  <div class="row"><span class="sec-label">Family AUM</span><span class="ml-auto fw-700 tnum">₹1.86 Cr</span></div>
+                  <div class="fam-bar" aria-hidden="true">
+                    <span style="width:66.7%;background:var(--chart-1)"></span>
+                    <span style="width:26.1%;background:var(--chart-2)"></span>
+                    <span style="width:7.2%;background:var(--chart-4)"></span>
+                  </div>
+                  <div class="mt-2">
+                    <div class="fam-row is-current"><span class="fam-sw" style="background:var(--chart-1)"></span><span class="avatar avatar-sm">RV</span><div><div class="fw-600 text-md">Rahul Verma</div><div class="faint text-sm">Self · Family head</div></div><div class="num">₹1.24 Cr<span>6 SIPs</span></div></div>
+                    <div class="fam-row"><span class="fam-sw" style="background:var(--chart-2)"></span><span class="avatar avatar-sm a2">AV</span><div><div class="fw-500 text-md">Anjali Verma</div><div class="faint text-sm">Spouse · Tier B</div></div><div class="num">₹48.6 L<span>1 SIP</span></div></div>
+                    <div class="fam-row"><span class="fam-sw" style="background:var(--chart-4)"></span><span class="avatar avatar-sm a4">AV</span><div><div class="fw-500 text-md">Aarav Verma</div><div class="faint text-sm">Son · Minor (14)</div></div><div class="num">₹13.4 L<span>1 SIP</span></div></div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header">
+                  <div class="card-title">Coverage</div>
+                  <span class="badge badge-dot badge-success ml-auto">On track</span>
+                </div>
+                <div class="card-body">
+                  <div class="row text-md"><span class="muted">Contacts this quarter (Oct–Dec)</span><span class="ml-auto fw-600 tnum">2 / 3</span></div>
+                  <div class="progress mt-2"><span style="width:67%"></span></div>
+                  <div class="faint text-sm mt-2">Tier A promise: monthly contact, quarterly review. Next contact by 14 Dec.</div>
+                  <div class="cov-grid">
+                    <div class="cov-cell"><div class="k">Review frequency</div><div class="v">Quarterly</div></div>
+                    <div class="cov-cell"><div class="k">Last review</div><div class="v">Today, 14 Nov</div></div>
+                    <div class="cov-cell"><div class="k">Next review</div><div class="v">~14 Feb 2027</div></div>
+                    <div class="cov-cell"><div class="k">Review outcome</div><div class="v text-warning">Pending</div></div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header">
+                  <div class="card-title">Health score</div>
+                  <span class="faint text-sm ml-auto">Updated today 06:00</span>
+                </div>
+                <div class="card-body">
+                  <div class="hs-top">
+                    <div class="hs-ring" style="--v:82"><b>82</b></div>
+                    <div>
+                      <span class="badge badge-dot badge-success">Healthy</span>
+                      <div class="text-md muted mt-1"><span class="delta-up fw-600">+4</span> since 1 Oct · family avg 79</div>
+                      <div class="faint text-sm">Explainable: every point has a reason</div>
+                    </div>
+                  </div>
+                  <div class="hs-factors">
+                    <div class="hs-f"><svg class="i faint"><use href="#i-layers"/></svg>Base score<span class="pts base">60</span></div>
+                    <div class="hs-f"><svg class="i text-success"><use href="#i-repeat"/></svg>6 SIPs running, no bounce in 12 months<span class="pts plus">+12</span></div>
+                    <div class="hs-f"><svg class="i text-success"><use href="#i-phone"/></svg>Contacted today at the review (decays after 30 days)<span class="pts plus">+8</span></div>
+                    <div class="hs-f"><svg class="i text-success"><use href="#i-shield"/></svg>KYC and nomination complete<span class="pts plus">+6</span></div>
+                    <div class="hs-f"><svg class="i text-success"><use href="#i-trending-up"/></svg>AUM up 14.2% in 12 months<span class="pts plus">+6</span></div>
+                    <div class="hs-f"><svg class="i text-danger"><use href="#i-arrow-down"/></svg>Redemption ₹3,00,000 on 22 Oct<span class="pts minus">−6</span></div>
+                    <div class="hs-f"><svg class="i text-danger"><use href="#i-life-buoy"/></svg>1 open service request<span class="pts minus">−4</span></div>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= ACTIVITY ================= -->
+        <div data-tab-panel="activity" data-tab-scope="c360">
+          <div class="split">
+            <section class="card">
+              <div class="card-header">
+                <div class="card-title">Comments &amp; activities</div>
+                <div class="card-actions">
+                  <div class="segmented" data-segmented>
+                    <button aria-pressed="true">All</button><button>Calls</button><button>Meetings</button><button>WhatsApp</button><button>Email</button><button>MF Box</button><button>Notes</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="composer mb-5">
+                  <textarea placeholder="Add a note or @mention a teammate…  (logs to Rahul Verma)"></textarea>
+                  <div class="composer-bar">
+                    <button class="btn btn-ghost btn-icon btn-sm" title="Attach" aria-label="Attach"><svg class="i"><use href="#i-paperclip"/></svg></button>
+                    <button class="btn btn-ghost btn-icon btn-sm" title="Mention" aria-label="Mention"><svg class="i"><use href="#i-at"/></svg></button>
+                    <label class="check text-sm muted" style="margin-left:6px"><input type="checkbox"> Confidential (named people only)</label>
+                    <button class="btn btn-primary btn-sm ml-auto" onclick="AK.toast('Note added to Rahul Verma')">Add note</button>
+                  </div>
+                </div>
+                <div class="timeline">
+                  <div class="tl-item"><div class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>WhatsApp</b> sent by <b>Neha Kapoor</b> · capital-gains statement FY 2026-27 (year to date)</div><span class="tl-when">Today · 12:20 PM</span></div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-warning"><svg class="i"><use href="#i-users"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Visit / meeting</b>: Portfolio review – Verma Family <span class="badge badge-dot badge-warning">Outcome pending</span></div><span class="tl-when">Today · 11:00 AM</span></div><div class="tl-meta">Attendees: Rahul, Anjali, Neha Kapoor · Andheri office · AI summary awaiting approval</div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-ai"><svg class="i"><use href="#i-life-buoy"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Service request</b> SR-2026-0149 created from email <span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI classified</span></div><span class="tl-when">Today · 9:05 AM</span></div><div class="tl-meta">Address change (“Shifted to Powai”) · waiting in the triage queue</div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-success"><svg class="i"><use href="#i-check"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Task done</b>: Portfolio review prep – Verma Family by <b>Neha Kapoor</b></div><span class="tl-when">13 Nov 2026 · 5:40 PM</span></div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-primary"><svg class="i"><use href="#i-repeat"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>New SIP registered</b> ₹10,000/month · Flexi Cap Fund <span class="badge badge-neutral"><svg class="i"><use href="#i-refresh"/></svg>Auto · MF Box</span></div><span class="tl-when">10 Nov 2026 · 11:02 AM</span></div></div></div>
+                  <div class="tl-item"><div class="tl-dot"><svg class="i"><use href="#i-lock"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Confidential note</b> by <b>Neha Kapoor</b></div><span class="tl-when">08 Nov 2026 · 6:52 PM</span></div><div class="tl-lock"><svg class="i i-sm"><use href="#i-eye"/></svg>Visible only to Neha Kapoor and Rajesh Sharma. You can see it because you are named.</div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-primary"><svg class="i"><use href="#i-phone"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Call</b> · outgoing · 12 min by <b>Neha Kapoor</b> <span class="badge badge-dot badge-warning">Follow-up</span></div><span class="tl-when">08 Nov 2026 · 6:40 PM</span></div><div class="tl-comment">Confirmed the new ₹10,000 SIP. FD of ₹25 L matures on 2 Dec; Rahul wants to talk about it at the review. He also asked for a term cover quote for Anjali.</div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>WhatsApp</b> sent by <b>Sneha Iyer</b> · SIP registration form</div><span class="tl-when">05 Nov 2026 · 10:15 AM</span></div></div></div>
+                  <div class="tl-item"><div class="tl-dot"><svg class="i"><use href="#i-arrow-down"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Redemption</b> ₹3,00,000 · Liquid fund <span class="badge badge-neutral"><svg class="i"><use href="#i-refresh"/></svg>Auto · MF Box</span></div><span class="tl-when">22 Oct 2026</span></div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-primary"><svg class="i"><use href="#i-users"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Visit / meeting</b>: Home visit – insurance needs <span class="badge badge-dot badge-success">Completed</span></div><span class="tl-when">21 Oct 2026 · 7:00 PM</span></div><div class="tl-meta">Attendees: Rahul, Anjali, Neha Kapoor · outcome logged in 9 minutes</div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-primary"><svg class="i"><use href="#i-mail"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Email</b> sent by <b>Neha Kapoor</b> · Q2 portfolio statement</div><span class="tl-when">15 Sep 2026</span></div></div></div>
+                  <div class="tl-item"><div class="tl-dot is-primary"><svg class="i"><use href="#i-calendar"/></svg></div><div class="tl-body"><div class="tl-head"><div class="tl-text"><b>Quarterly review</b> · Verma Family <span class="badge badge-dot badge-success">Completed</span></div><span class="tl-when">28 Aug 2026</span></div><div class="tl-meta">Review pack v2 · 3 action items · all closed</div></div></div>
+                </div>
+              </div>
+              <div class="card-footer"><span class="faint text-sm row gap-1"><svg class="i i-sm"><use href="#i-lock"/></svg>Append-only trail · nothing can be deleted, edits keep the old version</span><button class="btn btn-ghost btn-sm ml-auto">Load older</button></div>
+            </section>
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Activity mix · last 90 days</div></div>
+                <div class="card-body">
+                  <ul class="list-plain">
+                    <li class="list-row"><svg class="i text-primary"><use href="#i-phone"/></svg><span class="text-md">Calls</span><span class="ml-auto fw-600 tnum">7</span></li>
+                    <li class="list-row"><svg class="i text-primary"><use href="#i-users"/></svg><span class="text-md">Visits / meetings</span><span class="ml-auto fw-600 tnum">3</span></li>
+                    <li class="list-row"><svg class="i text-success"><use href="#i-whatsapp"/></svg><span class="text-md">WhatsApp</span><span class="ml-auto fw-600 tnum">12</span></li>
+                    <li class="list-row"><svg class="i text-primary"><use href="#i-mail"/></svg><span class="text-md">Email</span><span class="ml-auto fw-600 tnum">3</span></li>
+                    <li class="list-row"><svg class="i faint"><use href="#i-refresh"/></svg><span class="text-md">MF Box events</span><span class="ml-auto fw-600 tnum">9</span></li>
+                  </ul>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-header"><div class="card-title">Who worked with Rahul</div></div>
+                <div class="card-body">
+                  <ul class="list-plain">
+                    <li class="list-row"><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><div class="person-sub">Primary RM</div></span></span><span class="ml-auto tnum fw-600">20</span></li>
+                    <li class="list-row"><span class="person"><span class="avatar avatar-sm a2">PN</span><span><span class="person-name">Priya Nair</span><div class="person-sub">Ops Executive</div></span></span><span class="ml-auto tnum fw-600">6</span></li>
+                    <li class="list-row"><span class="person"><span class="avatar avatar-sm a3">SI</span><span><span class="person-name">Sneha Iyer</span><div class="person-sub">RM (backup)</div></span></span><span class="ml-auto tnum fw-600">5</span></li>
+                    <li class="list-row"><span class="person"><span class="avatar avatar-sm a5">AD</span><span><span class="person-name">Arjun Desai</span><div class="person-sub">Service Desk</div></span></span><span class="ml-auto tnum fw-600">2</span></li>
+                  </ul>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TASKS ================= -->
+        <div data-tab-panel="tasks" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <div class="segmented" data-segmented><button aria-pressed="true">Open · 3</button><button>Done · 14</button><button>All</button></div>
+            <a class="btn btn-primary ml-auto" href="10-task-create.html"><svg class="i"><use href="#i-plus"/></svg>Create task</a>
+          </div>
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Title</th><th>Status</th><th>Priority</th><th><span class="th-sort is-asc">Due date</span></th><th class="num">Age (days)</th><th>Last acted on</th><th>Assignee</th><th></th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><div class="cell-title"><a href="11-task-detail.html">Bank mandate renewal – HDFC ••4410</a></div><div class="cell-sub">Bank mandate · Rahul Verma</div></td>
+                    <td><span class="badge badge-dot badge-warning">Pending</span></td>
+                    <td><span class="prio prio-high">High</span></td>
+                    <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>13 Nov 2026</span></td>
+                    <td class="num"><span class="age-hot">11</span></td>
+                    <td>12 Nov 2026</td>
+                    <td><span class="person"><span class="avatar avatar-sm a2">PN</span><span class="person-name">Priya Nair</span></span></td>
+                    <td><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="11-task-detail.html" aria-label="View"><svg class="i"><use href="#i-eye"/></svg></a><button class="btn btn-ghost btn-icon btn-sm" aria-label="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-title"><a href="11-task-detail.html">SIP top-up proposal – Rahul Verma</a></div><div class="cell-sub">Transaction Proposal: SIP</div></td>
+                    <td><span class="badge badge-dot badge-info">In progress</span></td>
+                    <td><span class="prio prio-med">Medium</span></td>
+                    <td>18 Nov 2026</td>
+                    <td class="num">6</td>
+                    <td>10 Nov 2026</td>
+                    <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                    <td><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="11-task-detail.html" aria-label="View"><svg class="i"><use href="#i-eye"/></svg></a><button class="btn btn-ghost btn-icon btn-sm" aria-label="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-title"><a href="11-task-detail.html">Portfolio review – Verma Family</a></div><div class="cell-sub">Portfolio review · auto-created by Tier A schedule · closes when the outcome is logged</div></td>
+                    <td><span class="badge badge-dot badge-info">In progress</span></td>
+                    <td><span class="prio prio-high">High</span></td>
+                    <td><span class="due-today">14 Nov 2026</span></td>
+                    <td class="num">4</td>
+                    <td>14 Nov 2026</td>
+                    <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                    <td><span class="row-actions"><a class="btn btn-ghost btn-icon btn-sm" href="11-task-detail.html" aria-label="View"><svg class="i"><use href="#i-eye"/></svg></a><button class="btn btn-ghost btn-icon btn-sm" aria-label="More"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                  </tr>
+                  <tr class="row-done">
+                    <td><div class="cell-title">Portfolio review prep – Verma Family</div><div class="cell-sub">Portfolio review · prep pack from MF Box</div></td>
+                    <td><span class="badge badge-dot badge-success">Done</span></td>
+                    <td><span class="prio prio-low">Low</span></td>
+                    <td>13 Nov 2026</td>
+                    <td class="num">—</td>
+                    <td>13 Nov 2026</td>
+                    <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                    <td></td>
+                  </tr>
+                  <tr class="row-done">
+                    <td><div class="cell-title">Risk profile refresh – Rahul Verma</div><div class="cell-sub">KYC update</div></td>
+                    <td><span class="badge badge-dot badge-success">Done</span></td>
+                    <td><span class="prio prio-med">Medium</span></td>
+                    <td>25 Oct 2026</td>
+                    <td class="num">—</td>
+                    <td>21 Oct 2026</td>
+                    <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination">3 open · 2 recently done shown<div class="pg-btns"><button class="btn btn-ghost btn-sm">Show all done tasks</button></div></div>
+          </div>
+        </div>
+
+        <!-- ================= OPPORTUNITIES ================= -->
+        <div data-tab-panel="opps" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <span class="sec-title">Opportunities for Rahul &amp; family</span>
+            <a class="btn btn-primary ml-auto" href="12-opportunities.html"><svg class="i"><use href="#i-plus"/></svg>Create opportunity</a>
+          </div>
+          <div class="banner banner-ai mb-3"><svg class="i"><use href="#i-sparkles"/></svg><span><b>1 AI suggestion</b> is waiting: FD of ₹25 L matures 2 Dec. Internal – not advice.</span><div class="banner-actions"><a class="btn btn-sm btn-ai" href="12-opportunities.html">Review</a></div></div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Opportunity</th><th>Product</th><th>Stage</th><th>Source</th><th class="num">Value</th><th>Expected close</th><th>Owner</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="cell-title"><a href="12-opportunities.html">SIP top-up – Rahul Verma</a></div><div class="cell-sub">₹10,000 → ₹15,000 from Dec · confirmed in today's review</div></td>
+                  <td>MF-SIP</td>
+                  <td><span class="badge badge-dot badge-neutral">Requirements gathered</span></td>
+                  <td><span class="badge badge-neutral">Manual</span></td>
+                  <td class="num">₹5,000/mo</td>
+                  <td>30 Nov 2026</td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                </tr>
+                <tr>
+                  <td><div class="cell-title"><a href="12-opportunities.html">Term insurance – Anjali Verma</a></div><div class="cell-sub">₹1 Cr cover · from 21 Oct visit</div></td>
+                  <td>Term Insurance</td>
+                  <td><span class="badge badge-dot badge-info">New</span></td>
+                  <td><span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI generated · 71</span></td>
+                  <td class="num">₹14,200/yr</td>
+                  <td>15 Dec 2026</td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                </tr>
+                <tr class="row-done">
+                  <td><div class="cell-title">Health insurance top-up – Verma Family</div><div class="cell-sub">Closed 02 Jul 2026</div></td>
+                  <td>Health Insurance</td>
+                  <td><span class="badge badge-dot badge-success">Won</span></td>
+                  <td><span class="badge badge-neutral">Referral</span></td>
+                  <td class="num">₹38,600/yr</td>
+                  <td>02 Jul 2026</td>
+                  <td><span class="person"><span class="avatar avatar-sm a3">SI</span><span class="person-name">Sneha Iyer</span></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= MEETINGS ================= -->
+        <div data-tab-panel="meetings" data-tab-scope="c360">
+          <div class="banner banner-info mb-4"><svg class="i"><use href="#i-calendar"/></svg><span><b>Today's review is waiting for its outcome.</b> The next quarterly review is due around 14 Feb 2027.</span><div class="banner-actions"><a class="btn btn-sm btn-secondary" href="14-meeting-detail.html">Log outcome</a><button class="btn btn-sm btn-primary" data-open-drawer="drawer-review">Schedule next review</button></div></div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Meeting</th><th>Type</th><th>Date &amp; time</th><th>Attendees</th><th>Status</th><th>Outcome</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="cell-title"><a href="14-meeting-detail.html">Portfolio review – Verma Family</a></div><div class="cell-sub">Andheri office · in person</div></td>
+                  <td>Portfolio review</td><td>Today · 11:00 AM</td>
+                  <td><span class="avatar-group"><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a3">RV</span><span class="avatar avatar-sm a2">AV</span></span></td>
+                  <td><span class="badge badge-dot badge-warning">Outcome pending</span></td>
+                  <td class="muted">AI summary · 3 actions to approve</td>
+                </tr>
+                <tr>
+                  <td><div class="cell-title"><a href="14-meeting-detail.html">Home visit – insurance needs</a></div><div class="cell-sub">Andheri West · in person</div></td>
+                  <td>Visit</td><td>21 Oct 2026 · 7:00 PM</td>
+                  <td><span class="avatar-group"><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a3">RV</span><span class="avatar avatar-sm a2">AV</span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="muted">2 tasks · 1 opportunity</td>
+                </tr>
+                <tr>
+                  <td><div class="cell-title"><a href="14-meeting-detail.html">Quarterly review – Q2</a></div><div class="cell-sub">Sharma Wealth office, Andheri</div></td>
+                  <td>Portfolio review</td><td>28 Aug 2026 · 11:00 AM</td>
+                  <td><span class="avatar-group"><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a3">RV</span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="muted">3 action items · closed</td>
+                </tr>
+                <tr>
+                  <td><div class="cell-title"><a href="14-meeting-detail.html">Quarterly review – Q1</a></div><div class="cell-sub">Video call</div></td>
+                  <td>Portfolio review</td><td>27 May 2026 · 6:30 PM</td>
+                  <td><span class="avatar-group"><span class="avatar avatar-sm">NK</span><span class="avatar avatar-sm a3">RV</span></span></td>
+                  <td><span class="badge badge-dot badge-success">Completed</span></td>
+                  <td class="muted">SIP step-up agreed</td>
+                </tr>
+                <tr class="row-done">
+                  <td><div class="cell-title">Tax planning call</div><div class="cell-sub">Phone</div></td>
+                  <td>Call</td><td>18 Mar 2026 · 5:00 PM</td>
+                  <td><span class="avatar-group"><span class="avatar avatar-sm a3">SI</span><span class="avatar avatar-sm a3">RV</span></span></td>
+                  <td><span class="badge badge-dot badge-neutral">Cancelled</span></td>
+                  <td class="muted">Rescheduled by client</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= SERVICE REQUESTS ================= -->
+        <div data-tab-panel="service" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <span class="sec-title">Service requests · Verma Family</span>
+            <a class="btn btn-primary ml-auto" href="16-service-requests.html"><svg class="i"><use href="#i-plus"/></svg>New service request</a>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Request</th><th>Category</th><th>Channel</th><th>Raised</th><th>Status</th><th>SLA</th><th>Assignee</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="cell-title"><a href="16-service-requests.html?tab=triage">Address change – Rahul Verma</a></div><div class="cell-sub mono">SR-2026-0149</div></td>
+                  <td>Address change</td>
+                  <td><span class="row gap-1"><svg class="i i-sm"><use href="#i-mail"/></svg>Email</span></td>
+                  <td>14 Nov 2026</td>
+                  <td><span class="badge badge-dot badge-info">New</span></td>
+                  <td><span class="row gap-1 muted"><svg class="i i-sm"><use href="#i-clock"/></svg>Starts on assignment · 2 BD</span></td>
+                  <td><span class="muted">Triage queue</span></td>
+                </tr>
+                <tr>
+                  <td><div class="cell-title"><a href="16-service-requests.html">Nomination update – Anjali Verma</a></div><div class="cell-sub mono">SR-2026-0140</div></td>
+                  <td>Nomination update</td>
+                  <td><span class="row gap-1"><svg class="i i-sm text-success"><use href="#i-whatsapp"/></svg>WhatsApp</span></td>
+                  <td>10 Nov 2026</td>
+                  <td><span class="badge badge-dot badge-neutral">Waiting on client</span></td>
+                  <td><span class="row gap-1 muted"><svg class="i i-sm"><use href="#i-pause"/></svg>Paused · form to be signed this week</span></td>
+                  <td><span class="person"><span class="avatar avatar-sm a2">PN</span><span class="person-name">Priya Nair</span></span></td>
+                </tr>
+                <tr class="row-done">
+                  <td><div class="cell-title">Address change – Anjali Verma</div><div class="cell-sub mono">SR-2026-0128</div></td>
+                  <td>Address change</td>
+                  <td><span class="row gap-1"><svg class="i i-sm"><use href="#i-mail"/></svg>Email</span></td>
+                  <td>10 Nov 2026</td>
+                  <td><span class="badge badge-dot badge-success">Resolved</span></td>
+                  <td class="muted">Met · 0.8 days</td>
+                  <td><span class="person"><span class="avatar avatar-sm a2">PN</span><span class="person-name">Priya Nair</span></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= DOCUMENTS ================= -->
+        <div data-tab-panel="docs" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <span class="sec-title">Documents</span>
+            <span class="faint text-sm">Stored per client, linked to tasks and meetings</span>
+            <a class="btn btn-primary ml-auto" href="17-documents.html"><svg class="i"><use href="#i-upload"/></svg>Upload</a>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Type</th><th>Linked to</th><th>Visibility</th><th>Uploaded by</th><th>Date</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Verma_Family_Review_Pack_Nov2026.pdf</div><div class="cell-sub">Prep pack · 412 KB</div></span></span></td><td>Review pack</td><td>Meeting · 14 Nov review</td><td><span class="badge badge-ai"><svg class="i"><use href="#i-lock"/></svg>Internal – not advice</span></td><td>AI draft · Neha Kapoor</td><td>14 Nov 2026</td><td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></span></td></tr>
+                <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Nomination_form_Anjali_page1.jpg</div><div class="cell-sub">Not signed yet · 1.8 MB</div></span></span></td><td>Nomination</td><td>SR-2026-0140 · 14 Nov review</td><td><span class="badge badge-neutral">Team</span></td><td>Neha Kapoor</td><td>14 Nov 2026</td><td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></span></td></tr>
+                <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Capital_Gains_FY2026-27_YTD_RVerma.pdf</div><div class="cell-sub">From MF Box · 3 pages</div></span></span></td><td>Statement</td><td>WhatsApp · today 12:20 PM</td><td><span class="badge badge-info">Shared with client</span></td><td>Neha Kapoor</td><td>14 Nov 2026</td><td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></span></td></tr>
+                <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Risk profile questionnaire.pdf</div><div class="cell-sub">Signed · 3 pages</div></span></span></td><td>Risk profile</td><td>Meeting · 21 Oct</td><td><span class="badge badge-neutral">Team</span></td><td>Neha Kapoor</td><td>21 Oct 2026</td><td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></span></td></tr>
+                <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-image"/></svg></span><span><div class="cell-title">PAN card (masked).jpg</div><div class="cell-sub">KYC · 210 KB</div></span></span></td><td>KYC</td><td>Client</td><td><span class="badge badge-neutral"><svg class="i"><use href="#i-lock"/></svg>Ops only</span></td><td>Priya Nair</td><td>04 Jun 2014</td><td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= FAMILY ================= -->
+        <div data-tab-panel="family" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <span class="sec-title">Verma Family</span>
+            <span class="faint text-sm">Family head: Rahul Verma · grouping from MF Box</span>
+            <button class="btn btn-secondary ml-auto" onclick="AK.toast('Change family head: request sent to MF Box admin')">Change head</button>
+            <button class="btn btn-primary" onclick="AK.toast('Add member: pick an existing MF Box investor')"><svg class="i"><use href="#i-user-plus"/></svg>Add member</button>
+          </div>
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Member</th><th>Relation</th><th>PAN</th><th class="num">AUM</th><th class="num">Monthly SIP</th><th>KYC</th><th>Nomination</th><th>Last contacted</th></tr></thead>
+                <tbody>
+                  <tr class="is-selected"><td><span class="person"><span class="avatar avatar-sm">RV</span><span><span class="person-name">Rahul Verma</span><div class="person-sub">Family head · Tier A</div></span></span></td><td>Self</td><td class="mono">ABCPV••••K</td><td class="num fw-600">₹1,24,00,000</td><td class="num">₹45,000 <span class="faint">· 6</span></td><td><span class="badge badge-dot badge-success">Verified</span></td><td><span class="badge badge-dot badge-success">Complete</span></td><td>14 Nov 2026</td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">AV</span><span><a class="person-name" href="08-client-360.html">Anjali Verma</a><div class="person-sub">Tier B</div></span></span></td><td>Spouse</td><td class="mono">ABCPV••••R</td><td class="num fw-600">₹48,60,000</td><td class="num">₹15,000 <span class="faint">· 1</span></td><td><span class="badge badge-dot badge-success">Verified</span></td><td><span class="badge badge-dot badge-warning">Pending · 2 folios</span></td><td>14 Nov 2026</td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a4">AV</span><span><span class="person-name">Aarav Verma</span><div class="person-sub">Minor (14) · guardian Rahul</div></span></span></td><td>Son</td><td class="faint">Guardian PAN</td><td class="num fw-600">₹13,40,000</td><td class="num">₹2,500 <span class="faint">· 1</span></td><td><span class="badge badge-dot badge-neutral">Via guardian</span></td><td><span class="badge badge-dot badge-neutral">Not required</span></td><td>—</td></tr>
+                  <tr class="total-row"><td>Family total</td><td>3 members</td><td></td><td class="num">₹1,86,00,000</td><td class="num">₹62,500 <span class="faint">· 8</span></td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="banner banner-info mt-4"><svg class="i"><use href="#i-info"/></svg><span>Aarav turns 18 on 06 Mar 2030. The CRM will create a “Minor to major” KYC task 60 days before.</span></div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= Drawer: Log activity ================= -->
+  <aside class="drawer" id="drawer-log" aria-label="Log activity">
+    <div class="drawer-header"><div><div class="drawer-title">Log activity</div><div class="drawer-sub">Rahul Verma · Verma Family</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Type <span class="req">*</span></label>
+          <div class="choice-group" data-segmented>
+            <button class="choice" aria-pressed="true"><svg class="i"><use href="#i-phone"/></svg>Call</button>
+            <button class="choice"><svg class="i"><use href="#i-users"/></svg>Visit / meeting</button>
+            <button class="choice"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</button>
+            <button class="choice"><svg class="i"><use href="#i-mail"/></svg>Email</button>
+          </div>
+        </div>
+        <div class="field"><label class="label">Direction</label><select class="select"><option>Outgoing</option><option>Incoming</option></select></div>
+        <div class="field"><label class="label">Duration</label><input class="input" value="10 min"></div>
+        <div class="field"><label class="label">Date &amp; time <span class="req">*</span></label><input class="input" value="14 Nov 2026, 11:20 AM"></div>
+        <div class="field"><label class="label">Outcome <span class="req">*</span></label><select class="select"><option>Follow-up needed</option><option>Connected · no action</option><option>Not reachable</option><option>Interested</option></select></div>
+        <div class="field span-2"><label class="label">Notes</label><textarea class="textarea" rows="4" placeholder="What was discussed?"></textarea><div class="help">Counts toward Tier A coverage (2 of 3 this quarter).</div></div>
+        <div class="field span-2"><label class="label">Next follow-up</label><input class="input" value="Tomorrow, 4:00 PM"></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-log');AK.toast('Call logged for Rahul Verma')">Log activity</button></div>
+  </aside>
+
+  <!-- ================= Drawer: Schedule review ================= -->
+  <aside class="drawer" id="drawer-review" aria-label="Schedule review">
+    <div class="drawer-header"><div><div class="drawer-title">Schedule portfolio review</div><div class="drawer-sub">Verma Family · Tier A · next quarterly review</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field"><label class="label">Date <span class="req">*</span></label><input class="input" value="Sat 13 Feb 2027"></div>
+        <div class="field"><label class="label">Time <span class="req">*</span></label><input class="input" value="11:00 AM"></div>
+        <div class="field span-2"><label class="label">Mode</label>
+          <div class="choice-group" data-segmented>
+            <button class="choice" aria-pressed="true"><svg class="i"><use href="#i-building"/></svg>Office</button>
+            <button class="choice"><svg class="i"><use href="#i-map-pin"/></svg>Client home</button>
+            <button class="choice"><svg class="i"><use href="#i-video"/></svg>Video</button>
+          </div>
+        </div>
+        <div class="field span-2"><label class="label">Attendees</label>
+          <div class="chips" style="margin:0"><span class="chip">Rahul Verma<button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><span class="chip">Anjali Verma<button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><span class="chip">Neha Kapoor<button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span><span class="chip chip-ghost">+ Add</span></div>
+        </div>
+        <div class="field span-2">
+          <label class="check"><input type="checkbox" checked> Attach review pack (AI draft, Internal – not advice)</label>
+          <label class="check mt-2"><input type="checkbox" checked> Send WhatsApp invite to Rahul for approval</label>
+          <label class="check mt-2"><input type="checkbox" checked> Remind me to log the outcome 15 min after</label>
+        </div>
+        <div class="field span-2"><label class="label">Agenda</label><textarea class="textarea" rows="4">1. Portfolio performance since 14 Nov
+2. Insurance cover review (carried forward)
+3. Term cover for Anjali
+4. Check the SIP top-up from Dec is running</textarea></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-review');AK.toast('Review scheduled · Sat 13 Feb 2027, 11:00 AM')">Schedule review</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      // Dismiss AI suggestions (with undo toast)
+      document.addEventListener('click', function (e) {
+        var d = e.target.closest('[data-dismiss]');
+        if (!d) return;
+        var item = d.closest('.ai-item');
+        if (item) { item.style.display = 'none'; AK.toast('Suggestion dismissed'); }
+      });
+      // Deep link to a tab: ?tab=family
+      var t = new URLSearchParams(location.search).get('tab');
+      if (t) document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { var btn = document.querySelector('[data-tabs="c360"] [data-tab="' + t + '"]'); if (btn) btn.click(); }, 0); });
+    })();
+  </script>
+</body>
+</html>

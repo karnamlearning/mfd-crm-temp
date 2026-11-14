@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---------- Dashboard: page-specific styles (tokens only) ---------- */
+
+    /* Header */
+    .dash-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-4); flex-wrap: wrap; margin-bottom: var(--sp-4); }
+    .dash-sub { display: flex; align-items: center; gap: var(--sp-2); color: var(--text-2); margin-top: 2px; flex-wrap: wrap; }
+    .dash-sub .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--text-3); }
+    .sync { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--text-3); }
+    .sync .dot { width: 6px; height: 6px; background: var(--success); }
+    .viewas { display: flex; align-items: center; height: 36px; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--surface); overflow: hidden; }
+    .viewas-label { display: inline-flex; align-items: center; gap: 6px; padding: 0 10px 0 12px; height: 100%; font-size: 13px; color: var(--text-3); border-right: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; }
+    .viewas .select { border: 0; height: 34px; width: 172px; border-radius: 0; font-weight: 500; background-color: var(--surface); }
+    .viewas .select:focus { box-shadow: none; }
+    .viewas:focus-within { border-color: var(--primary); box-shadow: var(--focus-ring); }
+
+    /* Meeting-outcome banner */
+    .outcome { display: flex; align-items: center; gap: var(--sp-3); padding: 8px 8px 8px 14px; margin-bottom: var(--sp-4);
+      background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--warning); border-radius: var(--r-md); box-shadow: var(--shadow-sm); font-size: 13.5px; color: var(--text-2); }
+    .outcome-icon { width: 28px; height: 28px; border-radius: var(--r-sm); background: var(--warning-soft); color: var(--warning); display: grid; place-items: center; flex: none; }
+    .outcome b { color: var(--text); font-weight: 600; }
+    .outcome a { font-weight: 600; }
+    .outcome-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; flex: none; }
+    .outcome-actions .btn .i { width: 14px; height: 14px; }
+    .ok-ic { color: var(--success); } .fu-ic { color: var(--warning); } .ns-ic { color: var(--text-3); }
+    .outcome.is-done { border-left-color: var(--success); }
+    .outcome.is-done .outcome-icon { background: var(--success-soft); color: var(--success); }
+
+    /* Grid */
+    .dash-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); align-items: stretch; }
+    .dash-grid > .card { display: flex; flex-direction: column; }
+    .span-2 { grid-column: span 2; }
+    .rspan-2 { grid-row: span 2; }
+    .dash-grid .card-header { padding: 14px var(--sp-4); gap: 10px; }
+    .dash-grid .card-body { padding: var(--sp-4); flex: 1; display: flex; flex-direction: column; }
+    .pin { margin-top: auto; padding-top: var(--sp-4); }
+    .callout { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 12px; border-radius: var(--r-md); border: 1px solid var(--border); background: var(--surface-2); font-size: 12.5px; color: var(--text-2); min-width: 0; }
+    .callout b { color: var(--text); font-weight: 600; }
+    .callout > .i { flex: none; }
+    .callout .grow { flex: 1; min-width: 0; line-height: 16px; }
+    .callout .grow > * { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .callout .grow small { display: block; color: var(--text-3); font-size: 11.5px; }
+    .callout.c-ai { background: var(--ai-soft); border-color: transparent; color: var(--ai); }
+    .callout.c-ai b { color: var(--ai); }
+    .callout.c-ai .grow small { color: var(--text-2); }
+    .dash-grid .card-title { white-space: nowrap; min-width: 0; }
+    .card-title .ct-meta { font-size: 12px; font-weight: 500; color: var(--text-3); }
+    .card-icon .i { width: 16px; height: 16px; }
+    .card-icon.ci-neutral { background: var(--neutral-soft); color: var(--neutral); }
+    .go { width: 28px; height: 28px; border-radius: var(--r-sm); border: 1px solid var(--border); color: var(--text-2); display: grid; place-items: center; background: var(--surface); }
+    .go:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); text-decoration: none; }
+    .go .i { width: 15px; height: 15px; }
+    .card-foot { display: flex; align-items: center; gap: var(--sp-2); padding: 10px var(--sp-4); border-top: 1px solid var(--border); font-size: 13px; color: var(--text-3); }
+    .card-foot a { font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .card-foot a .i { width: 14px; height: 14px; }
+    .overline { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .sec-head { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 10px; }
+    .sec-head .ml-auto { font-size: 12px; }
+
+    /* Compact stat tiles */
+    .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .dash-grid .stat { padding: 10px 12px 10px 14px; }
+    .dash-grid .stat-label { font-size: 12.5px; }
+    .dash-grid .stat-value { font-size: 22px; line-height: 26px; margin-top: 4px; }
+    .dash-grid .stat-meta { font-size: 11.5px; margin-top: 0; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dash-grid .stat-label { white-space: nowrap; }
+    .stat-warning .stat-label { color: var(--warning); }
+    .stat-label .i { width: 13px; height: 13px; }
+
+    /* Today's schedule (mini timeline) */
+    .sched { list-style: none; margin: 0; padding: 0; position: relative; }
+    .sched-item { display: grid; grid-template-columns: 58px 14px minmax(0, 1fr); gap: 0 10px; position: relative; padding-bottom: 12px; }
+    .sched-item:last-child { padding-bottom: 0; }
+    .sched-time { font-size: 12px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; text-align: right; padding-top: 1px; white-space: nowrap; }
+    .sched-time small { display: block; font-weight: 500; color: var(--text-3); font-size: 11px; }
+    .sched-rail { position: relative; display: flex; justify-content: center; }
+    .sched-rail::before { content: ""; position: absolute; top: 14px; bottom: -14px; width: 1px; background: var(--border); }
+    .sched-item:last-child .sched-rail::before { display: none; }
+    .sched-dot { position: relative; z-index: 1; width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; background: var(--surface); border: 2px solid var(--primary); }
+    .is-done .sched-dot { background: var(--success); border-color: var(--success); }
+    .is-pending .sched-dot { background: var(--warning); border-color: var(--warning); }
+    .sched-body { min-width: 0; }
+    .sched-title { font-size: 13.5px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 6px; line-height: 18px; }
+    .sched-title a { color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .sched-title .i { width: 14px; height: 14px; color: var(--text-3); }
+    .is-done .sched-title { color: var(--text-2); }
+    .sched-meta { font-size: 12px; color: var(--text-3); margin-top: 2px; display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .sched-meta > .truncate { min-width: 0; }
+    .sched-meta .badge { flex: none; }
+    .sched-meta .badge { height: 20px; font-size: 11.5px; padding: 0 7px; }
+    .sched-now { display: grid; grid-template-columns: 58px 14px minmax(0, 1fr); gap: 0 10px; align-items: center; margin: -2px 0 10px; }
+    .sched-now span { font-size: 11px; font-weight: 700; color: var(--primary-text); text-align: right; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+    .sched-now i { grid-column: 2 / 4; height: 2px; background: var(--primary); border-radius: 2px; position: relative; }
+    .sched-now i::before { content: ""; position: absolute; left: 2px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+    .day-strip { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .day-strip .tag .i { width: 12px; height: 12px; }
+
+    /* Donut row */
+    .donut-row { display: flex; align-items: center; gap: var(--sp-5); }
+    .donut.sm { --size: 112px; --thick: 13px; }
+    .donut.sm .donut-center b { font-size: 22px; line-height: 24px; }
+    .donut.sm .donut-center span { font-size: 11px; }
+    .dlegend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .dlegend-row { white-space: nowrap; display: grid; grid-template-columns: 10px minmax(0, 1fr) auto 36px; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); padding: 5px 6px; border-radius: var(--r-sm); }
+    .dlegend-row:hover { background: var(--surface-2); text-decoration: none; }
+    .dlegend-row b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+    .dlegend-row em { font-style: normal; color: var(--text-3); font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Horizontal bars */
+    .hbars { display: flex; flex-direction: column; gap: 4px; }
+    .hbar { display: grid; grid-template-columns: 158px minmax(0, 1fr) 28px; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-2); padding: 3px 4px; border-radius: var(--r-sm); text-decoration: none; }
+    a.hbar:hover { background: var(--surface-2); text-decoration: none; }
+    .hbar-label { display: inline-flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hbar-label .dot { width: 7px; height: 7px; }
+    .hbar-track { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+    .hbar-track span { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--chart-1); }
+    .hbar-track.t-ai span { background: var(--ai); }
+    .hbar-val { text-align: right; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .tooltip[data-tip]:hover::after { bottom: calc(100% + 2px); }
+    .opp-sum { display: flex; align-items: baseline; gap: 6px; font-size: 12px; color: var(--text-3); margin: 14px 0 10px; }
+    .opp-sum b { font-size: 13px; color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .seg-sm button { height: 24px; padding: 0 10px; font-size: 12px; }
+    .seg-sm { padding: 2px; }
+
+    /* Lists (leads, events) */
+    .mini-list { list-style: none; margin: 0; padding: 0; }
+    .mini-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); min-width: 0; }
+    .mini-row:first-child { border-top: 0; padding-top: 2px; }
+    .mini-main { min-width: 0; flex: 1; }
+    .mini-name { font-size: 13.5px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 6px; min-width: 0; }
+    .mini-name a { color: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini-name a:hover { color: var(--primary-text); }
+    .mini-sub { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .mini-sub .overdue, .mini-sub .due-today { font-size: 12px; gap: 4px; }
+    .mini-sub .i { width: 12px; height: 12px; }
+    .mini-right { text-align: right; flex: none; }
+    .amt { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+    .badge.xs { height: 20px; font-size: 11.5px; padding: 0 7px; }
+    .divider { height: 1px; background: var(--border); margin: 14px calc(-1 * var(--sp-4)); }
+
+    /* Events */
+    .ev-ic { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+    .ev-ic .i { width: 15px; height: 15px; }
+    .ev-bday { background: var(--warning-soft); color: var(--warning); }
+    .ev-anniv { background: var(--ai-soft); color: var(--ai); }
+    .ev-inv { background: var(--primary-soft); color: var(--primary-text); }
+    .btn-wa { color: var(--success); border-color: var(--border-strong); }
+    .btn-wa .i { color: var(--success); }
+    .sent { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--success); font-weight: 500; height: 30px; }
+    .sent .i { width: 13px; height: 13px; }
+    .ev-row[hidden] { display: none; }
+    .seg-count { font-size: 11px; font-weight: 600; color: var(--text-3); background: var(--surface-3); border-radius: var(--r-full); padding: 0 6px; line-height: 16px; }
+    .segmented button[aria-pressed="true"] .seg-count { background: var(--primary-soft); color: var(--primary-text); }
+    .ev-note > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ev-note a { white-space: nowrap; }
+    .ev-note { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-md); background: var(--surface-2); font-size: 12.5px; color: var(--text-2); }
+    .ev-note .i { color: var(--text-3); width: 14px; height: 14px; }
+
+    /* Team activity */
+    .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+    .kpi { padding: 12px var(--sp-4); border-left: 1px solid var(--border); }
+    .kpi:first-child { border-left: 0; }
+    .kpi-label { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px; font-weight: 500; white-space: nowrap; }
+    .kpi-label .i { width: 13px; height: 13px; color: var(--text-3); }
+    .kpi-value { font-size: 20px; line-height: 26px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-top: 2px; display: flex; align-items: baseline; gap: 6px; }
+    .kpi-delta { font-size: 11.5px; font-weight: 600; letter-spacing: 0; display: inline-flex; align-items: center; gap: 2px; }
+    .kpi-delta .i { width: 12px; height: 12px; }
+    .team-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .team-wrap { overflow-x: auto; }
+    .team-table th { font-size: 11px; font-weight: 600; color: var(--text-3); text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; text-transform: uppercase; letter-spacing: .04em; background: var(--surface-2); }
+    .team-table td { padding: 0 8px; height: 44px; border-bottom: 1px solid var(--border); white-space: nowrap; color: var(--text); }
+    .team-table tr:last-child td { border-bottom: 0; }
+    .team-table tbody tr:hover td { background: var(--surface-2); }
+    .team-table th:first-child, .team-table td:first-child { padding-left: var(--sp-4); }
+    .team-table th:last-child, .team-table td:last-child { padding-right: var(--sp-4); }
+    .team-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .team-table .zero { color: var(--text-3); }
+    .act-bar { display: flex; align-items: center; gap: 8px; }
+    .act-track { width: 96px; height: 6px; border-radius: 3px; background: var(--surface-2); display: flex; overflow: hidden; gap: 2px; }
+    .act-track span { display: block; height: 100%; }
+    .act-track .c1 { background: var(--chart-1); } .act-track .c2 { background: var(--chart-2); } .act-track .c3 { background: var(--chart-4); } .act-track .c4 { background: var(--chart-5); }
+    .act-total { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 18px; text-align: right; }
+    .role-tag { font-size: 11px; color: var(--text-3); font-weight: 500; }
+    .me-tag { font-size: 10.5px; font-weight: 600; color: var(--primary-text); background: var(--primary-soft); padding: 1px 6px; border-radius: var(--r-full); margin-left: 4px; }
+    .team-legend { display: flex; gap: 12px; font-size: 12px; color: var(--text-3); }
+    .team-legend .legend-swatch { width: 8px; height: 8px; border-radius: 2px; }
+
+    /* Recent activities feed */
+    .feed-body { position: relative; flex: 1; min-height: 320px; }
+    .feed-scroll { position: absolute; inset: 0; overflow-y: auto; padding: 4px var(--sp-4) var(--sp-4); }
+    .feed-day { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); padding: 10px 0 8px; position: sticky; top: -4px; background: var(--surface); z-index: 2; }
+    .feed .tl-item { grid-template-columns: 26px 1fr; gap: 10px; padding-bottom: 14px; }
+    .feed .tl-item:not(:last-child)::before { left: 12.5px; top: 28px; }
+    .feed .tl-dot { width: 26px; height: 26px; }
+    .feed .tl-dot .i { width: 13px; height: 13px; }
+    .feed .tl-body { padding-top: 2px; }
+    .feed .tl-text { font-size: 13px; line-height: 18px; }
+    .feed .tl-text a { font-weight: 500; }
+    .feed .tl-meta { display: flex; align-items: center; gap: 6px; font-size: 11.5px; }
+    .chg { font-variant-numeric: tabular-nums; }
+    .chg s { color: var(--text-3); text-decoration-color: var(--text-3); }
+    .chg .i { width: 12px; height: 12px; color: var(--text-3); margin: 0 1px; }
+    .chg b { color: var(--text); font-weight: 600; }
+    .feed-filter .select { height: 28px; font-size: 12.5px; width: 128px; padding-left: 10px; }
+
+    /* Drawer (Log activity) */
+    .choice .i { width: 14px; height: 14px; }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      .hbar { grid-template-columns: 156px minmax(0, 1fr) 22px; gap: 8px; }
+      .donut-row { gap: var(--sp-3); }
+      .donut.sm { --size: 100px; --thick: 12px; }
+      .dlegend-row { grid-template-columns: 10px minmax(0, 1fr) auto 30px; gap: 6px; }
+      .dash-grid .stat { padding: 10px 10px 10px 12px; }
+      .dash-grid .stat-label { font-size: 12px; }
+      .stat-ai .stat-label .i { display: none; }
+      .hide-1280, .wish-txt, .feed-filter, .last-sub, .role-tag, .lead-meta { display: none; }
+      .btn-wa { width: 30px; padding: 0; }
+      .kpi-label .i { display: none; }
+      .seg-sm button { padding: 0 8px; }
+      .kpi { padding: 10px 12px; }
+      .act-track { width: 72px; }
+    }
+    @media (max-width: 1100px) {
+      .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .rspan-2 { grid-row: auto; }
+      .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 768px) {
+      .dash-grid { grid-template-columns: 1fr; }
+      .span-2 { grid-column: auto; }
+      .outcome { flex-wrap: wrap; }
+      .outcome-actions { margin-left: 0; width: 100%; flex-wrap: wrap; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .team-wrap { overflow-x: auto; }
+      .viewas .select { width: 150px; }
+    }
+  </style>
+</head>
+<body data-page="home" data-crumb="Dashboard">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- Header -->
+        <div class="dash-head">
+          <div>
+            <h1 class="greeting">Good afternoon, Neha</h1>
+            <div class="dash-sub">
+              <span>Saturday, 14 Nov 2026 · Andheri branch</span>
+              <span class="sep"></span>
+              <span class="sync"><span class="dot"></span>Synced from MF Box · 10:42</span>
+            </div>
+          </div>
+          <div class="page-actions">
+            <label class="viewas tooltip" data-tip="Only people in your reporting line · every switch is logged">
+              <span class="viewas-label"><svg class="i i-sm"><use href="#i-eye"/></svg>View dashboard as</span>
+              <select class="select" id="viewas" aria-label="View dashboard as">
+                <option value="Me">Me (Neha Kapoor)</option>
+                <option value="Andheri branch">Andheri branch</option>
+                <option value="Rohan Mehta">Rohan Mehta</option>
+                <option value="Sneha Iyer">Sneha Iyer</option>
+                <option value="Whole firm">Whole firm</option>
+              </select>
+            </label>
+            <button class="btn btn-secondary" data-open-drawer="drawer-log"><svg class="i"><use href="#i-plus"/></svg>Log activity</button>
+          </div>
+        </div>
+
+        <!-- Meeting-outcome prompt -->
+        <div class="outcome" id="outcome" role="status">
+          <span class="outcome-icon"><svg class="i i-sm"><use href="#i-clock"/></svg></span>
+          <span class="truncate" id="outcome-text">Log the outcome of <a href="14-meeting-detail.html">Portfolio review – Verma Family</a> <span class="faint">(ended 1 h 25 min ago)</span></span>
+          <div class="outcome-actions" id="outcome-actions">
+            <button class="btn btn-secondary btn-sm" data-outcome="Completed"><svg class="i ok-ic"><use href="#i-check"/></svg>Completed</button>
+            <button class="btn btn-secondary btn-sm" data-outcome="Follow-up needed"><svg class="i fu-ic"><use href="#i-repeat"/></svg>Follow-up needed</button>
+            <button class="btn btn-secondary btn-sm" data-outcome="No-show"><svg class="i ns-ic"><use href="#i-x"/></svg>No-show</button>
+            <span class="divider-v hide-1280" style="margin: 4px 2px;"></span>
+            <a class="btn btn-ghost btn-sm hide-1280" href="14-meeting-detail.html">Add notes</a>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+
+          <!-- 1. Today's Insights -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-calendar"/></svg></span>Today's Insights</div>
+              <div class="card-actions"><span class="faint text-sm">1 of 6 done</span><a class="go" href="03-calendar.html" title="Open calendar"><svg class="i"><use href="#i-chevron-right"/></svg></a></div>
+            </div>
+            <div class="card-body">
+              <div class="day-strip">
+                <span class="tag"><svg class="i"><use href="#i-video"/></svg>3 meetings</span>
+                <span class="tag"><svg class="i"><use href="#i-phone"/></svg>2 calls</span>
+                <span class="tag"><svg class="i"><use href="#i-check-square"/></svg>1 task</span>
+              </div>
+              <ul class="sched">
+                <li class="sched-item is-done">
+                  <div class="sched-time">10:00 AM</div><div class="sched-rail"><span class="sched-dot"></span></div>
+                  <div class="sched-body"><div class="sched-title"><svg class="i"><use href="#i-phone"/></svg><a href="08-client-360.html">Call · Suresh Iyer</a></div>
+                    <div class="sched-meta"><span class="truncate">SIP top-up · 12 min</span><span class="badge badge-dot badge-success">Done</span></div></div>
+                </li>
+                <li class="sched-item is-pending">
+                  <div class="sched-time">11:00 AM<small>– 11:45 AM</small></div><div class="sched-rail"><span class="sched-dot"></span></div>
+                  <div class="sched-body"><div class="sched-title"><svg class="i"><use href="#i-users"/></svg><a href="14-meeting-detail.html">Portfolio review – Verma Family</a></div>
+                    <div class="sched-meta"><span class="truncate">Andheri office</span><span class="badge badge-dot badge-warning">Outcome pending</span></div></div>
+                </li>
+                <li class="sched-now" aria-label="Now, 1:10 PM"><span>1:10 PM</span><i></i></li>
+                <li class="sched-item">
+                  <div class="sched-time">3:00 PM</div><div class="sched-rail"><span class="sched-dot"></span></div>
+                  <div class="sched-body"><div class="sched-title"><svg class="i"><use href="#i-phone"/></svg><a href="08-client-360.html">Call · Farhan Qureshi</a></div>
+                    <div class="sched-meta"><span class="truncate">FD maturity · ₹25 L lumpsum</span><span class="badge badge-dot badge-info">Scheduled</span></div></div>
+                </li>
+                <li class="sched-item">
+                  <div class="sched-time">3:30 PM</div><div class="sched-rail"><span class="sched-dot"></span></div>
+                  <div class="sched-body"><div class="sched-title"><svg class="i"><use href="#i-video"/></svg><a href="05-lead-create.html">Video call · Karan Malhotra</a></div>
+                    <div class="sched-meta"><span class="truncate">MF-SIP proposal · Lead</span><span class="badge badge-dot badge-info">Scheduled</span></div></div>
+                </li>
+                <li class="sched-item">
+                  <div class="sched-time">5:00 PM</div><div class="sched-rail"><span class="sched-dot"></span></div>
+                  <div class="sched-body"><div class="sched-title"><svg class="i"><use href="#i-check-square"/></svg><a href="11-task-detail.html">KYC update – Meera Joshi</a></div>
+                    <div class="sched-meta"><span class="due-today"><svg class="i i-sm"><use href="#i-clock"/></svg>Due today</span>· Task</div></div>
+                </li>
+                <li class="sched-item">
+                  <div class="sched-time">5:00 PM<small>– 5:30 PM</small></div><div class="sched-rail"><span class="sched-dot"></span></div>
+                  <div class="sched-body"><div class="sched-title"><svg class="i"><use href="#i-users"/></svg><a href="13-meetings.html">Weekly pipeline huddle – Andheri</a></div>
+                    <div class="sched-meta"><span class="truncate">Every Saturday · Andheri team</span><span class="badge badge-dot badge-info">Scheduled</span></div></div>
+                </li>
+              </ul>
+              <div class="pin">
+                <div class="callout">
+                  <svg class="i text-primary"><use href="#i-video"/></svg>
+                  <div class="grow"><b>Next video call in 2 h 20 min</b><small>Karan Malhotra · proposal attached</small></div>
+                  <button class="btn btn-secondary btn-sm" onclick="AK.toast('Google Meet link copied for 3:30 PM', {icon:'link', undo:false})">Copy link</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Tasks -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon ci-success"><svg class="i"><use href="#i-check-square"/></svg></span>Tasks</div>
+              <div class="card-actions"><a class="go" href="09-tasks-list.html" title="Open tasks"><svg class="i"><use href="#i-chevron-right"/></svg></a></div>
+            </div>
+            <div class="card-body">
+              <div class="tiles">
+                <a class="stat stat-danger" href="09-tasks-list.html?view=overdue">
+                  <div class="stat-label"><svg class="i"><use href="#i-clock"/></svg>Overdue</div>
+                  <div class="stat-value">3</div>
+                  <div class="stat-meta"><span class="delta-up">↓ 2</span> vs last week</div>
+                </a>
+                <a class="stat stat-warning" href="09-tasks-list.html?view=today">
+                  <div class="stat-label">Due today</div>
+                  <div class="stat-value">2</div>
+                  <div class="stat-meta">1 done already</div>
+                </a>
+                <a class="stat stat-info" href="09-tasks-list.html?view=upcoming">
+                  <div class="stat-label">Upcoming</div>
+                  <div class="stat-value">8</div>
+                  <div class="stat-meta">Next 7 days</div>
+                </a>
+                <a class="stat" href="09-tasks-list.html?view=unresolved">
+                  <div class="stat-label">Unresolved</div>
+                  <div class="stat-value">14</div>
+                  <div class="stat-meta">Oldest 21 days</div>
+                </a>
+              </div>
+              <div class="sec-head mt-5"><span class="overline">Unresolved task breakup</span></div>
+              <div class="donut-row">
+                <div class="donut sm" role="img" aria-label="14 unresolved tasks: 8 pending, 4 in progress, 2 on hold"
+                     style="background: conic-gradient(var(--warning) 0 56.6%, var(--surface) 0 57.4%, var(--primary) 0 85.2%, var(--surface) 0 86%, var(--neutral) 0 99.4%, var(--surface) 0 100%);">
+                  <div class="donut-center"><b>14</b><span>Unresolved</span></div>
+                </div>
+                <div class="dlegend">
+                  <a class="dlegend-row" href="09-tasks-list.html?status=pending"><span class="legend-swatch" style="background:var(--warning)"></span>Pending<b>8</b><em>57%</em></a>
+                  <a class="dlegend-row" href="09-tasks-list.html?status=in-progress"><span class="legend-swatch" style="background:var(--primary)"></span>In progress<b>4</b><em>29%</em></a>
+                  <a class="dlegend-row" href="09-tasks-list.html?status=on-hold"><span class="legend-swatch" style="background:var(--neutral)"></span>On hold<b>2</b><em>14%</em></a>
+                </div>
+              </div>
+              <div class="pin">
+                <div class="callout">
+                  <svg class="i text-danger"><use href="#i-clock"/></svg>
+                  <div class="grow"><b>Oldest overdue · 2 days</b><small>KYC update – Suresh Iyer</small></div>
+                  <a class="btn btn-secondary btn-sm" href="11-task-detail.html">Open</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Opportunities -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon ci-ai"><svg class="i"><use href="#i-target"/></svg></span>Opportunities</div>
+              <div class="card-actions"><a class="go" href="12-opportunities.html" title="Open opportunities"><svg class="i"><use href="#i-chevron-right"/></svg></a></div>
+            </div>
+            <div class="card-body">
+              <div class="tiles">
+                <a class="stat stat-danger" href="12-opportunities.html?view=overdue">
+                  <div class="stat-label"><svg class="i"><use href="#i-clock"/></svg>Overdue</div>
+                  <div class="stat-value">2</div>
+                  <div class="stat-meta">₹8.4 L at stake</div>
+                </a>
+                <a class="stat stat-warning" href="12-opportunities.html?view=today">
+                  <div class="stat-label">Due today</div>
+                  <div class="stat-value">1</div>
+                  <div class="stat-meta">SIP top-up – Suresh Iyer</div>
+                </a>
+                <a class="stat stat-info" href="12-opportunities.html?view=pending">
+                  <div class="stat-label">Pending</div>
+                  <div class="stat-value">9</div>
+                  <div class="stat-meta">₹48.5 L pipeline</div>
+                </a>
+                <a class="stat stat-ai" href="12-opportunities.html?source=ai">
+                  <div class="stat-label"><svg class="i"><use href="#i-sparkles"/></svg>AI identified today</div>
+                  <div class="stat-value">3</div>
+                  <div class="stat-meta">Needs your review</div>
+                </a>
+              </div>
+              <div class="sec-head mt-5">
+                <span class="overline" id="opp-break-title">Status breakup</span>
+                <div class="segmented seg-sm ml-auto" data-segmented id="opp-seg">
+                  <button aria-pressed="true" data-panel="status">Status</button>
+                  <button aria-pressed="false" data-panel="ai"><svg class="i i-sm"><use href="#i-sparkles"/></svg>AI score</button>
+                </div>
+              </div>
+              <div class="hbars" id="opp-status">
+                <a class="hbar tooltip" data-tip="4 new · ₹14.2 L" href="12-opportunities.html?status=new"><span class="hbar-label"><span class="dot"></span>New</span><span class="hbar-track"><span style="width:100%"></span></span><span class="hbar-val">4</span></a>
+                <a class="hbar tooltip" data-tip="3 in progress · ₹27.0 L" href="12-opportunities.html?status=in-progress"><span class="hbar-label"><span class="dot"></span>In progress</span><span class="hbar-track"><span style="width:75%"></span></span><span class="hbar-val">3</span></a>
+                <a class="hbar tooltip" data-tip="1 · ₹4.8 L" href="12-opportunities.html?status=requirements"><span class="hbar-label"><span class="dot dot-neutral"></span>Requirements gathered</span><span class="hbar-track"><span style="width:25%"></span></span><span class="hbar-val">1</span></a>
+                <a class="hbar tooltip" data-tip="1 · ₹2.5 L" href="12-opportunities.html?status=documents"><span class="hbar-label"><span class="dot dot-warning"></span>Documents collected</span><span class="hbar-track"><span style="width:25%"></span></span><span class="hbar-val">1</span></a>
+                <a class="hbar tooltip" data-tip="2 won this month · ₹6.1 L" href="12-opportunities.html?status=won"><span class="hbar-label"><span class="dot dot-success"></span>Won this month</span><span class="hbar-track"><span style="width:50%"></span></span><span class="hbar-val">2</span></a>
+              </div>
+              <div class="hbars hidden" id="opp-ai">
+                <a class="hbar tooltip" data-tip="e.g. Inactive client – Deepak Agarwal (82)" href="12-opportunities.html?ai=80"><span class="hbar-label"><span class="dot dot-ai"></span>80–100 · Very likely</span><span class="hbar-track t-ai"><span style="width:50%"></span></span><span class="hbar-val">2</span></a>
+                <a class="hbar tooltip" data-tip="e.g. Life insurance renewal – Meera Joshi (74)" href="12-opportunities.html?ai=60"><span class="hbar-label"><span class="dot dot-ai"></span>60–79 · Likely</span><span class="hbar-track t-ai"><span style="width:100%"></span></span><span class="hbar-val">4</span></a>
+                <a class="hbar tooltip" data-tip="3 opportunities" href="12-opportunities.html?ai=40"><span class="hbar-label"><span class="dot dot-ai"></span>40–59 · Possible</span><span class="hbar-track t-ai"><span style="width:75%"></span></span><span class="hbar-val">3</span></a>
+                <a class="hbar tooltip" data-tip="1 opportunity" href="12-opportunities.html?ai=0"><span class="hbar-label"><span class="dot dot-ai"></span>Below 40 · Unlikely</span><span class="hbar-track t-ai"><span style="width:25%"></span></span><span class="hbar-val">1</span></a>
+                <div class="hbar" style="color:var(--text-3)"><span class="hbar-label"><span class="dot dot-neutral"></span>Not scored (manual)</span><span class="hbar-track"><span style="width:0"></span></span><span class="hbar-val" style="color:var(--text-3)">1</span></div>
+              </div>
+              <div class="pin">
+                <div class="callout c-ai">
+                  <svg class="i"><use href="#i-sparkles"/></svg>
+                  <div class="grow"><b>3 AI suggestions to review</b><small>AI drafts, you approve</small></div>
+                  <a class="btn btn-secondary btn-sm" href="12-opportunities.html?source=ai">Review</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4. Leads assigned to me -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-user-plus"/></svg></span>Leads assigned to me</div>
+              <div class="card-actions"><span class="faint text-sm lead-meta">13 open</span><a class="go" href="04-leads-list.html" title="Open leads"><svg class="i"><use href="#i-chevron-right"/></svg></a></div>
+            </div>
+            <div class="card-body">
+              <div class="sec-head"><span class="overline">By stage</span><a class="ml-auto" href="06-leads-pipeline.html">Pipeline view</a></div>
+              <div class="hbars">
+                <a class="hbar tooltip" data-tip="3 new · created this week" href="04-leads-list.html?stage=new"><span class="hbar-label"><span class="dot"></span>New</span><span class="hbar-track"><span style="width:75%"></span></span><span class="hbar-val">3</span></a>
+                <a class="hbar tooltip" data-tip="3 contacted" href="04-leads-list.html?stage=contacted"><span class="hbar-label"><span class="dot dot-neutral"></span>Contacted</span><span class="hbar-track"><span style="width:75%"></span></span><span class="hbar-val">3</span></a>
+                <a class="hbar tooltip" data-tip="4 follow-ups · all 4 overdue" href="04-leads-list.html?stage=follow-up"><span class="hbar-label"><span class="dot dot-warning"></span>Follow-up</span><span class="hbar-track"><span style="width:100%"></span></span><span class="hbar-val">4</span></a>
+                <a class="hbar tooltip" data-tip="3 hot leads · ₹80 L" href="04-leads-list.html?stage=hot"><span class="hbar-label"><span class="dot dot-danger"></span>Hot lead</span><span class="hbar-track"><span style="width:75%"></span></span><span class="hbar-val">3</span></a>
+                <a class="hbar tooltip" data-tip="1 converted this month · not counted as open" href="04-leads-list.html?stage=completed"><span class="hbar-label"><span class="dot dot-success"></span>Completed this month</span><span class="hbar-track"><span style="width:25%"></span></span><span class="hbar-val">1</span></a>
+              </div>
+              <div class="divider"></div>
+              <div class="sec-head"><span class="overline">Hot leads</span><a class="ml-auto" href="04-leads-list.html?nature=hot">View all 3</a></div>
+              <ul class="mini-list">
+                <li class="mini-row">
+                  <span class="avatar avatar-sm a3">KM</span>
+                  <div class="mini-main">
+                    <div class="mini-name"><a href="05-lead-create.html">Karan Malhotra</a><span class="badge badge-dot badge-danger xs">Hot</span></div>
+                    <div class="mini-sub">MF-SIP · <span class="due-today"><svg class="i"><use href="#i-clock"/></svg>Today 3:30 PM</span></div>
+                  </div>
+                  <div class="mini-right amt">₹5,00,000</div>
+                </li>
+                <li class="mini-row">
+                  <span class="avatar avatar-sm a4">GS</span>
+                  <div class="mini-main">
+                    <div class="mini-name"><a href="05-lead-create.html">Gaurav Sinha</a><span class="badge badge-dot badge-danger xs">Hot</span></div>
+                    <div class="mini-sub">PMS · <span class="due-today"><svg class="i"><use href="#i-clock"/></svg>Today 12:30 PM</span></div>
+                  </div>
+                  <div class="mini-right amt">₹50,00,000</div>
+                </li>
+                <li class="mini-row">
+                  <span class="avatar avatar-sm a2">KS</span>
+                  <div class="mini-main">
+                    <div class="mini-name"><a href="05-lead-create.html">Kunal Shah</a><span class="badge badge-dot badge-danger xs">Hot</span></div>
+                    <div class="mini-sub">MF-Lumpsum · <span class="overdue"><svg class="i"><use href="#i-clock"/></svg>Overdue · 11 Nov</span></div>
+                  </div>
+                  <div class="mini-right amt">₹25,00,000</div>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <!-- 5. Today's Events -->
+          <section class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon ci-warning"><svg class="i"><use href="#i-gift"/></svg></span>Today's Events</div>
+              <div class="card-actions"><a class="go" href="07-clients-list.html?view=events" title="Open clients"><svg class="i"><use href="#i-chevron-right"/></svg></a></div>
+            </div>
+            <div class="card-body" style="display:flex; flex-direction:column;">
+              <div class="segmented seg-sm mb-3" data-segmented id="ev-seg" style="align-self:flex-start;">
+                <button aria-pressed="true" data-ev="all">All <span class="seg-count">5</span></button>
+                <button aria-pressed="false" data-ev="bday">Birthdays <span class="seg-count">3</span></button>
+                <button aria-pressed="false" data-ev="anniv">Anniversaries <span class="seg-count">2</span></button>
+              </div>
+              <ul class="mini-list">
+                <li class="mini-row ev-row" data-kind="bday">
+                  <span class="ev-ic ev-bday"><svg class="i"><use href="#i-cake"/></svg></span>
+                  <div class="mini-main"><div class="mini-name"><a href="08-client-360.html">Anjali Verma</a></div><div class="mini-sub">Birthday · Verma Family</div></div>
+                  <button class="btn btn-secondary btn-sm btn-wa" title="Send wishes on WhatsApp" data-wish="Anjali Verma"><svg class="i"><use href="#i-whatsapp"/></svg><span class="wish-txt">Send wishes</span></button>
+                </li>
+                <li class="mini-row ev-row" data-kind="anniv">
+                  <span class="ev-ic ev-anniv"><svg class="i"><use href="#i-gift"/></svg></span>
+                  <div class="mini-main"><div class="mini-name"><a href="08-client-360.html">Lakshmi Narayanan</a></div><div class="mini-sub">Wedding anniversary · 25th</div></div>
+                  <button class="btn btn-secondary btn-sm btn-wa" title="Send wishes on WhatsApp" data-wish="Lakshmi Narayanan"><svg class="i"><use href="#i-whatsapp"/></svg><span class="wish-txt">Send wishes</span></button>
+                </li>
+                <li class="mini-row ev-row" data-kind="bday">
+                  <span class="ev-ic ev-bday"><svg class="i"><use href="#i-cake"/></svg></span>
+                  <div class="mini-main"><div class="mini-name"><a href="08-client-360.html">Pooja Bansal</a></div><div class="mini-sub">Birthday · Client of Sneha Iyer</div></div>
+                  <span class="sent"><svg class="i"><use href="#i-check"/></svg>Sent 9:12 AM</span>
+                </li>
+                <li class="mini-row ev-row" data-kind="anniv">
+                  <span class="ev-ic ev-inv"><svg class="i"><use href="#i-trending-up"/></svg></span>
+                  <div class="mini-main"><div class="mini-name"><a href="08-client-360.html">Deepak Agarwal</a></div><div class="mini-sub">Investment anniv. · 5 yrs</div></div>
+                  <button class="btn btn-secondary btn-sm btn-wa" title="Send wishes on WhatsApp" data-wish="Deepak Agarwal"><svg class="i"><use href="#i-whatsapp"/></svg><span class="wish-txt">Send wishes</span></button>
+                </li>
+                <li class="mini-row ev-row" data-kind="bday">
+                  <span class="ev-ic ev-bday"><svg class="i"><use href="#i-cake"/></svg></span>
+                  <div class="mini-main"><div class="mini-name"><a href="08-client-360.html">Meera Joshi</a></div><div class="mini-sub">Birthday · Joshi Family</div></div>
+                  <button class="btn btn-secondary btn-sm btn-wa" title="Send wishes on WhatsApp" data-wish="Meera Joshi"><svg class="i"><use href="#i-whatsapp"/></svg><span class="wish-txt">Send wishes</span></button>
+                </li>
+              </ul>
+              <div class="ev-note mt-3"><svg class="i"><use href="#i-calendar"/></svg><span>This week: 6 birthdays, 3 anniversaries</span><a class="ml-auto" href="03-calendar.html">See all</a></div>
+            </div>
+          </section>
+
+          <!-- 7. Recent Activities (spans two rows) -->
+          <section class="card rspan-2">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon ci-neutral"><svg class="i"><use href="#i-activity"/></svg></span>Recent Activities</div>
+              <div class="card-actions feed-filter">
+                <select class="select" aria-label="Filter activities"><option>All modules</option><option>Tasks</option><option>Leads</option><option>Opportunities</option><option>Meetings</option><option>Service requests</option></select>
+              </div>
+            </div>
+            <div class="feed-body">
+              <div class="feed-scroll">
+                <div class="feed-day">Today</div>
+                <div class="timeline feed">
+                  <div class="tl-item"><span class="tl-dot is-primary"><svg class="i"><use href="#i-phone"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Rohan Mehta</b> logged a call with <a href="08-client-360.html">Suresh Iyer</a> · 6 min, callback requested</div><div class="tl-meta">12:58 PM · Client</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>You</b> sent the capital-gains statement (FY 2026-27) to <a href="08-client-360.html">Rahul Verma</a> on WhatsApp</div><div class="tl-meta">12:20 PM · WhatsApp</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-primary"><svg class="i"><use href="#i-phone"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Rohan Mehta</b> logged a call with <a href="05-lead-create.html">Ritu Saxena</a> · 8 min, interested</div><div class="tl-meta">12:10 PM · Lead</div></div></div>
+                  <div class="tl-item"><span class="tl-dot"><svg class="i"><use href="#i-upload"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Priya Nair</b> uploaded Bank mandate on <a href="08-client-360.html">Farhan Qureshi</a></div><div class="tl-meta">11:50 AM · Document</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-primary"><svg class="i"><use href="#i-users"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>You</b> ended meeting <a href="14-meeting-detail.html">Portfolio review – Verma Family</a></div><div class="tl-meta">11:45 AM · Meeting · 45 min</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-success"><svg class="i"><use href="#i-life-buoy"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Priya Nair</b> resolved <a href="16-service-requests.html">SR-2041 Address change</a> for Lakshmi Narayanan</div><div class="tl-meta">11:35 AM · Service request</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-warning"><svg class="i"><use href="#i-calendar"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Rohan Mehta</b> updated Follow-up date <span class="chg"><s>12 Nov</s><svg class="i"><use href="#i-arrow-right"/></svg><b>18 Nov</b></span> on <a href="05-lead-create.html">Karan Malhotra</a></div><div class="tl-meta">10:55 AM · Lead</div></div></div>
+                  <div class="tl-item"><span class="tl-dot"><svg class="i"><use href="#i-refresh"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>MF Box</b> logged a new SIP of <b>₹10,000/month</b> registered by <a href="08-client-360.html">Meera Joshi</a> (Sneha Iyer's client)</div><div class="tl-meta">10:42 AM · Auto-logged</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>AI</b> identified <a href="12-opportunities.html">Inactive client – Deepak Agarwal</a></div><div class="tl-meta">9:05 AM · Opportunity · <span class="badge badge-ai xs"><svg class="i"><use href="#i-sparkles"/></svg>Score 82</span></div></div></div>
+                </div>
+                <div class="feed-day">Yesterday</div>
+                <div class="timeline feed">
+                  <div class="tl-item"><span class="tl-dot is-warning"><svg class="i"><use href="#i-flag"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Sneha Iyer</b> changed Priority <span class="chg"><s>Medium</s><svg class="i"><use href="#i-arrow-right"/></svg><b>High</b></span> on <a href="11-task-detail.html">Nomination update – Pooja Bansal</a></div><div class="tl-meta">6:42 PM · Task</div></div></div>
+                  <div class="tl-item"><span class="tl-dot is-primary"><svg class="i"><use href="#i-target"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>You</b> moved <a href="12-opportunities.html">Lumpsum from FD maturity – Farhan Qureshi</a> to <b>In progress</b></div><div class="tl-meta">5:15 PM · Opportunity · ₹25,00,000</div></div></div>
+                  <div class="tl-item"><span class="tl-dot"><svg class="i"><use href="#i-user"/></svg></span>
+                    <div class="tl-body"><div class="tl-text"><b>Imran Sheikh</b> reassigned <a href="05-lead-create.html">Amit Kulkarni</a> to <b>Rohan Mehta</b></div><div class="tl-meta">4:30 PM · Lead</div></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="card-foot"><span>Every change is kept in the audit trail</span><a class="ml-auto" href="19-reports.html">Full audit log<svg class="i"><use href="#i-chevron-right"/></svg></a></div>
+          </section>
+
+          <!-- 6. Team activity today -->
+          <section class="card span-2">
+            <div class="card-header">
+              <div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-bar-chart"/></svg></span>Team activity today <span class="ct-meta">Andheri branch · 8 people</span></div>
+              <div class="card-actions">
+                <div class="team-legend tb-hide-sm">
+                  <span class="legend-item"><span class="legend-swatch" style="background:var(--chart-1)"></span>Calls</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:var(--chart-2)"></span>Visits</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:var(--chart-4)"></span>WhatsApp</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:var(--chart-5)"></span>Tasks</span>
+                </div>
+                <a class="go" href="18-team-activity.html" title="Open Team Activity" style="margin-left:8px;"><svg class="i"><use href="#i-chevron-right"/></svg></a>
+              </div>
+            </div>
+            <div class="kpis">
+              <div class="kpi"><div class="kpi-label"><svg class="i"><use href="#i-activity"/></svg>Activities</div><div class="kpi-value">86<span class="kpi-delta delta-up"><svg class="i"><use href="#i-trending-up"/></svg>+9</span></div></div>
+              <div class="kpi"><div class="kpi-label"><svg class="i"><use href="#i-phone"/></svg>Calls</div><div class="kpi-value">41</div></div>
+              <div class="kpi"><div class="kpi-label"><svg class="i"><use href="#i-map-pin"/></svg>Meetings &amp; visits</div><div class="kpi-value">9</div></div>
+              <div class="kpi"><div class="kpi-label"><svg class="i"><use href="#i-repeat"/></svg>Follow-ups done</div><div class="kpi-value">18<span class="kpi-delta" style="color:var(--text-3)">of 24 · 75%</span></div></div>
+              <div class="kpi"><div class="kpi-label"><svg class="i"><use href="#i-refresh"/></svg>New SIPs · MF Box</div><div class="kpi-value">7<span class="kpi-delta" style="color:var(--text-3)">₹1.6 L/month</span></div></div>
+            </div>
+            <div class="team-wrap">
+              <table class="team-table">
+                <thead><tr><th>Team member</th><th class="num">Calls</th><th class="num">Visits</th><th class="num">WhatsApp</th><th class="num">Tasks</th><th>Activity mix</th><th>Last logged</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">RM</span><span><span class="person-name">Rohan Mehta</span> <span class="role-tag">· RM</span></span></span></td><td class="num">12</td><td class="num">3</td><td class="num">5</td><td class="num">3</td>
+                    <td><span class="act-bar tooltip" data-tip="12 calls · 3 visits · 5 WhatsApp · 3 tasks"><span class="act-track"><span class="c1" style="width:48%"></span><span class="c2" style="width:12%"></span><span class="c3" style="width:20%"></span><span class="c4" style="width:12%"></span></span><span class="act-total">23</span></span></td><td class="muted">12:58 PM <span class="faint last-sub">· Call</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a4">SI</span><span><span class="person-name">Sneha Iyer</span> <span class="role-tag">· RM</span></span></span></td><td class="num">10</td><td class="num">2</td><td class="num">4</td><td class="num">2</td>
+                    <td><span class="act-bar tooltip" data-tip="10 calls · 2 visits · 4 WhatsApp · 2 tasks"><span class="act-track"><span class="c1" style="width:40%"></span><span class="c2" style="width:8%"></span><span class="c3" style="width:16%"></span><span class="c4" style="width:8%"></span></span><span class="act-total">18</span></span></td><td class="muted">12:45 PM <span class="faint last-sub">· WhatsApp</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><span class="me-tag">You</span></span></span></td><td class="num">6</td><td class="num">1</td><td class="num">3</td><td class="num">2</td>
+                    <td><span class="act-bar tooltip" data-tip="6 calls · 1 visit · 3 WhatsApp · 2 tasks"><span class="act-track"><span class="c1" style="width:24%"></span><span class="c2" style="width:4%"></span><span class="c3" style="width:12%"></span><span class="c4" style="width:8%"></span></span><span class="act-total">12</span></span></td><td class="muted">1:04 PM <span class="faint last-sub">· WhatsApp</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a5">KM</span><span><span class="person-name">Kavya Menon</span> <span class="role-tag">· Sub-broker</span></span></span></td><td class="num">7</td><td class="num">3</td><td class="num">4</td><td class="num">1</td>
+                    <td><span class="act-bar tooltip" data-tip="7 calls · 3 visits · 4 WhatsApp · 1 task"><span class="act-track"><span class="c1" style="width:28%"></span><span class="c2" style="width:12%"></span><span class="c3" style="width:16%"></span><span class="c4" style="width:4%"></span></span><span class="act-total">15</span></span></td><td class="muted">12:32 PM <span class="faint last-sub">· Check-in</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a3">IS</span><span><span class="person-name">Imran Sheikh</span> <span class="role-tag">· Sub-broker</span></span></span></td><td class="num">4</td><td class="num zero">0</td><td class="num">2</td><td class="num">1</td>
+                    <td><span class="act-bar tooltip" data-tip="4 calls · 0 visits · 2 WhatsApp · 1 task"><span class="act-track"><span class="c1" style="width:16%"></span><span class="c3" style="width:8%"></span><span class="c4" style="width:4%"></span></span><span class="act-total">7</span></span></td><td class="muted">11:40 AM <span class="faint last-sub">· Call</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a5">RP</span><span><span class="person-name">Ravi Pillai</span> <span class="role-tag">· Sub-broker</span></span></span></td><td class="num zero">0</td><td class="num zero">0</td><td class="num zero">0</td><td class="num zero">0</td>
+                    <td><span class="badge badge-dot badge-warning xs">No activity yet</span></td><td><span class="due-today">Yesterday</span><button class="btn btn-ghost btn-sm" data-nudge="Ravi Pillai" style="height:24px; padding:0 8px; margin-left:6px;"><svg class="i i-sm"><use href="#i-bell"/></svg>Nudge</button></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">PN</span><span><span class="person-name">Priya Nair</span> <span class="role-tag">· Ops</span></span></span></td><td class="num">2</td><td class="num zero">0</td><td class="num">1</td><td class="num">3</td>
+                    <td><span class="act-bar tooltip" data-tip="2 calls · 0 visits · 1 WhatsApp · 3 tasks"><span class="act-track"><span class="c1" style="width:8%"></span><span class="c3" style="width:4%"></span><span class="c4" style="width:12%"></span></span><span class="act-total">6</span></span></td><td class="muted">12:10 PM <span class="faint last-sub">· Task</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a4">AD</span><span><span class="person-name">Arjun Desai</span> <span class="role-tag">· Service desk</span></span></span></td><td class="num zero">0</td><td class="num zero">0</td><td class="num zero">0</td><td class="num zero">0</td>
+                    <td><span class="badge badge-dot badge-warning xs">No activity yet</span></td><td><span class="due-today">Yesterday</span><button class="btn btn-ghost btn-sm" data-nudge="Arjun Desai" style="height:24px; padding:0 8px; margin-left:6px;"><svg class="i i-sm"><use href="#i-bell"/></svg>Nudge</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Log activity drawer -->
+  <aside class="drawer" id="drawer-log" aria-label="Log activity">
+    <div class="drawer-header"><div><div class="drawer-title">Log activity</div><div class="drawer-sub">Takes 10 seconds · shows up in Team Activity</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Activity type <span class="req">*</span></label>
+          <div class="choice-group" data-single>
+            <button class="choice" aria-pressed="true"><svg class="i"><use href="#i-phone"/></svg>Call</button>
+            <button class="choice" aria-pressed="false"><svg class="i"><use href="#i-map-pin"/></svg>Visit / meeting</button>
+            <button class="choice" aria-pressed="false"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</button>
+            <button class="choice" aria-pressed="false"><svg class="i"><use href="#i-mail"/></svg>Email</button>
+          </div>
+        </div>
+        <div class="field span-2"><label class="label">Client or lead <span class="req">*</span></label>
+          <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by name, PAN, mobile or folio" value="Rahul Verma · Verma Family"></label></div>
+        <div class="field"><label class="label">When</label><input class="input" value="Today, 1:10 PM"></div>
+        <div class="field"><label class="label">Duration</label><select class="select"><option>15 min</option><option>5 min</option><option>30 min</option><option>1 hour</option></select></div>
+        <div class="field span-2"><label class="label">Outcome</label>
+          <select class="select"><option>Interested · send proposal</option><option>Call back later</option><option>Not reachable</option><option>Not interested</option></select></div>
+        <div class="field span-2"><label class="label">Notes</label><textarea class="textarea" placeholder="What was discussed?"></textarea></div>
+        <div class="field span-2">
+          <label class="check"><input type="checkbox" checked>Create a follow-up task</label>
+          <div class="help">Follow-up on Tue, 17 Nov 2026 · assigned to you</div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" id="save-log">Save activity</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      // View dashboard as (permission-gated + audited)
+      document.getElementById('viewas').addEventListener('change', function (e) {
+        AK.toast('Viewing the dashboard as <b>' + e.target.value + '</b> · logged in the audit trail', { icon: 'eye', undo: false });
+      });
+
+      // Meeting-outcome quick buttons
+      document.querySelectorAll('[data-outcome]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var o = b.getAttribute('data-outcome');
+          var box = document.getElementById('outcome');
+          box.classList.add('is-done');
+          box.querySelector('.outcome-icon').innerHTML = AK.icon('check', 'i-sm');
+          document.getElementById('outcome-text').innerHTML = 'Outcome saved for <a href="14-meeting-detail.html">Portfolio review – Verma Family</a>: <b>' + o + '</b>' + (o === 'Follow-up needed' ? ' · follow-up task created for Tue, 17 Nov' : '');
+          document.getElementById('outcome-actions').innerHTML = '<a class="btn btn-ghost btn-sm" href="14-meeting-detail.html">Add notes</a>';
+          AK.toast('Meeting outcome saved: ' + o);
+        });
+      });
+
+      // Opportunities: Status | AI score
+      document.querySelectorAll('#opp-seg button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var ai = b.getAttribute('data-panel') === 'ai';
+          document.getElementById('opp-status').classList.toggle('hidden', ai);
+          document.getElementById('opp-ai').classList.toggle('hidden', !ai);
+          document.getElementById('opp-break-title').textContent = ai ? 'AI score breakup' : 'Status breakup';
+        });
+      });
+
+      // Today's events filter
+      document.querySelectorAll('#ev-seg button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var k = b.getAttribute('data-ev');
+          document.querySelectorAll('.ev-row').forEach(function (r) { r.hidden = !(k === 'all' || r.getAttribute('data-kind') === k); });
+        });
+      });
+
+      // Send wishes on WhatsApp
+      document.addEventListener('click', function (e) {
+        var w = e.target.closest('[data-wish]');
+        if (w) {
+          var name = w.getAttribute('data-wish');
+          w.outerHTML = '<span class="sent">' + AK.icon('check') + 'Sent just now</span>';
+          AK.toast('WhatsApp wishes sent to ' + name + ' (template: Greetings)', { icon: 'whatsapp' });
+        }
+        var n = e.target.closest('[data-nudge]');
+        if (n) { AK.toast('Reminder sent to ' + n.getAttribute('data-nudge') + ' to log today\'s activity', { icon: 'bell', undo: false }); }
+      });
+
+      // Save activity
+      document.getElementById('save-log').addEventListener('click', function () {
+        AK.closeDrawer('drawer-log');
+        AK.toast('Call with Rahul Verma logged · follow-up task created');
+      });
+    })();
+  </script>
+</body>
+</html>

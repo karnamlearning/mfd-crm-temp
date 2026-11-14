@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Internal CRM Wireframes · AdvisorKhoj</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    .hub { max-width: 1240px; margin: 0 auto; padding: 0 var(--sp-6) var(--sp-10); }
+    .hub-top { display: flex; align-items: center; gap: var(--sp-3); height: 64px; border-bottom: 1px solid var(--border); margin-bottom: var(--sp-8); }
+    .hub-hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--sp-8); align-items: center; margin-bottom: var(--sp-10); }
+    .hub-eyebrow { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; color: var(--primary-text); }
+    .hub-title { font-size: 40px; line-height: 46px; font-weight: 700; letter-spacing: -.03em; margin: 10px 0 14px; text-wrap: balance; }
+    .hub-lead { font-size: 16px; line-height: 26px; color: var(--text-2); max-width: 600px; }
+    .hub-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+    .hub-fact { padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
+    .hub-fact b { display: block; font-size: 24px; line-height: 30px; letter-spacing: -.02em; }
+    .hub-fact span { font-size: 13px; color: var(--text-2); }
+    .sec-head { display: flex; align-items: baseline; gap: var(--sp-3); margin: var(--sp-10) 0 var(--sp-4); }
+    .sec-head h2 { font-size: 20px; line-height: 28px; letter-spacing: -.01em; }
+    .sec-head p { color: var(--text-3); font-size: 13px; }
+    .screens { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-5); }
+    .screen { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; color: inherit; transition: border-color .15s, box-shadow .15s, transform .15s; }
+    .screen:hover { text-decoration: none; border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .thumb { aspect-ratio: 16 / 10; background: var(--surface-2); border-bottom: 1px solid var(--border); overflow: hidden; position: relative; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; position: relative; z-index: 1; }
+    .thumb .t-dark { display: none; }
+    :root[data-theme="dark"] .thumb .t-light { display: none; }
+    :root[data-theme="dark"] .thumb .t-dark { display: block; }
+    .thumb-missing { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-3); font-size: 12px; }
+    .screen-body { padding: var(--sp-4); display: flex; flex-direction: column; gap: 6px; }
+    .screen-num { font-size: 12px; font-weight: 600; color: var(--text-3); font-variant-numeric: tabular-nums; }
+    .screen-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .screen-desc { font-size: 13px; color: var(--text-2); line-height: 19px; }
+    .swatches { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--sp-3); }
+    .sw { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
+    .sw i { display: block; height: 56px; border-bottom: 1px solid var(--border); }
+    .sw div { padding: 8px 10px; font-size: 12px; }
+    .sw code { font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+    .kit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-4); }
+    .kit .card-body { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center; }
+    .type-row { display: flex; align-items: baseline; gap: var(--sp-4); padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .type-row:last-child { border-bottom: 0; }
+    .type-row code { width: 90px; flex: none; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+    @media (max-width: 1000px) { .screens, .kit { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hub-hero { grid-template-columns: 1fr; } .swatches { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 640px) { .hub { padding: 0 16px 40px; } .screens, .kit { grid-template-columns: 1fr; } .hub-title { font-size: 30px; line-height: 36px; } .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  </style>
+</head>
+<body>
+  <div class="hub">
+    <div class="hub-top">
+      <div class="sb-logo">AK</div>
+      <div><div class="fw-700">AdvisorKhoj CRM</div><div class="text-sm faint">Internal CRM · wireframes v1</div></div>
+      <div class="ml-auto row gap-2">
+        <a class="btn btn-ghost btn-sm" href="DESIGN.md"><svg class="i"><use href="#i-file"/></svg>DESIGN.md</a>
+        <button class="btn btn-secondary btn-sm" data-ak="theme" title="Switch theme"><svg class="i"><use href="#i-moon"/></svg></button>
+      </div>
+    </div>
+
+    <section class="hub-hero">
+      <div>
+        <div class="hub-eyebrow">Wireframes · 14 Nov 2026</div>
+        <h1 class="hub-title">The internal CRM for MF Box MFDs, screen by screen</h1>
+        <p class="hub-lead">20 clickable screens that keep the layout MFD teams know from the Investwell CRM (as used by DoItNow), redrawn in a minimal blue-and-white system with a full dark theme. The centre of the MVP is daily activity tracking for RMs, branches and sub-brokers.</p>
+        <div class="row gap-2 mt-5">
+          <a class="btn btn-primary" href="01-dashboard.html">Open the prototype<svg class="i"><use href="#i-arrow-right"/></svg></a>
+          <a class="btn btn-secondary" href="18-team-activity.html"><svg class="i"><use href="#i-activity"/></svg>Team Activity (MVP core)</a>
+        </div>
+      </div>
+      <div class="hub-facts">
+        <div class="hub-fact"><b>20</b><span>screens, light and dark</span></div>
+        <div class="hub-fact"><b>1</b><span>shared design system: tokens, components, icons</span></div>
+        <div class="hub-fact"><b>9 → 16</b><span>Investwell modules → our modules (adds My Day, Team Activity, Service Requests, Documents…)</span></div>
+        <div class="hub-fact"><b>Ctrl K</b><span>command palette on every screen</span></div>
+      </div>
+    </section>
+
+    <div class="banner banner-info"><svg class="i"><use href="#i-info"/></svg><span>All people, clients and numbers are <b>fictional</b>. The tenant shown is a sample MFD firm, "Sharma Wealth Partners". Client data is shown as synced from MF Box Back Office.</span></div>
+
+    <div id="screen-sections"></div>
+
+    <div class="sec-head"><h2>Design system</h2><p>Full spec in DESIGN.md · switch theme with the moon icon</p></div>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--primary)"></i><div>Primary<br><code>--primary</code></div></div>
+      <div class="sw"><i style="background:var(--primary-soft)"></i><div>Primary soft<br><code>--primary-soft</code></div></div>
+      <div class="sw"><i style="background:var(--surface)"></i><div>Surface<br><code>--surface</code></div></div>
+      <div class="sw"><i style="background:var(--bg)"></i><div>Background<br><code>--bg</code></div></div>
+      <div class="sw"><i style="background:var(--text)"></i><div>Text<br><code>--text</code></div></div>
+      <div class="sw"><i style="background:var(--border-strong)"></i><div>Border<br><code>--border-strong</code></div></div>
+      <div class="sw"><i style="background:var(--success)"></i><div>Success<br><code>--success</code></div></div>
+      <div class="sw"><i style="background:var(--warning)"></i><div>Warning<br><code>--warning</code></div></div>
+      <div class="sw"><i style="background:var(--danger)"></i><div>Danger<br><code>--danger</code></div></div>
+      <div class="sw"><i style="background:var(--ai)"></i><div>AI<br><code>--ai</code></div></div>
+      <div class="sw"><i style="background:var(--neutral)"></i><div>Neutral<br><code>--neutral</code></div></div>
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--chart-1) 0 20%,var(--chart-2) 0 40%,var(--chart-3) 0 60%,var(--chart-4) 0 80%,var(--chart-5) 0)"></i><div>Charts<br><code>--chart-1…5</code></div></div>
+    </div>
+
+    <div class="kit mt-5">
+      <div class="card"><div class="card-header"><div class="card-title">Buttons</div></div><div class="card-body">
+        <button class="btn btn-primary"><svg class="i"><use href="#i-plus"/></svg>Create</button>
+        <button class="btn btn-secondary">Secondary</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-soft">Soft</button>
+        <button class="btn btn-secondary btn-icon"><svg class="i"><use href="#i-more-h"/></svg></button>
+      </div></div>
+      <div class="card"><div class="card-header"><div class="card-title">Status badges</div></div><div class="card-body">
+        <span class="badge badge-dot badge-warning">Pending</span>
+        <span class="badge badge-dot badge-info">In progress</span>
+        <span class="badge badge-dot badge-neutral">On hold</span>
+        <span class="badge badge-dot badge-success">Done</span>
+        <span class="badge badge-danger"><svg class="i"><use href="#i-clock"/></svg>Overdue</span>
+        <span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI · 82</span>
+      </div></div>
+      <div class="card"><div class="card-header"><div class="card-title">Inputs</div></div><div class="card-body" style="flex-direction:column;align-items:stretch">
+        <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by name, PAN, mobile"></label>
+        <div class="row gap-2"><div class="segmented" data-segmented><button aria-pressed="true">Low</button><button>Medium</button><button>High</button></div><label class="switch"><input type="checkbox" checked><span></span></label><label class="check"><input type="checkbox" checked>Remind me</label></div>
+      </div></div>
+      <div class="card"><div class="card-header"><div class="card-title">Typography</div><span class="card-actions faint text-sm">Inter</span></div><div class="card-body" style="display:block">
+        <div class="type-row"><code>xl · 24/700</code><span class="greeting" style="font-size:24px">Good afternoon</span></div>
+        <div class="type-row"><code>lg · 20/600</code><span class="page-title">Page title</span></div>
+        <div class="type-row"><code>base · 14/400</code><span>Body and table text</span></div>
+        <div class="type-row"><code>sm · 12/500</code><span class="text-sm faint">Meta and helper text</span></div>
+      </div></div>
+      <div class="card"><div class="card-header"><div class="card-title">Stat tiles</div></div><div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="stat stat-danger"><div class="stat-label">Overdue</div><div class="stat-value">5</div></div>
+        <div class="stat stat-ai"><div class="stat-label">AI identified</div><div class="stat-value">3</div></div>
+      </div></div>
+      <div class="card"><div class="card-header"><div class="card-title">People & priority</div></div><div class="card-body">
+        <span class="avatar-group"><span class="avatar">NK</span><span class="avatar a2">RM</span><span class="avatar a3">SI</span><span class="avatar a4">KM</span></span>
+        <span class="prio prio-high">High</span><span class="prio prio-med">Medium</span><span class="prio prio-low">Low</span>
+        <span class="kbd">Ctrl</span><span class="kbd">K</span>
+      </div></div>
+    </div>
+
+    <p class="text-sm faint mt-6">Source pack: INTERNAL_CRM/01_Video_Analysis (Investwell demo screens), 02_Research_Reports, 05_Open_Questions (stakeholder answers 13 Nov 2026), 06_Verification_and_Gap_Research.</p>
+  </div>
+
+  <script>
+    (function () {
+      if (!document.documentElement.getAttribute('data-theme')) {
+        document.documentElement.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      }
+      var tb = document.querySelector('[data-ak="theme"]');
+      if (tb && document.documentElement.getAttribute('data-theme') === 'dark') tb.innerHTML = AK.icon('sun');
+      var GROUPS = [
+        ['Daily work', 'Where every RM starts the day', [
+          ['01', '01-dashboard.html', 'Home dashboard', 'home', 'Investwell’s card layout, calmer: tasks, opportunities, leads, events, team snapshot.'],
+          ['02', '02-my-day.html', 'My Day', 'sun', 'One work queue (overdue → today → upcoming) with one-tap Done, Snooze, Delegate.'],
+          ['18', '18-team-activity.html', 'Team Activity', 'activity', 'MVP core: daily calls, visits and follow-ups for RMs, branches and sub-brokers.'],
+          ['03', '03-calendar.html', 'Calendar', 'calendar', 'Month / Week / Day / Agenda, view as any team member, birthdays and holidays.'],
+          ['15', '15-inbox-whatsapp.html', 'Team inbox', 'message', 'Shared WhatsApp inbox with assignment, 24-hour window and AI draft replies.'],
+        ]],
+        ['Pipeline', 'Leads and opportunities', [
+          ['04', '04-leads-list.html', 'Leads', 'user-plus', 'My / Collaborations / Team / New leads, filters, bulk actions, auto-assignment.'],
+          ['05', '05-lead-create.html', 'Lead detail & create', 'edit', 'Stage stepper, timeline and the Create Lead drawer with duplicate check.'],
+          ['06', '06-leads-pipeline.html', 'Leads pipeline', 'kanban', 'Kanban with Won/Lost drop zones and stage / product configuration.'],
+          ['12', '12-opportunities.html', 'Opportunities', 'target', 'Kanban ⇄ table, AI-identified opportunities with score and reason.'],
+        ]],
+        ['Clients & service', 'Synced from MF Box Back Office', [
+          ['07', '07-clients-list.html', 'Clients', 'users', 'AUM, SIP book, tier, last contact and health, synced from MF Box.'],
+          ['08', '08-client-360.html', 'Client 360', 'user', 'Family, portfolio snapshot, coverage, health score and full timeline.'],
+          ['16', '16-service-requests.html', 'Service requests', 'life-buoy', 'Cases with reference numbers, checklists and pausable SLA clocks.'],
+          ['17', '17-documents.html', 'Documents', 'folder', 'Investwell says “Coming soon”; we ship folders, expiry and access logs.'],
+        ]],
+        ['Tasks & meetings', 'Assign, collaborate, follow through', [
+          ['09', '09-tasks-list.html', 'Tasks', 'check-square', 'Investwell’s columns plus saved views, inline status and bulk actions.'],
+          ['10', '10-task-create.html', 'Create task', 'plus', 'Drawer form with natural-language quick-add and all Investwell fields.'],
+          ['11', '11-task-detail.html', 'Task detail', 'file', 'Comments & activities, checklist, linked records, attachments.'],
+          ['13', '13-meetings.html', 'Meetings', 'video', 'Grouped agenda, outcome-pending queue and the Schedule Meeting drawer.'],
+          ['14', '14-meeting-detail.html', 'Meeting detail', 'note', 'Log outcome, voice note, AI summary → tasks (human approves), prep pack.'],
+        ]],
+        ['Management', 'For owners and branch managers', [
+          ['19', '19-reports.html', 'Reports & MIS', 'bar-chart', 'Activity, funnel, task ageing, coverage, SIP book and commissions.'],
+          ['20', '20-settings.html', 'Settings', 'settings', 'Team & hierarchy, roles, configurations, lead capture, automations, MF Box sync.'],
+        ]],
+      ];
+      var out = '';
+      GROUPS.forEach(function (g) {
+        out += '<div class="sec-head"><h2>' + g[0] + '</h2><p>' + g[1] + '</p></div><div class="screens">';
+        g[2].forEach(function (s) {
+          var base = s[1].replace('.html', '');
+          out += '<a class="screen" href="' + s[1] + '"><div class="thumb"><span class="thumb-missing">' + s[2] + '</span>' +
+            '<img class="t-light" loading="lazy" alt="' + s[2] + ' (light)" src="_shots/' + base + '-light.png" onerror="this.remove()">' +
+            '<img class="t-dark" loading="lazy" alt="' + s[2] + ' (dark)" src="_shots/' + base + '-dark.png" onerror="this.remove()"></div>' +
+            '<div class="screen-body"><span class="screen-num">' + s[0] + '</span><span class="screen-name"><svg class="i"><use href="#i-' + s[3] + '"/></svg>' + s[2] + '</span><span class="screen-desc">' + s[4] + '</span></div></a>';
+        });
+        out += '</div>';
+      });
+      document.getElementById('screen-sections').innerHTML = out;
+    })();
+  </script>
+</body>
+</html>

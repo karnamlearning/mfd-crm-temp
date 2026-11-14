@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meeting detail · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Meeting detail (14) · page-specific, tokens only ---- */
+    .md-head { display: flex; gap: var(--sp-4); align-items: flex-start; margin-bottom: var(--sp-5); flex-wrap: wrap; }
+    .md-head-main { flex: 1; min-width: 0; }
+    .md-title-row { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+    .md-back { margin-left: -6px; }
+    .md-meta { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+    .md-meta .tag { height: 26px; padding: 0 10px; gap: 6px; background: var(--surface); }
+    .md-meta .tag .i { color: var(--text-3); width: 14px; height: 14px; }
+    .md-people { display: flex; align-items: center; gap: var(--sp-2) var(--sp-5); margin-top: var(--sp-3); flex-wrap: wrap; font-size: 13px; color: var(--text-2); }
+    .md-people-grp { display: inline-flex; align-items: center; gap: var(--sp-2); }
+    .md-people-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .md-people b { color: var(--text); font-weight: 500; }
+    .md-people .divider-v { height: 20px; align-self: center; }
+    @media (max-width: 1360px) { .md-people .divider-v { display: none; } }
+    .md-actions { display: flex; gap: var(--sp-2); align-items: center; }
+
+    /* Log outcome card */
+    .md-outcome { border-color: var(--primary-soft-2); }
+    .md-outcome .card-header { background: var(--surface); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+    .md-card-sub { font-size: 12px; color: var(--text-3); font-weight: 400; line-height: 16px; }
+    .md-section-label { font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: var(--sp-2); display: flex; align-items: center; gap: 6px; }
+    .md-section-label .md-hint { margin-left: auto; font-weight: 500; }
+    .md-choices .choice { height: 38px; padding: 0 14px; }
+    .md-choices .choice .i { width: 15px; height: 15px; }
+    .md-notes-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--sp-4); margin-top: var(--sp-5); }
+    .md-notes-grid .textarea { min-height: 148px; font-size: 13.5px; }
+    .md-voice { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); padding: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-3); min-height: 148px; }
+    .md-voice-clip { display: flex; align-items: center; gap: var(--sp-2); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 8px 10px; }
+    .md-play { width: 28px; height: 28px; border-radius: 50%; border: 0; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; flex: none; }
+    .md-play .i { width: 12px; height: 12px; fill: currentColor; }
+    .md-wave { flex: 1; min-width: 0; height: 28px; display: flex; align-items: center; gap: 2px; overflow: hidden; }
+    .md-wave span { width: 3px; flex: none; border-radius: 2px; background: var(--border-strong); }
+    .md-wave span.is-played { background: var(--primary); }
+    .md-wave.is-live span { background: var(--danger); animation: md-pulse 0.9s ease-in-out infinite alternate; }
+    @keyframes md-pulse { from { transform: scaleY(.45); } to { transform: scaleY(1); } }
+    .md-dur { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; flex: none; }
+    .md-voice-foot { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+    .md-rec-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); display: none; }
+    .is-recording .md-rec-dot { display: inline-block; }
+    .md-consent { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; line-height: 16px; }
+    .md-consent .i { color: var(--success); width: 14px; height: 14px; }
+    .md-next-grid { display: grid; grid-template-columns: minmax(0, 1fr) 170px 150px; gap: var(--sp-4); margin-top: var(--sp-5); }
+
+    /* AI section */
+    .md-ai { margin-top: var(--sp-5); border-radius: var(--r-md); background: var(--ai-soft); border: 1px solid transparent; padding: var(--sp-4); }
+    .md-ai-head { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+    .md-ai-title { font-weight: 600; font-size: 14px; color: var(--text); display: inline-flex; align-items: center; gap: 8px; }
+    .md-ai-title .i { color: var(--ai); }
+    .md-ai-src { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+    .md-ai-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); margin-top: var(--sp-3); }
+    .md-ai-panel + .md-ai-panel { margin-top: var(--sp-3); }
+    .md-ai-panel-head { display: flex; align-items: center; gap: var(--sp-2); padding: 10px var(--sp-4); border-bottom: 1px solid var(--border); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); }
+    .md-ai-panel-head .btn { text-transform: none; letter-spacing: 0; }
+    .md-bullets { margin: 0; padding: var(--sp-3) var(--sp-4) var(--sp-3) 34px; font-size: 13.5px; color: var(--text); }
+    .md-bullets li { padding: 3px 0; line-height: 20px; }
+    .md-bullets li::marker { color: var(--ai); }
+    .md-bullets .muted { font-size: 12.5px; }
+    .md-action { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 10px var(--sp-4); border-bottom: 1px solid var(--border); }
+    .md-action:last-child { border-bottom: 0; }
+    .md-action .check { margin-top: 2px; }
+    .md-action-title { font-weight: 500; font-size: 13.5px; color: var(--text); line-height: 20px; }
+    .md-action-meta { display: flex; align-items: center; gap: var(--sp-2); margin-top: 4px; flex-wrap: wrap; font-size: 12px; color: var(--text-3); }
+    .md-action-meta .person-name { font-size: 12px; font-weight: 500; color: var(--text-2); }
+    .md-action-side { display: flex; align-items: center; gap: 4px; }
+    .md-ai-foot { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-3); flex-wrap: wrap; }
+    .md-not-advice { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); font-weight: 500; }
+    .md-not-advice .i { width: 14px; height: 14px; color: var(--ai); }
+    .btn-ai { background: var(--ai); color: var(--surface); font-weight: 600; }
+    .btn-ai:hover { filter: brightness(1.08); }
+    .md-outcome .card-footer { justify-content: flex-end; flex-wrap: wrap; }
+    .md-outcome .card-footer .md-foot-note { margin-right: auto; font-size: 12px; color: var(--text-3); display: inline-flex; align-items: center; gap: 6px; }
+
+    /* Tabs card */
+    .md-tabs-card .tabs { padding: 0 var(--sp-5); margin: 0; }
+    .md-tabs-card .tab { padding-top: 14px; }
+    .md-tabs-card .tabs .md-tabs-right { margin-left: auto; align-self: center; }
+    .md-panel { padding: var(--sp-5); }
+    .md-panel.flush { padding: 0; }
+    .md-tl-head { display: flex; align-items: center; gap: var(--sp-2); margin: var(--sp-5) 0 var(--sp-4); }
+    .md-tl-head .segmented button { height: 26px; font-size: 12.5px; }
+    .md-flat.table-wrap { border: 0; border-radius: 0; box-shadow: none; }
+    .md-file { display: flex; align-items: center; gap: var(--sp-3); padding: 12px var(--sp-5); border-bottom: 1px solid var(--border); }
+    .md-file:last-child { border-bottom: 0; }
+    .md-file-icon { width: 36px; height: 36px; border-radius: var(--r-md); background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; flex: none; font-size: 10px; font-weight: 700; letter-spacing: .02em; }
+    .md-file-icon.is-img { background: var(--primary-soft); color: var(--primary-text); }
+    .md-dropzone { margin: var(--sp-4) var(--sp-5); border: 1.5px dashed var(--border-strong); border-radius: var(--r-md); padding: var(--sp-4); display: flex; align-items: center; justify-content: center; gap: var(--sp-2); color: var(--text-3); font-size: 13px; }
+
+    /* Right column */
+    .md-side .card-header { padding: 14px var(--sp-4); }
+    .md-side .card-body { padding: var(--sp-4); }
+    .md-sync { font-size: 11.5px; color: var(--text-3); display: inline-flex; align-items: center; gap: 5px; font-weight: 500; }
+    .md-sync .dot { width: 6px; height: 6px; }
+    .md-aum { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-2); }
+    .md-aum-value { font-size: 26px; line-height: 32px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .md-split { display: flex; height: 8px; border-radius: 6px; overflow: hidden; gap: 2px; margin: var(--sp-3) 0 var(--sp-2); }
+    .md-split span { display: block; height: 100%; }
+    .md-legend { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+    .md-legend-row { display: flex; align-items: center; gap: 8px; color: var(--text-2); }
+    .md-legend-row b { margin-left: auto; color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums; }
+    .md-sub-h { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: var(--sp-4) 0 var(--sp-2); display: flex; align-items: center; gap: 6px; }
+    .md-sub-h a { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; font-size: 12px; }
+    .md-mini { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); }
+    .md-mini > div { background: var(--surface-2); border-radius: var(--r-md); padding: 8px 10px; }
+    .md-mini small { display: block; font-size: 11.5px; color: var(--text-3); }
+    .md-mini b { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .md-txn { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .md-txn:last-child { border-bottom: 0; }
+    .md-txn-date { color: var(--text-3); font-variant-numeric: tabular-nums; line-height: 15px; }
+    .md-txn-what { min-width: 0; }
+    .md-txn-what div:first-child { color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .md-txn-what div + div { color: var(--text-3); font-size: 12px; }
+    .md-txn-amt { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text); text-align: right; }
+    .md-txn-amt.is-out { color: var(--text-2); }
+    .md-goal { margin-bottom: 10px; }
+    .md-goal:last-child { margin-bottom: 0; }
+    .md-goal-top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 5px; color: var(--text-2); }
+    .md-goal-top b { color: var(--text); font-weight: 500; }
+    .md-quote { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; font-size: 12.5px; color: var(--text-2); line-height: 18px; }
+    .md-quote .md-quote-meta { display: block; font-size: 11.5px; color: var(--text-3); margin-bottom: 4px; }
+
+    .md-client { display: flex; gap: var(--sp-3); align-items: center; }
+    .md-client-name { font-weight: 600; font-size: 14.5px; color: var(--text); }
+    .md-client .kv { margin-top: 0; }
+    .md-side .kv { grid-template-columns: 96px 1fr; font-size: 12.5px; gap: 7px 10px; margin-top: var(--sp-3); }
+    .md-client-actions { display: flex; gap: var(--sp-2); margin-top: var(--sp-4); }
+    .md-client-actions .btn { flex: 1; }
+
+    .md-agenda-item { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; font-size: 13px; color: var(--text); }
+    .md-agenda-item .check { margin-top: 1px; }
+    .md-agenda-item.is-done .md-agenda-text { color: var(--text-2); }
+    .md-agenda-item .badge { margin-left: auto; }
+    .md-rem { display: flex; gap: var(--sp-3); align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .md-rem:last-child { border-bottom: 0; padding-bottom: 0; }
+    .md-rem:first-child { padding-top: 0; }
+    .md-rem-icon { width: 28px; height: 28px; border-radius: var(--r-md); background: var(--surface-2); color: var(--text-2); display: grid; place-items: center; flex: none; }
+    .md-rem-icon .i { width: 14px; height: 14px; }
+    .md-rem-text { flex: 1; min-width: 0; font-size: 13px; color: var(--text); line-height: 18px; }
+    .md-rem-text small { display: block; color: var(--text-3); font-size: 12px; }
+
+    @media (max-width: 1280px) {
+      .md-next-grid { grid-template-columns: minmax(0, 1fr) 150px 130px; }
+    }
+    @media (max-width: 900px) {
+      .md-notes-grid, .md-next-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .md-actions { width: 100%; }
+      .md-actions .btn-primary { margin-left: auto; }
+      .md-tabs-card .tabs { padding: 0 var(--sp-4); }
+    }
+  </style>
+</head>
+<body data-page="meetings" data-crumb="Meetings|Portfolio review – Verma Family">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- ===== Header ===== -->
+        <div class="md-head">
+          <div class="md-head-main">
+            <div class="md-title-row">
+              <a class="btn btn-ghost btn-icon btn-sm md-back" href="13-meetings.html" aria-label="Back to meetings"><svg class="i"><use href="#i-arrow-left"/></svg></a>
+              <h1 class="page-title">Portfolio review – Verma Family</h1>
+              <span class="badge badge-dot badge-warning" id="md-status">Outcome pending</span>
+            </div>
+            <div class="md-meta">
+              <span class="tag"><svg class="i"><use href="#i-briefcase"/></svg>Portfolio review</span>
+              <span class="tag"><svg class="i"><use href="#i-users"/></svg>Offline</span>
+              <span class="tag"><svg class="i"><use href="#i-map-pin"/></svg>Andheri office</span>
+              <span class="tag"><svg class="i"><use href="#i-calendar"/></svg>Today · 11:00–11:45 AM</span>
+              <span class="tag"><svg class="i"><use href="#i-clock"/></svg>45 min</span>
+            </div>
+            <div class="md-people">
+              <span class="md-people-grp"><span class="md-people-label">Host</span><span class="avatar avatar-sm">NK</span><b>Neha Kapoor</b></span>
+              <span class="divider-v"></span>
+              <span class="md-people-grp"><span class="md-people-label">Participants</span>
+                <span class="person"><span class="avatar avatar-sm a2">RV</span><a href="08-client-360.html" class="fw-500">Rahul Verma</a><span class="faint">(Family Head)</span></span>
+                <span class="person"><span class="avatar avatar-sm a3">AV</span><b>Anjali Verma</b></span>
+                <button class="btn btn-ghost btn-sm" onclick="AK.toast('Add participant: search clients, leads or team', {undo:false, icon:'user-plus'})"><svg class="i"><use href="#i-plus"/></svg>Add</button>
+              </span>
+            </div>
+          </div>
+          <div class="md-actions">
+            <button class="btn btn-secondary" data-open-drawer="drawer-reschedule"><svg class="i"><use href="#i-calendar"/></svg>Reschedule</button>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary btn-icon" data-popover="pop-more" aria-label="More actions"><svg class="i"><use href="#i-more-h"/></svg></button>
+              <div class="popover" id="pop-more">
+                <div class="menu">
+                  <button class="menu-item"><svg class="i"><use href="#i-edit"/></svg>Edit meeting<span class="menu-hint">E</span></button>
+                  <button class="menu-item"><svg class="i"><use href="#i-copy"/></svg>Duplicate as next review</button>
+                  <button class="menu-item"><svg class="i"><use href="#i-link"/></svg>Copy meeting link</button>
+                  <button class="menu-item"><svg class="i"><use href="#i-whatsapp"/></svg>Send summary to client…</button>
+                  <button class="menu-item"><svg class="i"><use href="#i-download"/></svg>Export minutes (PDF)</button>
+                  <div class="menu-sep"></div>
+                  <button class="menu-item"><svg class="i"><use href="#i-user"/></svg>Mark as no-show</button>
+                  <button class="menu-item is-danger"><svg class="i"><use href="#i-x"/></svg>Cancel meeting</button>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="btn-complete"><svg class="i"><use href="#i-check"/></svg>Mark completed</button>
+          </div>
+        </div>
+
+        <div class="split">
+          <!-- ===== Main column ===== -->
+          <div class="stack">
+
+            <!-- Log outcome -->
+            <section class="card md-outcome" id="log-outcome">
+              <div class="card-header">
+                <span class="card-icon ci-warning"><svg class="i"><use href="#i-check-square"/></svg></span>
+                <div>
+                  <div class="card-title">Log outcome</div>
+                  <div class="md-card-sub">Ended 11:45 AM · takes about a minute</div>
+                </div>
+                <div class="card-actions"><span class="due-today text-sm" style="white-space:nowrap"><svg class="i i-sm"><use href="#i-clock"/></svg>Due today, 6:00 PM</span></div>
+              </div>
+              <div class="card-body">
+                <div class="md-section-label">How did it go? <span class="req text-primary">*</span>
+                  <span class="md-hint"><span class="badge badge-ai"><svg class="i"><use href="#i-sparkles"/></svg>AI suggests: Positive</span></span>
+                </div>
+                <div class="choice-group md-choices" data-single>
+                  <button class="choice" aria-pressed="true"><svg class="i"><use href="#i-smile"/></svg>Positive</button>
+                  <button class="choice" aria-pressed="false"><svg class="i"><use href="#i-repeat"/></svg>Needs follow-up</button>
+                  <button class="choice" aria-pressed="false"><svg class="i"><use href="#i-x"/></svg>No interest</button>
+                  <button class="choice" aria-pressed="false"><svg class="i"><use href="#i-calendar"/></svg>Rescheduled</button>
+                </div>
+
+                <div class="md-notes-grid">
+                  <div class="field">
+                    <label class="label" for="md-notes">Meeting notes <span class="label-action faint text-sm">Markdown · @mention</span></label>
+                    <textarea class="textarea" id="md-notes">Rahul ok with current allocation. Wants SIP top-up 10k → 15k from Dec (increment). Anjali – nominee missing on 2 folios, will sign form this week. Rahul needs cap gains stmt FY 26-27 (YTD) before advance tax (15 Dec). Insurance cover not discussed – next time.</textarea>
+                  </div>
+                  <div class="field">
+                    <span class="label">Voice note <span class="label-action faint text-sm">Hindi / English</span></span>
+                    <div class="md-voice" id="md-voice">
+                      <div class="md-voice-clip">
+                        <button class="md-play" aria-label="Play voice note"><svg class="i"><use href="#i-play"/></svg></button>
+                        <div class="md-wave" id="md-wave-1" data-bars="34" data-played="12"></div>
+                        <span class="md-dur">0:48 / 2:14</span>
+                      </div>
+                      <div class="md-voice-clip hidden" id="md-live-clip">
+                        <span class="md-rec-dot" style="display:inline-block"></span>
+                        <div class="md-wave is-live" id="md-wave-live" data-bars="34"></div>
+                        <span class="md-dur" id="md-live-time">0:00</span>
+                      </div>
+                      <div class="md-voice-foot">
+                        <button class="btn btn-secondary btn-sm" id="btn-record"><svg class="i"><use href="#i-mic"/></svg><span>Record voice note</span></button>
+                        <span class="badge badge-success badge-dot">Transcribed</span>
+                      </div>
+                      <div class="md-consent"><svg class="i"><use href="#i-shield"/></svg>Consent to record: Rahul Verma · 11:03 AM</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="md-next-grid">
+                  <div class="field">
+                    <label class="label" for="md-next">Next step</label>
+                    <input class="input" id="md-next" value="Send SIP top-up &amp; nomination forms">
+                  </div>
+                  <div class="field">
+                    <label class="label" for="md-fu">Follow-up date</label>
+                    <label class="input-group"><svg class="i"><use href="#i-calendar"/></svg><input class="input" id="md-fu" value="18 Nov 2026"></label>
+                  </div>
+                  <div class="field">
+                    <label class="label" for="md-fu-type">Follow-up by</label>
+                    <select class="select" id="md-fu-type"><option>Call</option><option>WhatsApp</option><option>Visit / meeting</option><option>Email</option></select>
+                  </div>
+                </div>
+
+                <!-- AI section -->
+                <div class="md-ai" id="md-ai">
+                  <div class="md-ai-head">
+                    <span class="md-ai-title"><svg class="i"><use href="#i-sparkles"/></svg>AI summary (draft)</span>
+                    <span class="badge badge-ai badge-dot">Needs your approval</span>
+                    <span class="ml-auto"></span>
+                    <button class="btn btn-ghost btn-sm" onclick="AK.toast('Regenerating from notes + voice note…', {icon:'refresh', undo:false})"><svg class="i"><use href="#i-refresh"/></svg>Regenerate</button>
+                  </div>
+                  <div class="md-ai-src">Drafted at 11:47 AM from your typed notes and the 2:14 voice note. Nothing is saved or sent until you approve it.</div>
+
+                  <div class="md-ai-panel">
+                    <div class="md-ai-panel-head">Summary <button class="btn btn-ghost btn-sm ml-auto"><svg class="i"><use href="#i-edit"/></svg>Edit</button></div>
+                    <ul class="md-bullets">
+                      <li>Family is comfortable with the current allocation; <b>no change to risk profile</b> <span class="muted">(Moderately aggressive, last updated 21 Oct 2026)</span>.</li>
+                      <li>Rahul wants to raise his monthly SIP from <b>₹10,000 to ₹15,000</b> from December, after his annual increment.</li>
+                      <li>Anjali's <b>2 folios have no nominee</b>; she agreed to sign the nomination form this week.</li>
+                      <li>Rahul needs a <b>capital-gains statement for FY 2026-27 (year to date)</b> before the 15 Dec advance-tax date.</li>
+                      <li>Insurance cover was <b>not discussed</b>; carry it to the next review.</li>
+                    </ul>
+                  </div>
+
+                  <div class="md-ai-panel">
+                    <div class="md-ai-panel-head">Suggested action items <span class="faint" id="md-sel-count" style="text-transform:none;letter-spacing:0;font-weight:500">· 3 of 3 selected</span></div>
+                    <div class="md-action">
+                      <label class="check"><input type="checkbox" class="md-act-cb" checked aria-label="Select action 1"></label>
+                      <div>
+                        <div class="md-action-title">Send SIP top-up form (₹10,000 → ₹15,000) – Rahul Verma</div>
+                        <div class="md-action-meta"><span class="tag">Transaction Proposal: SIP</span><span class="person"><span class="avatar avatar-xs">NK</span><span class="person-name">Neha Kapoor</span></span><span>· Due 17 Nov 2026</span></div>
+                      </div>
+                      <div class="md-action-side"><span class="prio prio-high">High</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit action"><svg class="i"><use href="#i-edit"/></svg></button></div>
+                    </div>
+                    <div class="md-action">
+                      <label class="check"><input type="checkbox" class="md-act-cb" checked aria-label="Select action 2"></label>
+                      <div>
+                        <div class="md-action-title">Nomination update for 2 folios – Anjali Verma</div>
+                        <div class="md-action-meta"><span class="tag">Nomination update</span><span class="person"><span class="avatar avatar-xs a2">PN</span><span class="person-name">Priya Nair</span></span><span>· Due 18 Nov 2026</span></div>
+                      </div>
+                      <div class="md-action-side"><span class="prio prio-med">Medium</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit action"><svg class="i"><use href="#i-edit"/></svg></button></div>
+                    </div>
+                    <div class="md-action">
+                      <label class="check"><input type="checkbox" class="md-act-cb" checked aria-label="Select action 3"></label>
+                      <div>
+                        <div class="md-action-title">Share capital-gains statement FY 2026-27 (YTD) – Rahul Verma</div>
+                        <div class="md-action-meta"><span class="tag">Statement request</span><span class="person"><span class="avatar avatar-xs">NK</span><span class="person-name">Neha Kapoor</span></span><span>· Sent on WhatsApp 12:20 PM · saves as done</span></div>
+                      </div>
+                      <div class="md-action-side"><span class="prio prio-med">Medium</span><button class="btn btn-ghost btn-icon btn-sm" aria-label="Edit action"><svg class="i"><use href="#i-edit"/></svg></button></div>
+                    </div>
+                  </div>
+
+                  <div class="md-ai-foot">
+                    <span class="md-not-advice"><svg class="i"><use href="#i-lock"/></svg>Internal — not advice · not shared with the client</span>
+                    <span class="ml-auto"></span>
+                    <button class="btn btn-ghost btn-sm" id="btn-discard-ai">Discard draft</button>
+                    <button class="btn btn-ai btn-sm" id="btn-create-tasks"><svg class="i"><use href="#i-check-square"/></svg><span>Create 3 tasks</span></button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <span class="md-foot-note"><svg class="i i-sm"><use href="#i-info"/></svg>Saving adds the outcome to Comments &amp; Activities and to the client timeline.</span>
+                <button class="btn btn-secondary">Save draft</button>
+                <button class="btn btn-secondary" id="btn-save-outcome"><svg class="i"><use href="#i-check"/></svg>Save outcome</button>
+              </div>
+            </section>
+
+            <!-- Tabs: Comments & Activities etc. -->
+            <section class="card md-tabs-card">
+              <div class="tabs" data-tabs="mt">
+                <button class="tab is-active" data-tab="act">Comments &amp; Activities</button>
+                <button class="tab" data-tab="tasks">Tasks <span class="count" id="tasks-count">2</span></button>
+                <button class="tab" data-tab="opps">Opportunities <span class="count">1</span></button>
+                <button class="tab" data-tab="leads">Leads</button>
+                <button class="tab" data-tab="files">Attachments <span class="count">2</span></button>
+              </div>
+
+              <!-- Comments & Activities -->
+              <div class="md-panel is-active" data-tab-panel="act" data-tab-scope="mt">
+                <div class="composer">
+                  <textarea placeholder="Add a comment… use @ to mention a teammate"></textarea>
+                  <div class="composer-bar">
+                    <button class="btn btn-ghost btn-icon btn-sm" aria-label="Mention"><svg class="i"><use href="#i-at"/></svg></button>
+                    <button class="btn btn-ghost btn-icon btn-sm" aria-label="Attach"><svg class="i"><use href="#i-paperclip"/></svg></button>
+                    <button class="btn btn-ghost btn-icon btn-sm" aria-label="Voice"><svg class="i"><use href="#i-mic"/></svg></button>
+                    <span class="faint text-sm ml-auto">Visible to your team only</span>
+                    <button class="btn btn-soft btn-sm"><svg class="i"><use href="#i-send"/></svg>Comment</button>
+                  </div>
+                </div>
+                <div class="md-tl-head">
+                  <span class="fw-600">Activity</span><span class="faint text-sm">· newest first</span>
+                  <div class="segmented ml-auto" data-segmented>
+                    <button aria-pressed="true">All</button><button aria-pressed="false">Comments</button><button aria-pressed="false">System</button>
+                  </div>
+                </div>
+                <div class="timeline">
+                  <div class="tl-item">
+                    <div class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></div>
+                    <div class="tl-body"><div class="tl-text"><b>Neha Kapoor</b> sent the capital-gains statement FY 2026-27 (YTD) to Rahul on WhatsApp</div><div class="tl-meta">Today, 12:20 PM · <a href="15-inbox-whatsapp.html">Open chat</a></div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot is-ai"><svg class="i"><use href="#i-sparkles"/></svg></div>
+                    <div class="tl-body"><div class="tl-text"><b>AI</b> drafted a summary and 3 action items from Neha's notes <span class="badge badge-ai">Awaiting approval</span></div><div class="tl-meta">Today, 11:47 AM</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot is-warning"><svg class="i"><use href="#i-clock"/></svg></div>
+                    <div class="tl-body"><div class="tl-text">Meeting ended. Status changed to <b>Outcome pending</b></div><div class="tl-meta">Today, 11:45 AM · System</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot"><svg class="i"><use href="#i-mic"/></svg></div>
+                    <div class="tl-body"><div class="tl-text"><b>Neha Kapoor</b> recorded a voice note (2:14) with client consent</div><div class="tl-meta">Today, 11:41 AM</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot is-success"><svg class="i"><use href="#i-map-pin"/></svg></div>
+                    <div class="tl-body"><div class="tl-text"><b>Neha Kapoor</b> checked in at <b>Andheri office</b></div><div class="tl-meta">Today, 11:02 AM · Visit / meeting</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <span class="avatar a4">RM</span>
+                    <div class="tl-body"><div class="tl-text"><b>Rohan Mehta</b> commented</div>
+                      <div class="tl-comment"><span class="text-primary fw-500">@Neha Kapoor</span> Anjali's KYC is verified (checked on KRA today), so the nomination form can go straight to the RTA.</div>
+                      <div class="tl-meta">Today, 10:36 AM</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot is-ai"><svg class="i"><use href="#i-file"/></svg></div>
+                    <div class="tl-body"><div class="tl-text">Meeting prep pack generated from <b>MF Box</b> data</div><div class="tl-meta">Today, 10:30 AM · System</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot is-success"><svg class="i"><use href="#i-whatsapp"/></svg></div>
+                    <div class="tl-body"><div class="tl-text"><b>Rahul Verma</b> confirmed on WhatsApp: "Yes, see you at 11."</div><div class="tl-meta">Fri 13 Nov, 6:14 PM</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot"><svg class="i"><use href="#i-bell"/></svg></div>
+                    <div class="tl-body"><div class="tl-text">Reminder sent to Rahul Verma and Anjali Verma on WhatsApp <span class="tag">meeting_reminder</span></div><div class="tl-meta">Fri 13 Nov, 6:00 PM · System</div></div>
+                  </div>
+                  <div class="tl-item">
+                    <div class="tl-dot is-primary"><svg class="i"><use href="#i-plus"/></svg></div>
+                    <div class="tl-body"><div class="tl-text"><b>Neha Kapoor</b> created this meeting and linked it to <a href="08-client-360.html">Rahul Verma</a></div><div class="tl-meta">Tue 10 Nov 2026, 4:12 PM</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tasks -->
+              <div class="md-panel flush" data-tab-panel="tasks" data-tab-scope="mt">
+                <div class="table-wrap md-flat">
+                  <table class="table">
+                    <thead><tr><th>Title</th><th>Status</th><th>Priority</th><th>Due date</th><th>Assignee</th><th></th></tr></thead>
+                    <tbody id="md-task-rows">
+                      <tr>
+                        <td><a href="11-task-detail.html" class="cell-title">Bank mandate renewal – HDFC ••4410</a><div class="cell-sub">Bank mandate · Rahul Verma · from this meeting's prep</div></td>
+                        <td><span class="badge badge-dot badge-warning">Pending</span></td>
+                        <td><span class="prio prio-high">High</span></td>
+                        <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>13 Nov 2026</span></td>
+                        <td><span class="person"><span class="avatar avatar-sm a2">PN</span><span class="person-name">Priya Nair</span></span></td>
+                        <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                      </tr>
+                      <tr>
+                        <td><a href="11-task-detail.html" class="cell-title">Portfolio review prep – Verma Family</a><div class="cell-sub">Portfolio review</div></td>
+                        <td><span class="badge badge-dot badge-success">Done</span></td>
+                        <td><span class="prio prio-low">Low</span></td>
+                        <td>13 Nov 2026</td>
+                        <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                        <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm"><svg class="i"><use href="#i-more-h"/></svg></button></span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="card-footer"><button class="btn btn-ghost btn-sm" onclick="AK.toast('Create task opens in a drawer (see 10-task-create.html)', {undo:false, icon:'check-square'})"><svg class="i"><use href="#i-plus"/></svg>Add task</button></div>
+              </div>
+
+              <!-- Opportunities -->
+              <div class="md-panel flush" data-tab-panel="opps" data-tab-scope="mt">
+                <div class="table-wrap md-flat">
+                  <table class="table">
+                    <thead><tr><th>Opportunity</th><th>Stage</th><th class="num">Value</th><th>Source</th><th>Owner</th></tr></thead>
+                    <tbody>
+                      <tr>
+                        <td><a href="12-opportunities.html" class="cell-title">SIP top-up – Rahul Verma</a><div class="cell-sub">MF-SIP · ₹10,000 → ₹15,000 from Dec · expected close 30 Nov 2026</div></td>
+                        <td><span class="badge badge-dot badge-neutral">Requirements gathered</span></td>
+                        <td class="num">₹5,000 / mo</td>
+                        <td><span class="badge badge-neutral">Manual</span></td>
+                        <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Leads -->
+              <div class="md-panel" data-tab-panel="leads" data-tab-scope="mt">
+                <div class="empty">
+                  <div class="empty-icon"><svg class="i"><use href="#i-user-plus"/></svg></div>
+                  <div class="empty-title">No leads linked</div>
+                  <div class="empty-text">If a family member or a referral came up in this meeting, add them as a lead so the follow-up isn't lost.</div>
+                  <div class="row gap-2 mt-2"><button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-link"/></svg>Link existing lead</button><a class="btn btn-soft btn-sm" href="05-lead-create.html"><svg class="i"><use href="#i-plus"/></svg>Create lead</a></div>
+                </div>
+              </div>
+
+              <!-- Attachments -->
+              <div class="md-panel flush" data-tab-panel="files" data-tab-scope="mt">
+                <div class="md-file">
+                  <span class="md-file-icon">PDF</span>
+                  <div class="col" style="min-width:0"><span class="fw-500 truncate">Verma_Family_Review_Pack_Nov2026.pdf</span><span class="faint text-sm">Prep pack · 412 KB · generated 10:30 AM</span></div>
+                  <div class="row gap-1 ml-auto"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></div>
+                </div>
+                <div class="md-file">
+                  <span class="md-file-icon is-img">IMG</span>
+                  <div class="col" style="min-width:0"><span class="fw-500 truncate">Nomination_form_Anjali_page1.jpg</span><span class="faint text-sm">Uploaded by Neha Kapoor · 1.8 MB · 11:38 AM</span></div>
+                  <div class="row gap-1 ml-auto"><button class="btn btn-ghost btn-icon btn-sm" aria-label="Preview"><svg class="i"><use href="#i-eye"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" aria-label="Download"><svg class="i"><use href="#i-download"/></svg></button></div>
+                </div>
+                <div class="md-dropzone"><svg class="i"><use href="#i-upload"/></svg>Drop files here or <a href="#">browse</a> · saved to Documents › Verma Family</div>
+              </div>
+            </section>
+          </div>
+
+          <!-- ===== Right column ===== -->
+          <aside class="stack md-side">
+
+            <!-- Prep pack -->
+            <section class="card">
+              <div class="card-header">
+                <div><div class="card-title">Meeting prep pack</div><span class="md-sync"><span class="dot dot-success"></span>Synced from MF Box · 10:42</span></div>
+                <button class="btn btn-ghost btn-icon btn-sm ml-auto" aria-label="Refresh from MF Box" onclick="AK.toast('Refreshed from MF Box', {undo:false, icon:'refresh'})"><svg class="i"><use href="#i-refresh"/></svg></button>
+              </div>
+              <div class="card-body">
+                <div class="md-aum">
+                  <div><div class="stat-label">Family AUM</div><div class="md-aum-value">₹1.86 Cr</div></div>
+                  <div class="text-sm delta-up row gap-1" style="padding-bottom:6px"><svg class="i i-sm"><use href="#i-trending-up"/></svg>₹6.2 L since Aug review</div>
+                </div>
+                <div class="md-split" role="img" aria-label="AUM split: Rahul 67%, Anjali 26%, Aarav 7%">
+                  <span style="width:66.7%;background:var(--chart-1)"></span><span style="width:26.1%;background:var(--chart-2)"></span><span style="width:7.2%;background:var(--chart-4)"></span>
+                </div>
+                <div class="md-legend">
+                  <div class="md-legend-row"><span class="legend-swatch" style="background:var(--chart-1)"></span>Rahul Verma (Head)<b>₹1.24 Cr</b></div>
+                  <div class="md-legend-row"><span class="legend-swatch" style="background:var(--chart-2)"></span>Anjali Verma<b>₹48.6 L</b></div>
+                  <div class="md-legend-row"><span class="legend-swatch" style="background:var(--chart-4)"></span>Aarav Verma (minor)<b>₹13.4 L</b></div>
+                </div>
+
+                <div class="md-sub-h">SIPs</div>
+                <div class="md-mini">
+                  <div><small>Active SIPs</small><b>8 · ₹62,500/mo</b></div>
+                  <div><small>Next debit</small><b>20 Nov 2026</b></div>
+                </div>
+                <div class="banner banner-warning mt-2" style="padding:7px 10px;font-size:12px"><svg class="i i-sm"><use href="#i-alert"/></svg>1 of Anjali's SIPs bounced on 05 Oct (mandate limit)</div>
+
+                <div class="md-sub-h">Recent transactions <a href="08-client-360.html">All</a></div>
+                <div class="md-txn"><span class="md-txn-date">05 Nov</span><div class="md-txn-what"><div>SIP · Large cap fund</div><div>Rahul Verma</div></div><span class="md-txn-amt">₹10,000</span></div>
+                <div class="md-txn"><span class="md-txn-date">28 Oct</span><div class="md-txn-what"><div>Lumpsum · Balanced advantage</div><div>Anjali Verma</div></div><span class="md-txn-amt">₹2,00,000</span></div>
+                <div class="md-txn"><span class="md-txn-date">22 Oct</span><div class="md-txn-what"><div>Redemption · Liquid fund</div><div>Rahul Verma</div></div><span class="md-txn-amt is-out">−₹3,00,000</span></div>
+
+                <div class="md-sub-h">Goals</div>
+                <div class="md-goal"><div class="md-goal-top"><b>Aarav's education · 2034</b><span>58%</span></div><div class="progress"><span style="width:58%"></span></div></div>
+                <div class="md-goal"><div class="md-goal-top"><b>Retirement · 2045</b><span>31%</span></div><div class="progress"><span style="width:31%"></span></div></div>
+
+                <div class="md-sub-h">Last meeting notes</div>
+                <div class="md-quote"><span class="md-quote-meta">28 Aug 2026 · Quarterly review · Neha Kapoor</span>Rahul wants to wait for his increment before topping up the SIP. Anjali's nomination is still pending; send the form again.</div>
+              </div>
+            </section>
+
+            <!-- Linked client -->
+            <section class="card">
+              <div class="card-header"><div class="card-title">Linked client</div><a class="btn btn-ghost btn-sm ml-auto" href="08-client-360.html">Client 360<svg class="i i-sm"><use href="#i-arrow-right"/></svg></a></div>
+              <div class="card-body">
+                <div class="md-client">
+                  <span class="avatar avatar-lg a2">RV</span>
+                  <div style="min-width:0">
+                    <a class="md-client-name" href="08-client-360.html">Rahul Verma</a>
+                    <div class="row gap-2 mt-1"><span class="badge badge-info">Family Head</span><span class="faint text-sm">Verma Family · 3 members</span></div>
+                  </div>
+                </div>
+                <dl class="kv">
+                  <dt>PAN</dt><dd class="mono">ABCPV••••K</dd>
+                  <dt>Mobile</dt><dd class="tnum">+91 98••• ••210</dd>
+                  <dt>Risk profile</dt><dd>Moderately aggressive</dd>
+                  <dt>KYC</dt><dd><span class="badge badge-dot badge-success">Verified</span></dd>
+                  <dt>RM</dt><dd>Neha Kapoor</dd>
+                </dl>
+                <div class="md-client-actions">
+                  <button class="btn btn-secondary btn-sm"><svg class="i"><use href="#i-phone"/></svg>Call</button>
+                  <a class="btn btn-secondary btn-sm" href="15-inbox-whatsapp.html"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</a>
+                </div>
+              </div>
+            </section>
+
+            <!-- Agenda -->
+            <section class="card">
+              <div class="card-header"><div class="card-title">Agenda</div><span class="faint text-sm ml-auto" id="agenda-count">4 of 5 covered</span></div>
+              <div class="card-body" style="padding-top:10px;padding-bottom:10px">
+                <label class="md-agenda-item is-done"><span class="check"><input type="checkbox" checked></span><span class="md-agenda-text">Review family AUM and asset allocation</span></label>
+                <label class="md-agenda-item is-done"><span class="check"><input type="checkbox" checked></span><span class="md-agenda-text">SIP top-up after increment</span></label>
+                <label class="md-agenda-item is-done"><span class="check"><input type="checkbox" checked></span><span class="md-agenda-text">Nomination for Anjali's folios</span></label>
+                <label class="md-agenda-item is-done"><span class="check"><input type="checkbox" checked></span><span class="md-agenda-text">Aarav's education goal check</span></label>
+                <label class="md-agenda-item"><span class="check"><input type="checkbox"></span><span class="md-agenda-text">Insurance cover review</span><span class="badge badge-neutral">Carry forward</span></label>
+              </div>
+            </section>
+
+            <!-- Reminders -->
+            <section class="card">
+              <div class="card-header"><div class="card-title">Reminders</div><button class="btn btn-ghost btn-icon btn-sm ml-auto" aria-label="Add reminder"><svg class="i"><use href="#i-plus"/></svg></button></div>
+              <div class="card-body">
+                <div class="md-rem">
+                  <span class="md-rem-icon"><svg class="i"><use href="#i-whatsapp"/></svg></span>
+                  <div class="md-rem-text">Client reminder on WhatsApp<small>Day before · sent Fri 13 Nov, 6:00 PM</small></div>
+                  <span class="badge badge-dot badge-success">Sent</span>
+                </div>
+                <div class="md-rem">
+                  <span class="md-rem-icon"><svg class="i"><use href="#i-bell"/></svg></span>
+                  <div class="md-rem-text">Remind me 15 min before<small>In-app · 10:45 AM</small></div>
+                  <span class="badge badge-dot badge-success">Sent</span>
+                </div>
+                <div class="md-rem">
+                  <span class="md-rem-icon"><svg class="i"><use href="#i-check-square"/></svg></span>
+                  <div class="md-rem-text">Log outcome prompt<small>15 min after end · Home and My Day</small></div>
+                  <span class="badge badge-dot badge-warning">Active</span>
+                </div>
+                <div class="md-rem">
+                  <span class="md-rem-icon"><svg class="i"><use href="#i-repeat"/></svg></span>
+                  <div class="md-rem-text">Next portfolio review<small>Quarterly · around 14 Feb 2027</small></div>
+                  <label class="switch"><input type="checkbox" checked aria-label="Auto-schedule next review"><span></span></label>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Reschedule drawer -->
+  <aside class="drawer" id="drawer-reschedule" aria-label="Reschedule meeting">
+    <div class="drawer-header"><div><div class="drawer-title">Reschedule meeting</div><div class="drawer-sub">Portfolio review – Verma Family</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field"><label class="label">New date <span class="req">*</span></label><label class="input-group"><svg class="i"><use href="#i-calendar"/></svg><input class="input" value="21 Nov 2026"></label></div>
+        <div class="field"><label class="label">Time <span class="req">*</span></label><div class="row gap-2"><select class="select"><option>11:00 AM</option></select><select class="select"><option>11:45 AM</option></select></div></div>
+        <div class="field span-2"><label class="label">Mode</label><div class="segmented" data-segmented style="align-self:flex-start"><button aria-pressed="true"><svg class="i"><use href="#i-users"/></svg>Offline</button><button aria-pressed="false"><svg class="i"><use href="#i-video"/></svg>Online</button><button aria-pressed="false"><svg class="i"><use href="#i-phone"/></svg>Phone</button></div></div>
+        <div class="field span-2"><label class="label">Free slots for you and Rahul Verma</label>
+          <div class="choice-group" data-single>
+            <button class="choice" aria-pressed="false">Mon 16 Nov · 4:00 PM</button>
+            <button class="choice" aria-pressed="false">Wed 18 Nov · 11:30 AM</button>
+            <button class="choice" aria-pressed="true">Sat 21 Nov · 11:00 AM</button>
+          </div>
+          <span class="help">From your calendar and the client's last 3 preferred slots</span>
+        </div>
+        <div class="field span-2"><label class="label">Reason</label><select class="select"><option>Client requested</option><option>Host unavailable</option><option>Documents not ready</option></select></div>
+        <div class="field span-2"><label class="label">Note to participants</label><textarea class="textarea" style="min-height:72px">Hi Rahul ji, as discussed, we will continue the review on Sat 21 Nov at 11 AM at our Andheri office.</textarea></div>
+        <div class="field span-2"><label class="check"><input type="checkbox" checked>Notify Rahul Verma and Anjali Verma on WhatsApp</label><label class="check"><input type="checkbox" checked>Log outcome as "Rescheduled" and keep notes</label></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" data-close-drawer onclick="AK.toast('Meeting moved to Sat 21 Nov, 11:00 AM · participants notified')">Reschedule</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      // Waveform placeholders (deterministic heights)
+      function wave(el) {
+        var n = +el.getAttribute('data-bars') || 30, played = +el.getAttribute('data-played') || 0, html = '';
+        for (var i = 0; i < n; i++) {
+          var h = 6 + Math.round(Math.abs(Math.sin(i * 1.7) * 14 + Math.sin(i * 0.53) * 6));
+          html += '<span style="height:' + Math.min(h, 26) + 'px;animation-delay:' + (i % 7) * 0.11 + 's"' + (i < played ? ' class="is-played"' : '') + '></span>';
+        }
+        el.innerHTML = html;
+      }
+      document.querySelectorAll('.md-wave').forEach(wave);
+
+      // Record voice note toggle
+      var rec = document.getElementById('btn-record'), live = document.getElementById('md-live-clip'), timer, secs = 0;
+      rec.addEventListener('click', function () {
+        var on = rec.classList.toggle('is-recording');
+        live.classList.toggle('hidden', !on);
+        rec.querySelector('span').textContent = on ? 'Stop recording' : 'Record voice note';
+        rec.querySelector('use').setAttribute('href', on ? '#i-pause' : '#i-mic');
+        if (on) { secs = 0; timer = setInterval(function () { secs++; document.getElementById('md-live-time').textContent = '0:' + String(secs).padStart(2, '0'); }, 1000); }
+        else { clearInterval(timer); AK.toast('Voice note saved · transcribing (Hindi + English)', { icon: 'mic' }); }
+      });
+
+      // AI action selection → button label
+      var cbs = document.querySelectorAll('.md-act-cb'), btn = document.getElementById('btn-create-tasks');
+      function sync() {
+        var n = Array.prototype.filter.call(cbs, function (c) { return c.checked; }).length;
+        btn.querySelector('span').textContent = n ? 'Create ' + n + ' task' + (n > 1 ? 's' : '') : 'Select actions';
+        btn.classList.toggle('is-disabled', !n);
+        document.getElementById('md-sel-count').textContent = '· ' + n + ' of ' + cbs.length + ' selected';
+      }
+      cbs.forEach(function (c) { c.addEventListener('change', sync); });
+      btn.addEventListener('click', function () {
+        var n = Array.prototype.filter.call(cbs, function (c) { return c.checked; }).length; if (!n) return;
+        document.getElementById('tasks-count').textContent = 2 + n;
+        btn.querySelector('span').textContent = n + ' tasks created';
+        btn.classList.add('is-disabled');
+        AK.toast(n + ' tasks created and linked to this meeting · AI draft approved by Neha Kapoor');
+      });
+      document.getElementById('btn-discard-ai').addEventListener('click', function () { AK.toast('AI draft discarded'); });
+
+      // Save outcome / Mark completed
+      document.getElementById('btn-save-outcome').addEventListener('click', function () { AK.toast('Outcome saved: Positive · follow-up on 18 Nov 2026'); });
+      document.getElementById('btn-complete').addEventListener('click', function () {
+        var s = document.getElementById('md-status');
+        s.className = 'badge badge-dot badge-success'; s.textContent = 'Completed';
+        AK.toast('Meeting marked completed · outcome logged to Rahul Verma\'s timeline');
+      });
+
+      // Agenda count
+      var ag = document.querySelectorAll('.md-agenda-item input');
+      ag.forEach(function (c) { c.addEventListener('change', function () {
+        c.closest('.md-agenda-item').classList.toggle('is-done', c.checked);
+        var n = Array.prototype.filter.call(ag, function (x) { return x.checked; }).length;
+        document.getElementById('agenda-count').textContent = n + ' of ' + ag.length + ' covered';
+      }); });
+
+      // Popover menu items → toast
+      document.querySelectorAll('#pop-more .menu-item').forEach(function (m) {
+        m.addEventListener('click', function () { document.getElementById('pop-more').classList.remove('is-open'); AK.toast(m.textContent.replace(/E$/, '').trim(), { undo: false, icon: 'info' }); });
+      });
+    })();
+  </script>
+</body>
+</html>

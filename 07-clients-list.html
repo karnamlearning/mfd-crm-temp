@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clients · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- page-specific styles: tokens only ---- */
+    .title-row { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; }
+    .sync { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-full); background: var(--surface); color: var(--text-2); font-size: var(--fs-sm); white-space: nowrap; }
+    .sync b { color: var(--text); font-weight: 500; }
+    .sync .sep { color: var(--text-3); }
+    .sync a { font-weight: 500; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    .sync .i { width: 12px; height: 12px; }
+    .sync.is-syncing .i { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .approval { font-size: 11px; font-weight: 600; color: var(--warning); background: var(--warning-soft); padding: 1px 6px; border-radius: var(--r-full); display: inline-flex; align-items: center; gap: 3px; }
+    .approval .i { width: 11px; height: 11px; }
+
+    .kpis { margin-bottom: var(--sp-5); }
+    .stat-label .i { color: var(--text-3); }
+    .stat-warning .stat-value { color: var(--warning); }
+    .stat-meta a { font-weight: 500; }
+    .kpis .stat-meta { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .kpis .stat-value { white-space: nowrap; }
+    .stat-value small { font-size: 13px; font-weight: 500; color: var(--text-2); letter-spacing: 0; margin-left: 4px; }
+
+    .tab .i-lock { width: 12px; height: 12px; color: var(--text-3); }
+    .tab-hint { margin-left: auto; align-self: center; font-size: var(--fs-sm); color: var(--text-3); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+    .views { display: inline-flex; align-items: center; gap: 6px; }
+    .view-btn { height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text-2); font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+    .view-btn:hover { background: var(--surface-2); color: var(--text); }
+    .view-btn .n { font-size: 11px; font-weight: 600; color: var(--text-3); background: var(--surface-2); border-radius: var(--r-full); padding: 0 6px; line-height: 16px; }
+    .view-btn.is-active { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-text); }
+    .view-btn.is-active .n { background: var(--surface); color: var(--primary-text); }
+    .view-btn .i { width: 14px; height: 14px; }
+
+    .chips-row { display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-3); flex-wrap: wrap; }
+    .chips-row .chips { margin-bottom: 0; }
+    .coverage { margin-left: auto; display: inline-flex; align-items: center; gap: var(--sp-4); font-size: var(--fs-sm); color: var(--text-2); white-space: nowrap; }
+    .coverage .cov-label { color: var(--text-3); display: inline-flex; align-items: center; gap: 5px; }
+    .cov { display: inline-flex; align-items: center; gap: 6px; }
+    .cov b { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+    .cov .progress { width: 44px; height: 5px; }
+
+    /* table */
+    .clients td { height: 56px; }
+    .clients th, .clients td { padding-left: 8px; padding-right: 8px; }
+    .clients .col-check { width: 36px; }
+    .clients th.sticky-1, .clients td.sticky-1 { position: sticky; left: 0; z-index: 1; background: var(--surface); }
+    .clients th.sticky-2, .clients td.sticky-2 { position: sticky; left: 36px; z-index: 1; background: var(--surface); box-shadow: 1px 0 0 var(--border); }
+    .clients th.sticky-1, .clients th.sticky-2 { z-index: 3; background: var(--surface-2); }
+    .clients tbody tr:hover td.sticky-1, .clients tbody tr:hover td.sticky-2, .clients tbody tr.show-actions td.sticky-1, .clients tbody tr.show-actions td.sticky-2 { background: var(--surface-2); }
+    .clients tbody tr.is-selected td.sticky-1, .clients tbody tr.is-selected td.sticky-2 { background: var(--primary-soft); }
+    .clients tbody tr.show-actions td { background: var(--surface-2); }
+    .client { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+    .client a.cname { color: var(--text); font-weight: 600; text-decoration: none; }
+    .client a.cname:hover { color: var(--primary-text); text-decoration: underline; }
+    .client .cell-sub { display: flex; align-items: center; gap: 4px; }
+    .client .cell-sub .i { width: 11px; height: 11px; color: var(--text-3); }
+    .flag { font-size: 10.5px; font-weight: 600; height: 18px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
+    .pan { font-size: 12.5px; color: var(--text); letter-spacing: .02em; line-height: 18px; }
+    .tier { width: 24px; height: 22px; padding: 0; justify-content: center; font-weight: 700; }
+    .amt { font-weight: 600; }
+    .sip-stopped { color: var(--warning); font-size: var(--fs-sm); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+    .sip-stopped .i { width: 12px; height: 12px; }
+    .contact-ok { color: var(--text); }
+    .health { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 8px 0 3px; border-radius: var(--r-full); font-size: 12px; font-weight: 500; white-space: nowrap; cursor: help; }
+    .health b { min-width: 24px; height: 18px; border-radius: var(--r-full); display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--on-primary); font-variant-numeric: tabular-nums; }
+    .h-good { background: var(--success-soft); color: var(--success); } .h-good b { background: var(--success); }
+    .h-watch { background: var(--warning-soft); color: var(--warning); } .h-watch b { background: var(--warning); }
+    .h-risk { background: var(--danger-soft); color: var(--danger); } .h-risk b { background: var(--danger); }
+    [data-theme="dark"] .health b { color: var(--bg); }
+    .health.tooltip[data-tip]:hover::after { bottom: auto; top: calc(100% + 6px); left: auto; right: 0; transform: none; }
+
+    /* hover actions float at the right edge of the row */
+    .clients td.col-act { position: sticky; right: 0; width: 0; padding: 0 !important; z-index: 2; }
+    .clients .row-actions { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); box-shadow: var(--shadow-md); padding: 2px; }
+    .clients tr.show-actions .row-actions { opacity: 1; }
+    .row-actions .btn-icon.btn-sm { width: 30px; height: 30px; }
+    .row-actions .wa .i { color: var(--success); }
+
+    .th-sort.is-desc::after { transform: rotate(180deg); }
+    .bulk-bar { display: none; }
+    .bulk-bar.is-on { display: flex; }
+
+    /* columns + saved views popovers */
+    .menu .check { width: 100%; height: 32px; padding: 0 10px; color: var(--text); }
+    .menu .check .faint { margin-left: auto; font-size: 11px; }
+
+    /* filter drawer */
+    .range { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--sp-2); }
+    .range .to { color: var(--text-3); font-size: 13px; }
+    .tier-choice .choice { min-width: 56px; justify-content: center; }
+    .drawer-count { font-size: 13px; color: var(--text-2); }
+    .drawer-count b { color: var(--text); }
+
+    @media (max-width: 1280px) { .coverage .cov-label span { display: none; } }
+    @media (max-width: 1100px) { .coverage { margin-left: 0; } .tab-hint { display: none; } }
+  </style>
+</head>
+<body data-page="clients" data-crumb="Clients">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <!-- Page head -->
+        <div class="page-head">
+          <div>
+            <div class="title-row">
+              <h1 class="page-title">Clients</h1>
+              <span class="sync" id="sync"><span class="dot dot-success"></span>Synced from <b>MF Box Back Office</b> <span class="sep">·</span> <span id="sync-time">today 10:42</span> <span class="sep">·</span> <a id="sync-now"><svg class="i"><use href="#i-refresh"/></svg>Sync now</a></span>
+            </div>
+            <p class="page-sub">Clients, families, AUM and SIPs come from MF Box. Nothing here needs re-typing.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" id="btn-export" title="Exports of client data need approval from the principal"><svg class="i"><use href="#i-download"/></svg>Export <span class="approval"><svg class="i"><use href="#i-lock"/></svg>Needs approval</span></button>
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-columns"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+              <div class="popover" id="pop-columns">
+                <div class="menu" style="min-width:240px">
+                  <div class="menu-label">Visible columns · 11 of 16</div>
+                  <label class="check"><input type="checkbox" checked disabled>Client <span class="faint">locked</span></label>
+                  <label class="check"><input type="checkbox" checked>PAN (masked)</label>
+                  <label class="check"><input type="checkbox" checked>Mobile (masked)</label>
+                  <label class="check"><input type="checkbox" checked>Primary RM</label>
+                  <label class="check"><input type="checkbox" checked>Branch</label>
+                  <label class="check"><input type="checkbox" checked>Tier</label>
+                  <label class="check"><input type="checkbox" checked>AUM</label>
+                  <label class="check"><input type="checkbox" checked>SIP book</label>
+                  <label class="check"><input type="checkbox" checked>Last purchase</label>
+                  <label class="check"><input type="checkbox" checked>Last contacted</label>
+                  <label class="check"><input type="checkbox" checked>Health score</label>
+                  <div class="menu-sep"></div>
+                  <label class="check"><input type="checkbox">Email (masked)</label>
+                  <label class="check"><input type="checkbox">Created date</label>
+                  <label class="check"><input type="checkbox">Next review due</label>
+                  <label class="check"><input type="checkbox">KYC status</label>
+                  <label class="check"><input type="checkbox">Sub-broker</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI strip -->
+        <div class="grid-4 kpis">
+          <div class="stat stat-info">
+            <div class="stat-label"><svg class="i"><use href="#i-rupee"/></svg>Total AUM · my team</div>
+            <div class="stat-value">₹218 Cr</div>
+            <div class="stat-meta"><span class="delta-up">▲ 2.1%</span> vs last month · 712 clients</div>
+          </div>
+          <div class="stat stat-success">
+            <div class="stat-label"><svg class="i"><use href="#i-repeat"/></svg>Active SIPs</div>
+            <div class="stat-value">1,042 <small>₹1.12 Cr / month</small></div>
+            <div class="stat-meta"><span class="delta-down">23 stopped</span> in 30 days · <a href="#" data-view="sip">View</a></div>
+          </div>
+          <div class="stat stat-warning">
+            <div class="stat-label"><svg class="i"><use href="#i-clock"/></svg>Not contacted in 90+ days</div>
+            <div class="stat-value">38</div>
+            <div class="stat-meta">12 are Tier A · <a href="#" data-view="tier">Show list</a></div>
+          </div>
+          <div class="stat stat-danger">
+            <div class="stat-label"><svg class="i"><use href="#i-alert"/></svg>KYC / nomination issues</div>
+            <div class="stat-value">11</div>
+            <div class="stat-meta">7 KYC on hold · 4 no nominee · <a href="#">Fix</a></div>
+          </div>
+        </div>
+
+        <!-- Visibility tabs -->
+        <div class="tabs" data-tabs="vis">
+          <button class="tab">My Clients <span class="count">186</span></button>
+          <button class="tab">Collaborations <span class="count">9</span></button>
+          <button class="tab is-active">My Team Clients <span class="count">712</span></button>
+          <button class="tab" title="Visible to managers and the principal">All firm <span class="count">1,284</span><svg class="i i-lock"><use href="#i-lock"/></svg></button>
+          <span class="tab-hint"><svg class="i i-sm"><use href="#i-users"/></svg>Andheri team · 8 people · 3 sub-brokers</span>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="input-group" style="width:300px"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search by name, PAN, mobile, folio"><span class="input-suffix"><span class="kbd">/</span></span></label>
+            <button class="btn btn-secondary" data-open-drawer="drawer-filters"><svg class="i"><use href="#i-filter"/></svg>Filters <span class="filter-count">3</span></button>
+            <button class="btn btn-ghost" id="btn-reset">Reset</button>
+          </div>
+          <div class="toolbar-right">
+            <div class="views">
+              <button class="view-btn" data-view="tier"><svg class="i"><use href="#i-star"/></svg>Tier A not reviewed <span class="n">7</span></button>
+              <button class="view-btn" data-view="sip"><svg class="i"><use href="#i-pause"/></svg>SIP stopped <span class="n">23</span></button>
+              <div class="popover-wrap">
+                <button class="btn btn-ghost btn-sm" data-popover="pop-views">Saved views<svg class="i i-sm"><use href="#i-chevron-down"/></svg></button>
+                <div class="popover" id="pop-views">
+                  <div class="menu" style="min-width:250px">
+                    <div class="menu-label">My views</div>
+                    <button class="menu-item" data-view="tier"><svg class="i"><use href="#i-star"/></svg>Tier A not reviewed<span class="menu-hint">7</span></button>
+                    <button class="menu-item" data-view="sip"><svg class="i"><use href="#i-pause"/></svg>SIP stopped<span class="menu-hint">23</span></button>
+                    <button class="menu-item"><svg class="i"><use href="#i-cake"/></svg>Birthdays this week<span class="menu-hint">5</span></button>
+                    <div class="menu-label">Shared by Rajesh Sharma</div>
+                    <button class="menu-item"><svg class="i"><use href="#i-alert"/></svg>KYC / nominee pending<span class="menu-hint">11</span></button>
+                    <button class="menu-item"><svg class="i"><use href="#i-trending-down"/></svg>Redemptions &gt; ₹5 L (30 d)<span class="menu-hint">6</span></button>
+                    <div class="menu-sep"></div>
+                    <button class="menu-item"><svg class="i"><use href="#i-plus"/></svg>Save current filters as view</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active filters + tier coverage -->
+        <div class="chips-row">
+          <div class="chips" id="chips">
+            <span class="chip">Family head: <b>Any</b><button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <span class="chip">AUM: <b>₹10 L – ₹5 Cr</b><button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <span class="chip">Branch: <b>Andheri</b><button class="chip-remove" aria-label="Remove"><svg class="i i-sm"><use href="#i-x"/></svg></button></span>
+            <button class="chip chip-ghost" data-open-drawer="drawer-filters"><svg class="i i-sm"><use href="#i-plus"/></svg>Add filter</button>
+          </div>
+          <div class="coverage" title="Share of clients in each tier contacted within the tier's contact promise (A: monthly, B: quarterly, C: half-yearly)">
+            <span class="cov-label"><svg class="i i-sm"><use href="#i-shield"/></svg><span>Service coverage</span></span>
+            <span class="cov"><span class="badge badge-info badge-square tier">A</span><b>82%</b><span class="progress p-success"><span style="width:82%"></span></span></span>
+            <span class="cov"><span class="badge badge-neutral badge-square tier">B</span><b>64%</b><span class="progress p-warning"><span style="width:64%"></span></span></span>
+            <span class="cov"><span class="badge badge-outline badge-square tier">C</span><b>38%</b><span class="progress p-danger"><span style="width:38%"></span></span></span>
+          </div>
+        </div>
+
+        <!-- Bulk bar (appears when rows are selected) -->
+        <div class="bulk-bar" id="bulk">
+          <b id="bulk-n">0 selected</b>
+          <button class="btn btn-ghost btn-sm"><svg class="i"><use href="#i-user-plus"/></svg>Reassign RM</button>
+          <button class="btn btn-ghost btn-sm"><svg class="i"><use href="#i-check-square"/></svg>Create task</button>
+          <button class="btn btn-ghost btn-sm"><svg class="i"><use href="#i-whatsapp"/></svg>Send WhatsApp</button>
+          <button class="btn btn-ghost btn-sm"><svg class="i"><use href="#i-tag"/></svg>Set tier</button>
+          <span class="spacer"></span>
+          <button class="btn btn-ghost btn-sm" id="bulk-clear"><svg class="i"><use href="#i-x"/></svg>Clear</button>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+          <div class="table-wrap">
+            <table class="table clients">
+              <thead><tr>
+                <th class="col-check sticky-1"><label class="check"><input type="checkbox" id="check-all"></label></th>
+                <th class="sticky-2"><span class="th-sort">Client</span></th>
+                <th>PAN · Mobile</th>
+                <th><span class="th-sort">Primary RM · Branch</span></th>
+                <th>Tier</th>
+                <th class="num"><span class="th-sort is-asc is-desc">AUM</span></th>
+                <th class="num"><span class="th-sort">SIP book / mo</span></th>
+                <th><span class="th-sort">Last purchase</span></th>
+                <th><span class="th-sort">Last contacted</span></th>
+                <th><span class="th-sort">Health</span></th>
+                <th class="col-act"></th>
+              </tr></thead>
+              <tbody>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a4">HP</span><div><a class="cname" href="08-client-360.html">Harish Patel</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Patel Family</div></div></div></td>
+                  <td><div class="mono pan">AAKPP••••L</div><div class="cell-sub tnum">+91 98••• ••114</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-info badge-square tier">A</span></td>
+                  <td class="num amt">₹3.40 Cr</td>
+                  <td class="num">₹1,50,000</td>
+                  <td class="tnum">08 Nov 2026</td>
+                  <td class="contact-ok">6 days ago</td>
+                  <td><span class="health h-good tooltip" data-tip="SIPs running +20 · Contacted 6 d ago +15 · KYC OK"><b>91</b>Healthy</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar">FQ</span><div><a class="cname" href="08-client-360.html">Farhan Qureshi</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Qureshi Family</div></div></div></td>
+                  <td><div class="mono pan">AAFPQ••••M</div><div class="cell-sub tnum">+91 99••• ••482</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-info badge-square tier">A</span></td>
+                  <td class="num amt">₹2.10 Cr</td>
+                  <td class="num">₹75,000</td>
+                  <td class="tnum">21 Oct 2026</td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>96 days</span></td>
+                  <td><span class="health h-watch tooltip" data-tip="No contact 96 d −25 · FD maturing 18 Nov · SIPs running +20"><b>58</b>Watch</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr class="show-actions">
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a2">RV</span><div><a class="cname" href="08-client-360.html">Rahul Verma</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Verma Family</div></div></div></td>
+                  <td><div class="mono pan">ABCPV••••K</div><div class="cell-sub tnum">+91 98••• ••210</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-info badge-square tier">A</span></td>
+                  <td class="num amt">₹1.24 Cr</td>
+                  <td class="num">₹45,000</td>
+                  <td class="tnum">05 Nov 2026</td>
+                  <td class="contact-ok">Today</td>
+                  <td><span class="health h-good tooltip" data-tip="6 SIPs running +12 · Contacted today +8 · KYC and nomination OK +6"><b>82</b>Healthy</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a3">SI</span><div><a class="cname" href="08-client-360.html">Suresh Iyer</a><span class="badge badge-danger flag">KYC</span><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Iyer Family</div></div></div></td>
+                  <td><div class="mono pan">BDKPI••••R</div><div class="cell-sub tnum">+91 97••• ••356</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a2">RM</span><span><span class="person-name">Rohan Mehta</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-neutral badge-square tier">B</span></td>
+                  <td class="num amt">₹86.5 L</td>
+                  <td class="num">₹25,000</td>
+                  <td class="tnum">12 Oct 2026</td>
+                  <td class="contact-ok">41 days ago</td>
+                  <td><span class="health h-watch tooltip" data-tip="KYC on hold −20 · SIPs running +20 · Contacted 41 d ago"><b>66</b>Watch</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a4">LN</span><div><a class="cname" href="08-client-360.html">Lakshmi Narayanan</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Narayanan Family</div></div></div></td>
+                  <td><div class="mono pan">AGJPN••••H</div><div class="cell-sub tnum">+91 94••• ••871</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a3">SI</span><span><span class="person-name">Sneha Iyer</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-neutral badge-square tier">B</span></td>
+                  <td class="num amt">₹67.8 L</td>
+                  <td class="num">₹40,000</td>
+                  <td class="tnum">01 Nov 2026</td>
+                  <td class="contact-ok">18 days ago</td>
+                  <td><span class="health h-good tooltip" data-tip="SIPs running +20 · Step-up done Nov +10 · KYC OK"><b>88</b>Healthy</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a5">AM</span><div><a class="cname" href="08-client-360.html">Arvind Menon</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Menon Family</div></div></div></td>
+                  <td><div class="mono pan">ARQPM••••D</div><div class="cell-sub tnum">+91 98••• ••637</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a4">KM</span><span><span class="person-name">Kavya Menon</span><span class="person-sub" style="display:block">Sub-broker · Andheri</span></span></span></td>
+                  <td><span class="badge badge-neutral badge-square tier">B</span></td>
+                  <td class="num amt">₹54.1 L</td>
+                  <td class="num"><span class="sip-stopped"><svg class="i"><use href="#i-pause"/></svg>Stopped Oct</span></td>
+                  <td class="tnum">14 Jul 2026</td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>124 days</span></td>
+                  <td><span class="health h-risk tooltip" data-tip="SIP stopped −25 · No contact 124 d −25 · Redemption ₹4 L −10"><b>34</b>At risk</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a4">VP</span><div><a class="cname" href="08-client-360.html">Vandana Patel</a><div class="cell-sub">Family head: Patel Family</div></div></div></td>
+                  <td><div class="mono pan">AAKPP••••N</div><div class="cell-sub tnum">+91 98••• ••115</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-info badge-square tier">A</span></td>
+                  <td class="num amt">₹48.6 L</td>
+                  <td class="num">₹20,000</td>
+                  <td class="tnum">08 Nov 2026</td>
+                  <td class="contact-ok">6 days ago</td>
+                  <td><span class="health h-good tooltip" data-tip="SIPs running +20 · Contacted 6 d ago +15 · KYC OK"><b>90</b>Healthy</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a2">AV</span><div><a class="cname" href="08-client-360.html">Anjali Verma</a><span class="badge badge-warning flag">Nominee</span><div class="cell-sub">Family head: Verma Family</div></div></div></td>
+                  <td><div class="mono pan">ABCPV••••R</div><div class="cell-sub tnum">+91 98••• ••211</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm">NK</span><span><span class="person-name">Neha Kapoor</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-neutral badge-square tier">B</span></td>
+                  <td class="num amt">₹48.6 L</td>
+                  <td class="num">₹15,000</td>
+                  <td class="tnum">05 Nov 2026</td>
+                  <td class="contact-ok">Today</td>
+                  <td><span class="health h-good tooltip" data-tip="SIP running +10 · Family review today +15 · 2 folios without nominee −10"><b>76</b>Healthy</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a3">MJ</span><div><a class="cname" href="08-client-360.html">Meera Joshi</a><span class="badge badge-warning flag">Nominee</span><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Joshi Family</div></div></div></td>
+                  <td><div class="mono pan">BJLPJ••••C</div><div class="cell-sub tnum">+91 90••• ••528</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a3">SI</span><span><span class="person-name">Sneha Iyer</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-neutral badge-square tier">B</span></td>
+                  <td class="num amt">₹42.3 L</td>
+                  <td class="num">₹10,000</td>
+                  <td class="tnum">27 Sep 2026</td>
+                  <td class="contact-ok">63 days ago</td>
+                  <td><span class="health h-watch tooltip" data-tip="Nominee missing −15 · Insurance renewal due · SIPs running +20"><b>61</b>Watch</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a5">NS</span><div><a class="cname" href="08-client-360.html">Nikhil Shah</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Shah Family</div></div></div></td>
+                  <td><div class="mono pan">CNSPS••••F</div><div class="cell-sub tnum">+91 99••• ••903</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a5">IS</span><span><span class="person-name">Imran Sheikh</span><span class="person-sub" style="display:block">Sub-broker · Andheri</span></span></span></td>
+                  <td><span class="badge badge-outline badge-square tier">C</span></td>
+                  <td class="num amt">₹31.4 L</td>
+                  <td class="num"><span class="sip-stopped"><svg class="i"><use href="#i-pause"/></svg>Stopped Sep</span></td>
+                  <td class="tnum">03 Jun 2026</td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>157 days</span></td>
+                  <td><span class="health h-risk tooltip" data-tip="SIP stopped −25 · No contact 157 d −30 · 2 mandate bounces −10"><b>27</b>At risk</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar">SR</span><div><a class="cname" href="08-client-360.html">Sunita Rao</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Rao Family</div></div></div></td>
+                  <td><div class="mono pan">AFRPR••••J</div><div class="cell-sub tnum">+91 93••• ••746</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a4">KM</span><span><span class="person-name">Kavya Menon</span><span class="person-sub" style="display:block">Sub-broker · Andheri</span></span></span></td>
+                  <td><span class="badge badge-outline badge-square tier">C</span></td>
+                  <td class="num amt">₹18.9 L</td>
+                  <td class="num">₹5,000</td>
+                  <td class="tnum">18 Aug 2026</td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>102 days</span></td>
+                  <td><span class="health h-risk tooltip" data-tip="No contact 102 d −25 · SIP reduced −10 · KYC OK"><b>45</b>At risk</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+                <tr>
+                  <td class="sticky-1"><label class="check"><input type="checkbox"></label></td>
+                  <td class="sticky-2"><div class="client"><span class="avatar a3">DA</span><div><a class="cname" href="08-client-360.html">Deepak Agarwal</a><div class="cell-sub"><svg class="i"><use href="#i-star"/></svg>Family head: Agarwal Family</div></div></div></td>
+                  <td><div class="mono pan">AHDPA••••G</div><div class="cell-sub tnum">+91 98••• ••062</div></td>
+                  <td><span class="person"><span class="avatar avatar-sm a2">RM</span><span><span class="person-name">Rohan Mehta</span><span class="person-sub" style="display:block">Andheri</span></span></span></td>
+                  <td><span class="badge badge-outline badge-square tier">C</span></td>
+                  <td class="num amt">₹15.2 L</td>
+                  <td class="num"><span class="sip-stopped"><svg class="i"><use href="#i-pause"/></svg>Stopped Mar</span></td>
+                  <td class="tnum">11 Mar 2026</td>
+                  <td><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>188 days</span></td>
+                  <td><span class="health h-risk tooltip" data-tip="SIP stopped −25 · No contact 188 d −30 · No purchase 8 months −15"><b>22</b>At risk</span></td>
+                  <td class="col-act"><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" title="Call"><svg class="i"><use href="#i-phone"/></svg></button><button class="btn btn-ghost btn-icon btn-sm wa" title="WhatsApp"><svg class="i"><use href="#i-whatsapp"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" title="Create task"><svg class="i"><use href="#i-check-square"/></svg></button><a class="btn btn-ghost btn-icon btn-sm" href="08-client-360.html" title="Open Client 360"><svg class="i"><use href="#i-external"/></svg></a></span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <select class="select"><option>20</option><option>50</option><option>100</option></select> rows · 1–20 of 712
+            <span class="faint">· Health score refreshes nightly after the MF Box sync</span>
+            <div class="pg-btns">
+              <button class="pg-btn" disabled><svg class="i"><use href="#i-chevrons-left"/></svg></button>
+              <button class="pg-btn" disabled><svg class="i"><use href="#i-chevron-left"/></svg></button>
+              <button class="pg-btn is-active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><span class="faint">…</span><button class="pg-btn">36</button>
+              <button class="pg-btn"><svg class="i"><use href="#i-chevron-right"/></svg></button>
+              <button class="pg-btn"><svg class="i"><use href="#i-chevrons-right"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Filters drawer -->
+  <aside class="drawer" id="drawer-filters" aria-label="Filter clients">
+    <div class="drawer-header">
+      <div><div class="drawer-title">Filters</div><div class="drawer-sub">3 active · applies to My Team Clients</div></div>
+      <button class="btn btn-ghost btn-icon ml-auto" data-close-drawer><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-section">
+        <div class="form-section-title">Who</div>
+        <div class="form-grid">
+          <div class="field span-2">
+            <label class="label">Family head</label>
+            <label class="input-group"><svg class="i"><use href="#i-users"/></svg><input class="input" placeholder="Any family head · type a name or family"></label>
+          </div>
+          <div class="field">
+            <label class="label">Primary user (RM / sub-broker)</label>
+            <select class="select"><option>Anyone in my team</option><option>Neha Kapoor (me)</option><option>Rohan Mehta</option><option>Sneha Iyer</option><option>Kavya Menon · Sub-broker</option><option>Imran Sheikh · Sub-broker</option><option>Ravi Pillai · Sub-broker</option></select>
+          </div>
+          <div class="field">
+            <label class="label">Branch</label>
+            <select class="select"><option>Andheri</option><option>Thane</option><option>Pune</option><option>All branches</option></select>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Portfolio (from MF Box)</div>
+        <div class="field" style="margin-bottom:var(--sp-4)">
+          <label class="label">AUM</label>
+          <div class="range">
+            <label class="input-group"><span class="input-icon">₹</span><input class="input" value="10 L"></label>
+            <span class="to">to</span>
+            <label class="input-group"><span class="input-icon">₹</span><input class="input" value="5 Cr"></label>
+          </div>
+          <span class="help">Use L for lakh and Cr for crore, e.g. 25 L</span>
+        </div>
+        <div class="field" style="margin-bottom:var(--sp-4)">
+          <label class="label">Tier</label>
+          <div class="choice-group tier-choice">
+            <button class="choice" aria-pressed="false">A</button>
+            <button class="choice" aria-pressed="false">B</button>
+            <button class="choice" aria-pressed="false">C</button>
+            <button class="choice" aria-pressed="false">Untiered</button>
+          </div>
+          <span class="help">A: monthly contact, quarterly review · B: quarterly contact, half-yearly review · C: half-yearly contact, yearly review</span>
+        </div>
+        <div class="field">
+          <label class="label">SIP status</label>
+          <div class="choice-group" data-single>
+            <button class="choice" aria-pressed="true">Any</button>
+            <button class="choice" aria-pressed="false">Active</button>
+            <button class="choice" aria-pressed="false">Stopped (90 d)</button>
+            <button class="choice" aria-pressed="false">Bounced</button>
+            <button class="choice" aria-pressed="false">No SIP</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Engagement</div>
+        <div class="field" style="margin-bottom:var(--sp-4)">
+          <label class="label">Last contacted</label>
+          <div class="segmented" data-segmented>
+            <button aria-pressed="true">Any time</button>
+            <button aria-pressed="false">&gt; 30 days</button>
+            <button aria-pressed="false">&gt; 60 days</button>
+            <button aria-pressed="false">&gt; 90 days</button>
+            <button aria-pressed="false">Never</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Health</label>
+          <div class="choice-group">
+            <button class="choice" aria-pressed="false"><span class="dot dot-success"></span>Healthy</button>
+            <button class="choice" aria-pressed="false"><span class="dot dot-warning"></span>Watch</button>
+            <button class="choice" aria-pressed="false"><span class="dot dot-danger"></span>At risk</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-ghost" id="drawer-reset">Reset</button>
+      <button class="btn btn-ghost"><svg class="i"><use href="#i-star"/></svg>Save as view</button>
+      <span class="spacer"></span>
+      <span class="drawer-count"><b>712</b> clients</span>
+      <button class="btn btn-primary" data-close-drawer>Apply filters</button>
+    </div>
+  </aside>
+
+  <script>
+    (function () {
+      // Selection + bulk bar
+      var table = document.querySelector('.clients');
+      var bulk = document.getElementById('bulk');
+      var bulkN = document.getElementById('bulk-n');
+      var all = document.getElementById('check-all');
+      function rows() { return table.querySelectorAll('tbody input[type=checkbox]'); }
+      function refresh() {
+        var n = 0;
+        rows().forEach(function (c) { c.closest('tr').classList.toggle('is-selected', c.checked); if (c.checked) n++; });
+        bulk.classList.toggle('is-on', n > 0);
+        bulkN.textContent = n + ' selected';
+        all.checked = n === rows().length; all.indeterminate = n > 0 && n < rows().length;
+      }
+      table.addEventListener('change', function (e) {
+        if (e.target === all) rows().forEach(function (c) { c.checked = all.checked; });
+        refresh();
+      });
+      document.getElementById('bulk-clear').addEventListener('click', function () { rows().forEach(function (c) { c.checked = false; }); refresh(); });
+
+      // Remove the demo hover state once the user moves the mouse over the table
+      table.addEventListener('mouseover', function () { var d = table.querySelector('tr.show-actions'); if (d) d.classList.remove('show-actions'); }, { once: true });
+
+      // Row actions
+      table.addEventListener('click', function (e) {
+        var b = e.target.closest('.row-actions button'); if (!b) return;
+        var name = b.closest('tr').querySelector('.cname').textContent;
+        var t = b.getAttribute('title');
+        if (t === 'Call') AK.toast('Calling ' + name + ' · the call will be logged on the timeline', { icon: 'phone', undo: false });
+        else if (t === 'WhatsApp') AK.toast('WhatsApp chat with ' + name + ' opened in Inbox', { icon: 'whatsapp', undo: false });
+        else AK.toast('Task created for ' + name + ' · due tomorrow', { icon: 'check' });
+      });
+
+      // Sync now
+      var sync = document.getElementById('sync');
+      document.getElementById('sync-now').addEventListener('click', function () {
+        sync.classList.add('is-syncing');
+        setTimeout(function () { sync.classList.remove('is-syncing'); document.getElementById('sync-time').textContent = 'just now'; AK.toast('MF Box sync complete · 3 clients updated', { icon: 'refresh', undo: false }); }, 1200);
+      });
+
+      // Export needs approval
+      document.getElementById('btn-export').addEventListener('click', function () {
+        AK.toast('Export request sent to Rajesh Sharma for approval', { icon: 'lock', undo: false });
+      });
+
+      // Saved views (toggle)
+      document.addEventListener('click', function (e) {
+        var v = e.target.closest('[data-view]'); if (!v) return;
+        e.preventDefault();
+        var key = v.getAttribute('data-view');
+        var btn = document.querySelector('.view-btn[data-view="' + key + '"]');
+        var on = !btn.classList.contains('is-active');
+        document.querySelectorAll('.view-btn').forEach(function (b) { b.classList.remove('is-active'); });
+        if (on) { btn.classList.add('is-active'); AK.toast('View applied: ' + btn.textContent.replace(/\d+\s*$/, '').trim(), { icon: 'star', undo: false }); }
+        document.querySelectorAll('.popover.is-open').forEach(function (p) { p.classList.remove('is-open'); });
+      });
+
+      // Filter chips
+      document.getElementById('chips').addEventListener('click', function (e) {
+        var x = e.target.closest('.chip-remove'); if (!x) return;
+        x.closest('.chip').remove();
+        var n = document.querySelectorAll('#chips .chip:not(.chip-ghost)').length;
+        var fc = document.querySelector('.filter-count'); fc.textContent = n; fc.style.display = n ? '' : 'none';
+        AK.toast('Filter removed');
+      });
+      document.getElementById('btn-reset').addEventListener('click', function () {
+        document.querySelectorAll('#chips .chip:not(.chip-ghost)').forEach(function (c) { c.remove(); });
+        document.querySelector('.filter-count').style.display = 'none';
+        AK.toast('Filters reset');
+      });
+
+      // Tier choices are multi-select
+      document.querySelectorAll('.tier-choice .choice, .drawer .choice-group:not([data-single]) .choice').forEach(function (c) {
+        c.addEventListener('click', function () { c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); });
+      });
+    })();
+  </script>
+</body>
+</html>
