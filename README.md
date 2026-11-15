@@ -70,6 +70,8 @@ MFBOX_CRM_Wireframe/
     ├── 18-team-activity.html      ← Team Activity tracker (MVP core)
     ├── 19-reports.html            ← Reports & MIS
     ├── 20-settings.html           ← Settings (team & hierarchy, roles, automations, MF Box sync…)
+    ├── 21-commissions.html        ← Commissions (own share, breakdown, reconciliation, statements)
+    ├── 22-campaigns.html          ← Campaigns and referrals
     │
     ├── _template.html             ← working starter page for new screens
     ├── DESIGN.md                  ← design system spec (tokens, components, sample cast, page contract)
@@ -81,9 +83,9 @@ MFBOX_CRM_Wireframe/
     │
     ├── guide/                     ← plain-English explainers (for CEO / stakeholders)
     │   ├── 00_Overview.md         ← start here: product summary, screen list, 10-min demo script
-    │   ├── 01_Home_Dashboard.md … 20_Settings.md   ← one guide per screen
-    │   ├── 21_Design_System.md    ← why it looks the way it does
-    │   ├── 22_Glossary.md         ← simple meanings of MF and CRM terms
+    │   ├── 01_Home_Dashboard.md … 22_Campaigns.md   ← one guide per screen
+    │   ├── 23_Design_System.md    ← why it looks the way it does
+    │   ├── 24_Glossary.md         ← simple meanings of MF and CRM terms
     │   └── _GUIDE_BRIEF.md        ← the template the guides follow
     │
     ├── tools/
@@ -111,6 +113,7 @@ MFBOX_CRM_Wireframe/
 | 05 | [Lead detail & create](wireframe/05-lead-create.html) | Stage stepper, timeline, Create Lead drawer with MF Box duplicate check | [guide](wireframe/guide/05_Lead_Detail_and_Create.md) |
 | 06 | [Leads pipeline](wireframe/06-leads-pipeline.html) | Kanban with Won/Lost drop zones; stages, products, sources, auto-assignment config | [guide](wireframe/guide/06_Leads_Pipeline.md) |
 | 12 | [Opportunities](wireframe/12-opportunities.html) | Kanban ⇄ table; AI-identified opportunities with explained score, human approval | [guide](wireframe/guide/12_Opportunities.md) |
+| 22 | [Campaigns](wireframe/22-campaigns.html) | Campaign spend, leads, clients and business by channel; referral and thank-you tracking | [guide](wireframe/guide/22_Campaigns.md) |
 | **Clients & service** ||||
 | 07 | [Clients list](wireframe/07-clients-list.html) | AUM, SIP book, tier, last contact, health score, from MF Box | [guide](wireframe/guide/07_Clients_List.md) |
 | 08 | [Client 360](wireframe/08-client-360.html) | Family, portfolio snapshot, coverage, health, AI suggestions, full timeline | [guide](wireframe/guide/08_Client_360.md) |
@@ -124,7 +127,8 @@ MFBOX_CRM_Wireframe/
 | 14 | [Meeting detail](wireframe/14-meeting-detail.html) | Log outcome, voice note, AI summary → tasks (human approves), MF Box prep pack | [guide](wireframe/guide/14_Meeting_Detail.md) |
 | **Management** ||||
 | 19 | [Reports & MIS](wireframe/19-reports.html) | Activity, funnel, task ageing, coverage, SIP book, commissions (MF Box MIS) | [guide](wireframe/guide/19_Reports_and_MIS.md) |
-| 20 | [Settings](wireframe/20-settings.html) | Team & hierarchy, roles, module config, lead capture, automations, MF Box sync, security | [guide](wireframe/guide/20_Settings.md) |
+| 20 | [Settings](wireframe/20-settings.html) | Team & hierarchy, departments, roles, module config, lead capture, automations, MF Box sync, security | [guide](wireframe/guide/20_Settings.md) |
+| 21 | [Commissions](wireframe/21-commissions.html) | Everyone's own share, breakdown by AMC / scheme / client / person, AMC statement reconciliation | [guide](wireframe/guide/21_Commissions.md) |
 
 > On GitHub the `.html` links open the source. To use the screens, open them in a browser from a local clone.
 
@@ -132,7 +136,7 @@ MFBOX_CRM_Wireframe/
 
 ## Design system
 
-Full spec: **[`wireframe/DESIGN.md`](wireframe/DESIGN.md)**. Plain-English version: [`guide/21_Design_System.md`](wireframe/guide/21_Design_System.md).
+Full spec: **[`wireframe/DESIGN.md`](wireframe/DESIGN.md)**. Plain-English version: [`guide/23_Design_System.md`](wireframe/guide/23_Design_System.md).
 
 | Area | Choice |
 |---|---|
@@ -157,7 +161,7 @@ Full spec: **[`wireframe/DESIGN.md`](wireframe/DESIGN.md)**. Plain-English versi
 - **How to demo it** (2-minute click path)
 - **Questions the CEO may ask** · **Decisions needed**
 
-Start with **[`guide/00_Overview.md`](wireframe/guide/00_Overview.md)**, which includes a 10-minute walkthrough script. **[`guide/22_Glossary.md`](wireframe/guide/22_Glossary.md)** explains terms like SLA, AUM, ARN/EUIN and the WhatsApp 24-hour window.
+Start with **[`guide/00_Overview.md`](wireframe/guide/00_Overview.md)**, which includes a 10-minute walkthrough script. **[`guide/24_Glossary.md`](wireframe/guide/24_Glossary.md)** explains terms like SLA, AUM, ARN/EUIN and the WhatsApp 24-hour window.
 
 > The guides embed screenshots from `_shots/`, which is not committed. Generate them locally to see the pictures (see [Screenshots](#screenshots)).
 

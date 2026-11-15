@@ -101,6 +101,42 @@
     .score { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--ai); font-variant-numeric: tabular-nums; }
     .doc-ic { width: 32px; height: 32px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); flex: none; }
 
+
+    /* ---- Investments + Financial profile tabs, statement drawer ---- */
+    .inv-split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: var(--sp-5); align-items: start; }
+    .gain-up { color: var(--success); font-weight: 600; }
+    .gain-down { color: var(--danger); font-weight: 600; }
+    .alloc-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .alloc-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .alloc-row .num { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+    .alloc-row .num span { display: block; font-size: 11.5px; color: var(--text-3); font-weight: 500; }
+    .sched-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .sched-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .sched-item:first-child { padding-top: 0; }
+    .sched-ic { width: 28px; height: 28px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--primary-soft); color: var(--primary-text); flex: none; }
+    .sched-t { font-size: 13px; font-weight: 600; color: var(--text); line-height: 18px; }
+    .sched-s { font-size: 12px; color: var(--text-3); line-height: 16px; margin-top: 2px; }
+    .risk-scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 10px; }
+    .risk-scale span { height: 8px; border-radius: 4px; background: var(--surface-3); }
+    .risk-scale span.on { background: var(--primary); }
+    .risk-scale-l { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 6px; font-size: 11px; color: var(--text-3); text-align: center; line-height: 14px; }
+    .risk-scale-l b { color: var(--primary-text); font-weight: 600; }
+    .goal-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .goal-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    .goal-row:first-child { padding-top: 0; }
+    .goal-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; font-size: 13.5px; }
+    .goal-top b { font-weight: 600; }
+    .goal-top .ml-auto { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .hist-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .hist-item:last-child { border-bottom: 0; padding-bottom: 0; }
+    .hist-item:first-child { padding-top: 0; }
+    .hist-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); margin-top: 6px; flex: none; }
+    .hist-item.is-now .hist-dot { background: var(--primary); }
+    .drawer-sec { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: 4px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
+    .sched-box { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); padding: 12px 14px; }
+    .sched-box[hidden] { display: none; }
+    @media (max-width: 1100px) { .inv-split { grid-template-columns: 1fr; } }
+
     @media (max-width: 1280px) {
       .stat-row { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--sp-2); }
       .stat { padding: var(--sp-3); }
@@ -215,6 +251,8 @@
         <!-- ================= Tabs ================= -->
         <div class="tabs" data-tabs="c360" role="tablist">
           <button class="tab is-active" data-tab="overview">Overview</button>
+          <button class="tab" data-tab="invest">Investments</button>
+          <button class="tab" data-tab="profile">Financial profile</button>
           <button class="tab" data-tab="activity">Activity <span class="count">50</span></button>
           <button class="tab" data-tab="tasks">Tasks <span class="count">3</span></button>
           <button class="tab" data-tab="opps">Opportunities <span class="count">2</span></button>
@@ -348,7 +386,7 @@
                 <section class="card">
                   <div class="card-header">
                     <div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-repeat"/></svg></span>Active SIPs <span class="badge badge-neutral">6</span></div>
-                    <span class="sync-note ml-auto text-sm"><svg class="i"><use href="#i-refresh"/></svg>MF Box · 10:42</span>
+                    <a class="btn btn-ghost btn-sm ml-auto" href="#" onclick="document.querySelector('[data-tab=invest]').click();return false">Details &amp; statements</a>
                   </div>
                   <div class="card-body flush">
                     <table class="table sip-table">
@@ -376,7 +414,7 @@
                       <dt>Date of birth</dt><dd>14 Mar 1979 <span class="faint">(47)</span></dd>
                       <dt>Occupation</dt><dd>Senior Manager, private sector</dd>
                       <dt>Tax status</dt><dd>Resident individual</dd>
-                      <dt>Risk profile</dt><dd>Moderately aggressive <div class="faint text-sm">Updated 21 Oct 2026</div></dd>
+                      <dt>Risk profile</dt><dd>Moderately aggressive <div class="faint text-sm">Updated 21 Oct 2026 · <a href="#" onclick="document.querySelector('[data-tab=profile]').click();return false">Financial profile</a></div></dd>
                       <dt>KYC</dt><dd><span class="badge badge-dot badge-success">Verified (KRA)</span></dd>
                       <dt>Nomination</dt><dd><span class="badge badge-dot badge-success">Complete · 9/9 folios</span></dd>
                       <dt>Bank</dt><dd>HDFC Bank ••4410 <div class="text-sm text-warning">Mandate expiring</div></dd>
@@ -481,6 +519,202 @@
                 </div>
               </section>
 
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ================= INVESTMENTS ================= -->
+        <div data-tab-panel="invest" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <span class="sec-title">Investments</span>
+            <span class="faint text-sm">Holdings, SIPs and transactions · read-only from MF Box</span>
+            <span class="sync-note ml-auto text-sm"><svg class="i"><use href="#i-refresh"/></svg>MF Box · 10:42</span>
+            <button class="btn btn-secondary" data-open-drawer="drawer-statement" data-for="schedule"><svg class="i"><use href="#i-repeat"/></svg>Schedule statements</button>
+            <button class="btn btn-primary" data-open-drawer="drawer-statement"><svg class="i"><use href="#i-file"/></svg>Generate statement</button>
+          </div>
+
+          <div class="grid-4" style="margin-bottom:var(--sp-4)">
+            <div class="stat"><div class="stat-label">Invested</div><div class="stat-value">₹92.4 L</div><div class="stat-meta">Rahul · 7 schemes · 9 folios</div></div>
+            <div class="stat stat-info"><div class="stat-label">Current value</div><div class="stat-value">₹1.24 Cr</div><div class="stat-meta">NAV of 13 Nov 2026</div></div>
+            <div class="stat stat-success"><div class="stat-label">Unrealised gain</div><div class="stat-value">+₹31.6 L</div><div class="stat-meta"><span class="delta-up fw-600">+34.2%</span> on invested · 1-yr return 14.2%</div></div>
+            <div class="stat"><div class="stat-label">Realised, FY 2026-27</div><div class="stat-value">₹1.8 L</div><div class="stat-meta">LTCG ₹1.4 L · STCG ₹0.4 L</div></div>
+          </div>
+
+          <div class="inv-split">
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Holdings and gains / losses</div><span class="faint text-sm ml-auto">Rahul Verma · all folios</span></div>
+                <div class="table-wrap" style="border:0;border-radius:0;box-shadow:none">
+                  <table class="table">
+                    <thead><tr><th>Scheme</th><th>Category</th><th class="num">Invested</th><th class="num">Current value</th><th class="num">Gain / loss</th><th class="num">Return</th></tr></thead>
+                    <tbody>
+                      <tr><td><div class="cell-title">Large Cap Fund – Direct Growth</div><div class="cell-sub">Folio ••4410 · since 2016</div></td><td>Equity</td><td class="num">₹20,00,000</td><td class="num">₹29,60,000</td><td class="num gain-up">+₹9,60,000</td><td class="num gain-up">48.0%</td></tr>
+                      <tr><td><div class="cell-title">Flexi Cap Fund – Direct Growth</div><div class="cell-sub">Folio ••7712 · since 2022</div></td><td>Equity</td><td class="num">₹14,00,000</td><td class="num">₹19,20,000</td><td class="num gain-up">+₹5,20,000</td><td class="num gain-up">37.1%</td></tr>
+                      <tr><td><div class="cell-title">Mid Cap Opportunities – Direct Growth</div><div class="cell-sub">Folio ••2093 · since 2019</div></td><td>Equity</td><td class="num">₹12,00,000</td><td class="num">₹18,40,000</td><td class="num gain-up">+₹6,40,000</td><td class="num gain-up">53.3%</td></tr>
+                      <tr><td><div class="cell-title">ELSS Tax Saver – Direct Growth</div><div class="cell-sub">Folio ••5531 · since 2015</div></td><td>Equity</td><td class="num">₹9,40,000</td><td class="num">₹14,60,000</td><td class="num gain-up">+₹5,20,000</td><td class="num gain-up">55.3%</td></tr>
+                      <tr><td><div class="cell-title">Balanced Advantage – Direct Growth</div><div class="cell-sub">Folio ••8820 · since 2021</div></td><td>Hybrid</td><td class="num">₹11,00,000</td><td class="num">₹14,00,000</td><td class="num gain-up">+₹3,00,000</td><td class="num gain-up">27.3%</td></tr>
+                      <tr><td><div class="cell-title">Short Duration Fund – Direct Growth</div><div class="cell-sub">Folio ••3067 · since 2022</div></td><td>Debt</td><td class="num">₹15,00,000</td><td class="num">₹16,40,000</td><td class="num gain-up">+₹1,40,000</td><td class="num gain-up">9.3%</td></tr>
+                      <tr><td><div class="cell-title">Liquid Fund – Direct Growth</div><div class="cell-sub">Folio ••9154 · after 22 Oct redemption</div></td><td>Debt</td><td class="num">₹11,00,000</td><td class="num">₹11,80,000</td><td class="num gain-up">+₹80,000</td><td class="num gain-up">7.3%</td></tr>
+                      <tr class="total-row"><td>Total</td><td></td><td class="num">₹92,40,000</td><td class="num">₹1,24,00,000</td><td class="num gain-up">+₹31,60,000</td><td class="num gain-up">34.2%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-repeat"/></svg></span>SIPs <span class="badge badge-neutral">6</span></div><span class="faint text-sm ml-auto">₹45,000 / month</span></div>
+                <div class="table-wrap" style="border:0;border-radius:0;box-shadow:none">
+                  <table class="table">
+                    <thead><tr><th>Scheme</th><th>Frequency</th><th class="num">Amount</th><th>Debit date</th><th>Started</th><th>Ends</th></tr></thead>
+                    <tbody>
+                      <tr><td><div class="cell-title">Large Cap Fund</div></td><td>Monthly</td><td class="num">₹10,000</td><td>5th</td><td>Mar 2016</td><td>Perpetual</td></tr>
+                      <tr><td><div class="cell-title">Flexi Cap Fund</div><div class="cell-sub">Top-up to ₹15,000 from Dec (proposed)</div></td><td>Monthly</td><td class="num">₹10,000</td><td>20th</td><td>Nov 2026</td><td>Perpetual</td></tr>
+                      <tr><td><div class="cell-title">Mid Cap Opportunities</div></td><td>Monthly</td><td class="num">₹8,000</td><td>10th</td><td>Jun 2019</td><td>May 2029</td></tr>
+                      <tr><td><div class="cell-title">ELSS Tax Saver</div></td><td>Monthly</td><td class="num">₹7,000</td><td>5th</td><td>Apr 2015</td><td>Perpetual</td></tr>
+                      <tr><td><div class="cell-title">Balanced Advantage</div></td><td>Monthly</td><td class="num">₹5,000</td><td>15th</td><td>Jan 2021</td><td>Dec 2030</td></tr>
+                      <tr><td><div class="cell-title">Short Duration Fund</div></td><td>Monthly</td><td class="num">₹5,000</td><td>25th</td><td>Aug 2022</td><td>Jul 2027 <span class="badge badge-dot badge-warning" style="margin-left:6px">Ends in 8 months</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="card-footer"><span class="faint text-sm">0 bounces in 12 months · firm book by frequency: Monthly 1,031 · Quarterly 9 · Weekly 2</span></div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Recent transactions</div><span class="faint text-sm ml-auto">Last 30 days · all types come from MF Box</span></div>
+                <div class="table-wrap" style="border:0;border-radius:0;box-shadow:none">
+                  <table class="table">
+                    <thead><tr><th>Date</th><th>Type</th><th>Scheme</th><th class="num">Amount</th><th>Reference</th><th>Status</th></tr></thead>
+                    <tbody>
+                      <tr><td>10 Nov 2026</td><td>SIP</td><td>Mid Cap Opportunities</td><td class="num">₹8,000</td><td class="mono">MFB-TX-771204</td><td><span class="badge badge-dot badge-success">Successful</span></td></tr>
+                      <tr><td>05 Nov 2026</td><td>SIP</td><td>Large Cap Fund</td><td class="num">₹10,000</td><td class="mono">MFB-TX-770118</td><td><span class="badge badge-dot badge-success">Successful</span></td></tr>
+                      <tr><td>05 Nov 2026</td><td>SIP</td><td>ELSS Tax Saver</td><td class="num">₹7,000</td><td class="mono">MFB-TX-770119</td><td><span class="badge badge-dot badge-success">Successful</span></td></tr>
+                      <tr><td>25 Oct 2026</td><td>SIP</td><td>Short Duration Fund</td><td class="num">₹5,000</td><td class="mono">MFB-TX-766240</td><td><span class="badge badge-dot badge-success">Successful</span></td></tr>
+                      <tr><td>22 Oct 2026</td><td>Redemption</td><td>Liquid Fund</td><td class="num">₹3,00,000</td><td class="mono">MFB-TX-764981</td><td><span class="badge badge-dot badge-success">Successful</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Allocation</div></div>
+                <div class="card-body">
+                  <div class="fam-bar" aria-hidden="true"><span style="width:66%;background:var(--chart-1)"></span><span style="width:11.3%;background:var(--chart-4)"></span><span style="width:22.7%;background:var(--chart-5)"></span></div>
+                  <div class="alloc-row"><span class="fam-sw" style="background:var(--chart-1)"></span>Equity<div class="num">₹81.8 L<span>66%</span></div></div>
+                  <div class="alloc-row"><span class="fam-sw" style="background:var(--chart-4)"></span>Hybrid<div class="num">₹14.0 L<span>11.3%</span></div></div>
+                  <div class="alloc-row"><span class="fam-sw" style="background:var(--chart-5)"></span>Debt and liquid<div class="num">₹28.2 L<span>22.7%</span></div></div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title"><span class="card-icon"><svg class="i"><use href="#i-repeat"/></svg></span>Scheduled statements <span class="badge badge-neutral">2</span></div><button class="btn btn-ghost btn-sm ml-auto" data-open-drawer="drawer-statement" data-for="schedule">Add</button></div>
+                <div class="card-body">
+                  <div class="sched-item"><span class="sched-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><div style="min-width:0"><div class="sched-t">SIP statement · monthly</div><div class="sched-s">6th of every month · WhatsApp to Rahul · next 06 Dec</div></div><label class="switch ml-auto"><input type="checkbox" checked><span></span></label></div>
+                  <div class="sched-item"><span class="sched-ic"><svg class="i"><use href="#i-mail"/></svg></span><div style="min-width:0"><div class="sched-t">Portfolio statement · quarterly</div><div class="sched-s">2nd of Jan, Apr, Jul, Oct · Email, saved to Documents · next 02 Jan</div></div><label class="switch ml-auto"><input type="checkbox" checked><span></span></label></div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Recent statements</div><a class="btn btn-ghost btn-sm ml-auto" href="17-documents.html">All in Documents</a></div>
+                <div class="card-body">
+                  <div class="sched-item"><span class="sched-ic"><svg class="i"><use href="#i-file"/></svg></span><div style="min-width:0"><div class="sched-t">Capital gains, FY 2026-27 YTD</div><div class="sched-s">Today 12:20 PM · WhatsApp · Neha Kapoor</div></div></div>
+                  <div class="sched-item"><span class="sched-ic"><svg class="i"><use href="#i-file"/></svg></span><div style="min-width:0"><div class="sched-t">SIP statement, Oct 2026</div><div class="sched-s">06 Nov · WhatsApp · auto-scheduled</div></div></div>
+                  <div class="sched-item"><span class="sched-ic"><svg class="i"><use href="#i-file"/></svg></span><div style="min-width:0"><div class="sched-t">Portfolio statement, Q2 FY27</div><div class="sched-s">02 Oct · Email · auto-scheduled</div></div></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= FINANCIAL PROFILE ================= -->
+        <div data-tab-panel="profile" data-tab-scope="c360">
+          <div class="tab-pane-head">
+            <span class="sec-title">Financial profile</span>
+            <span class="faint text-sm">Risk, horizon, income and liquidity · last reviewed 21 Oct 2026 by Neha Kapoor</span>
+            <button class="btn btn-primary ml-auto" data-open-drawer="drawer-profile"><svg class="i"><use href="#i-edit"/></svg>Update profile</button>
+          </div>
+
+          <div class="inv-split">
+            <div class="stack">
+              <div class="grid-2">
+                <section class="card">
+                  <div class="card-header"><div class="card-title">Risk and time horizon</div><span class="badge badge-dot badge-success ml-auto">Reviewed</span></div>
+                  <div class="card-body">
+                    <div class="fw-700" style="font-size:18px">Moderately aggressive</div>
+                    <div class="faint text-sm">From the questionnaire signed on 21 Oct 2026</div>
+                    <div class="risk-scale" aria-hidden="true"><span class="on"></span><span class="on"></span><span class="on"></span><span></span><span></span></div>
+                    <div class="risk-scale-l"><span>Conservative</span><span>Moderate</span><span><b>Moderately agg.</b></span><span>Aggressive</span><span>Very aggressive</span></div>
+                    <dl class="kv mt-4">
+                      <dt>Time horizon</dt><dd>10+ years <div class="faint text-sm">Retirement in 2039 · education in 2032</div></dd>
+                      <dt>Next review</dt><dd>21 Oct 2027 <span class="faint">(yearly)</span></dd>
+                    </dl>
+                  </div>
+                </section>
+                <section class="card">
+                  <div class="card-header"><div class="card-title">Income and obligations</div><span class="faint text-sm ml-auto">Self-declared</span></div>
+                  <div class="card-body">
+                    <dl class="kv">
+                      <dt>Monthly income</dt><dd class="tnum">₹3,10,000 <span class="faint">net, salaried</span></dd>
+                      <dt>Obligations</dt><dd class="tnum">₹1,15,000 <div class="faint text-sm">Home loan EMI ₹82,000 · school fees ₹33,000</div></dd>
+                      <dt>Monthly surplus</dt><dd class="tnum">₹1,95,000</dd>
+                      <dt>Dependents</dt><dd>Spouse, 1 child (14)</dd>
+                      <dt>Insurance</dt><dd>Term ₹2 Cr (Rahul) · none for Anjali <span class="badge badge-ai" style="margin-left:4px"><svg class="i"><use href="#i-sparkles"/></svg>Gap</span></dd>
+                    </dl>
+                  </div>
+                </section>
+              </div>
+
+              <div class="grid-2">
+                <section class="card">
+                  <div class="card-header"><div class="card-title">Investment budget</div></div>
+                  <div class="card-body">
+                    <div class="row text-md"><span class="muted">SIP capacity</span><span class="ml-auto fw-600 tnum">₹60,000 / month</span></div>
+                    <div class="progress mt-2"><span style="width:75%"></span></div>
+                    <div class="faint text-sm mt-2">₹45,000 in use (75%) · ₹15,000 headroom, enough for the ₹5,000 top-up from Dec</div>
+                    <div class="row text-md mt-4"><span class="muted">Lump-sum capacity, next 12 months</span><span class="ml-auto fw-600 tnum">₹25,00,000</span></div>
+                    <div class="faint text-sm mt-2">Matches the ₹25 L FD maturing on 2 Dec</div>
+                  </div>
+                </section>
+                <section class="card">
+                  <div class="card-header"><div class="card-title">Liquidity requirements</div><span class="badge badge-dot badge-warning ml-auto">Medium</span></div>
+                  <div class="card-body">
+                    <dl class="kv">
+                      <dt>Emergency reserve</dt><dd class="tnum">₹10,00,000 <span class="faint">(6 months of spending)</span></dd>
+                      <dt>Held in liquid</dt><dd class="tnum">₹11,80,000 <span class="badge badge-dot badge-success" style="margin-left:4px">Covered</span></dd>
+                      <dt>Known needs</dt><dd>School fees ₹2.4 L · Jun 2027<div class="faint text-sm">Advance tax 15 Dec</div></dd>
+                    </dl>
+                  </div>
+                </section>
+              </div>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Financial goals</div><span class="faint text-sm ml-auto">Linked to this portfolio</span></div>
+                <div class="card-body">
+                  <div class="goal-row"><div class="goal-top"><b>Aarav's education</b><span class="faint">₹60 L by 2032</span><span class="ml-auto">58%</span></div><div class="progress p-success"><span style="width:58%"></span></div></div>
+                  <div class="goal-row"><div class="goal-top"><b>Retirement</b><span class="faint">₹6 Cr by 2039</span><span class="ml-auto">31%</span></div><div class="progress p-warning"><span style="width:31%"></span></div></div>
+                  <div class="goal-row"><div class="goal-top"><b>Home renovation</b><span class="faint">Done Oct 2026</span><span class="ml-auto">100%</span></div><div class="progress p-neutral"><span style="width:100%"></span></div></div>
+                </div>
+              </section>
+            </div>
+
+            <div class="stack">
+              <section class="card ai-card">
+                <div class="card-header"><div class="card-title"><span class="card-icon ci-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>Suitability check</div><span class="badge badge-ai ml-auto"><svg class="i"><use href="#i-lock"/></svg>Internal – not advice</span></div>
+                <div class="card-body">
+                  <div class="ai-item"><div class="ai-item-title">Equity is 66% against a 60–75% guide for this risk class</div><div class="ai-item-why">No mismatch. The proposed SIP top-up keeps it inside the range.</div></div>
+                  <div class="ai-item"><div class="ai-item-title">Anjali has no term cover</div><div class="ai-item-why">Income and dependents suggest a gap. A term-cover opportunity is already open.</div><div class="ai-item-act"><a class="btn btn-sm btn-ai" href="12-opportunities.html"><svg class="i"><use href="#i-target"/></svg>Open opportunity</a></div></div>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-header"><div class="card-title">Assessment history</div></div>
+                <div class="card-body">
+                  <div class="hist-item is-now"><span class="hist-dot"></span><div><b>Moderately aggressive</b><div class="faint text-sm">21 Oct 2026 · questionnaire signed · Neha Kapoor</div></div></div>
+                  <div class="hist-item"><span class="hist-dot"></span><div><b>Moderate</b><div class="faint text-sm">14 Oct 2025 · changed after a salary increase</div></div></div>
+                  <div class="hist-item"><span class="hist-dot"></span><div><b>Moderate</b><div class="faint text-sm">09 Oct 2023 · first assessment · Rohan Mehta</div></div></div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -778,7 +1012,8 @@
           <div class="tab-pane-head">
             <span class="sec-title">Verma Family</span>
             <span class="faint text-sm">Family head: Rahul Verma · grouping from MF Box</span>
-            <button class="btn btn-secondary ml-auto" onclick="AK.toast('Change family head: request sent to MF Box admin')">Change head</button>
+            <button class="btn btn-secondary ml-auto" data-open-drawer="drawer-statement" data-for="family"><svg class="i"><use href="#i-file"/></svg>Family report</button>
+            <button class="btn btn-secondary" onclick="AK.toast('Change family head: request sent to MF Box admin')">Change head</button>
             <button class="btn btn-primary" onclick="AK.toast('Add member: pick an existing MF Box investor')"><svg class="i"><use href="#i-user-plus"/></svg>Add member</button>
           </div>
           <div class="table-card">
@@ -856,8 +1091,92 @@
     <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-review');AK.toast('Review scheduled · Sat 13 Feb 2027, 11:00 AM')">Schedule review</button></div>
   </aside>
 
+
+  <!-- ================= Drawer: Generate / schedule statement ================= -->
+  <aside class="drawer" id="drawer-statement" aria-label="Generate statement">
+    <div class="drawer-header"><div><div class="drawer-title">Generate statement or report</div><div class="drawer-sub">Built from MF Box data · one-off or on a schedule</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">What do you need? <span class="req">*</span></label>
+          <div class="choice-group" data-segmented>
+            <button class="choice" aria-pressed="true">Portfolio statement</button>
+            <button class="choice">Capital gains</button>
+            <button class="choice">SIP statement</button>
+            <button class="choice">Transaction statement</button>
+            <button class="choice">Investment report</button>
+          </div>
+        </div>
+        <div class="field span-2"><label class="label">For</label>
+          <div class="choice-group" data-segmented>
+            <button class="choice" id="st-self" aria-pressed="true"><svg class="i"><use href="#i-user"/></svg>Rahul Verma</button>
+            <button class="choice" id="st-fam"><svg class="i"><use href="#i-users"/></svg>Verma Family · consolidated (3)</button>
+          </div>
+        </div>
+        <div class="field"><label class="label">Period</label><select class="select"><option>FY 2026-27 to date</option><option>Last quarter</option><option>Last 12 months</option><option>Custom range…</option></select></div>
+        <div class="field"><label class="label">Format</label><select class="select"><option>PDF</option><option>Excel</option></select></div>
+
+        <div class="field span-2 drawer-sec">Deliver</div>
+        <div class="field span-2">
+          <label class="check"><input type="checkbox" checked> Save a copy to Documents · Verma Family</label>
+          <label class="check mt-2"><input type="checkbox" checked> Send on WhatsApp to Rahul <span class="faint">· approved template · ₹0.15 / msg</span></label>
+          <label class="check mt-2"><input type="checkbox"> Email to rahul••••@••••.com</label>
+        </div>
+
+        <div class="field span-2 drawer-sec">Repeat</div>
+        <div class="field span-2">
+          <label class="row gap-3"><span class="switch"><input type="checkbox" id="st-repeat"><span></span></span><span>Generate this automatically on a schedule</span></label>
+        </div>
+        <div class="field span-2 sched-box" id="st-sched" hidden>
+          <div class="form-grid">
+            <div class="field"><label class="label">How often</label><select class="select"><option>Monthly</option><option>Quarterly</option><option>Half-yearly</option><option>Yearly (after 31 Mar)</option></select></div>
+            <div class="field"><label class="label">On day</label><select class="select"><option>6th of the month</option><option>1st of the month</option><option>Last working day</option></select></div>
+            <div class="field"><label class="label">First run</label><input class="input" value="06 Dec 2026, 9:00 AM"></div>
+            <div class="field"><label class="label">Ends</label><select class="select"><option>Never</option><option>After 12 runs</option><option>On a date…</option></select></div>
+            <div class="field span-2"><label class="check"><input type="checkbox" checked> Ask the RM to review before it is sent to the client</label><div class="help">Review reminder lands in My Day the day before. Stops if the client opts out of WhatsApp or email.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="banner banner-info mt-4"><svg class="i"><use href="#i-info"/></svg><span>Statements show holdings and transactions only. They carry the firm's ARN and a generated-on date, and never any advice.</span></div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to run</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" id="st-go" onclick="AK.closeDrawer('drawer-statement');AK.toast(document.getElementById('st-repeat').checked ? 'Schedule saved · first run 06 Dec, 9:00 AM' : 'Statement generated · saved to Documents and sent on WhatsApp')">Generate</button></div>
+  </aside>
+
+  <!-- ================= Drawer: Update financial profile ================= -->
+  <aside class="drawer" id="drawer-profile" aria-label="Update financial profile">
+    <div class="drawer-header"><div><div class="drawer-title">Update financial profile</div><div class="drawer-sub">Rahul Verma · saved as a new dated assessment</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field"><label class="label">Risk class <span class="req">*</span></label><select class="select"><option>Moderately aggressive</option><option>Conservative</option><option>Moderate</option><option>Aggressive</option><option>Very aggressive</option></select></div>
+        <div class="field"><label class="label">Time horizon <span class="req">*</span></label><select class="select"><option>10+ years</option><option>7–10 years</option><option>3–7 years</option><option>Under 3 years</option></select></div>
+        <div class="field span-2 drawer-sec">Income and obligations</div>
+        <div class="field"><label class="label">Monthly income</label><input class="input" value="₹3,10,000"></div>
+        <div class="field"><label class="label">Monthly obligations</label><input class="input" value="₹1,15,000"></div>
+        <div class="field span-2 drawer-sec">Investment budget</div>
+        <div class="field"><label class="label">SIP capacity / month</label><input class="input" value="₹60,000"></div>
+        <div class="field"><label class="label">Lump-sum capacity, 12 months</label><input class="input" value="₹25,00,000"></div>
+        <div class="field span-2 drawer-sec">Liquidity</div>
+        <div class="field"><label class="label">Emergency reserve</label><input class="input" value="₹10,00,000"></div>
+        <div class="field"><label class="label">Liquidity need</label><select class="select"><option>Medium</option><option>Low</option><option>High</option></select></div>
+        <div class="field span-2"><label class="label">Known cash needs</label><textarea class="textarea" rows="3">School fees ₹2.4 L in Jun 2027</textarea></div>
+        <div class="field span-2"><label class="label">Reason for change</label><input class="input" placeholder="Required if the risk class changes"></div>
+        <div class="field span-2"><label class="check"><input type="checkbox" checked> Keep the previous assessment in history</label><label class="check mt-2"><input type="checkbox" checked> Create a review task for 21 Oct 2027</label></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-profile');AK.toast('Profile updated · history kept')">Save profile</button></div>
+  </aside>
+
   <script>
     (function () {
+      // Statement drawer presets and schedule switch
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-for]');
+        if (!b) return;
+        var f = b.getAttribute('data-for');
+        if (f === 'family') document.getElementById('st-fam').click();
+        if (f === 'schedule') { var r = document.getElementById('st-repeat'); r.checked = true; r.dispatchEvent(new Event('change')); }
+      });
+      var rep = document.getElementById('st-repeat');
+      rep.addEventListener('change', function () { document.getElementById('st-sched').hidden = !rep.checked; document.getElementById('st-go').textContent = rep.checked ? 'Save schedule' : 'Generate'; });
       // Dismiss AI suggestions (with undo toast)
       document.addEventListener('click', function (e) {
         var d = e.target.closest('[data-dismiss]');

@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Commissions · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Commissions: page-specific styles (tokens only) ---- */
+    .filterbar { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-4); }
+    .filterbar .select { width: auto; }
+    .sel-wrap { position: relative; display: inline-flex; align-items: center; }
+    .sel-wrap > .i { position: absolute; left: 11px; color: var(--text-3); pointer-events: none; }
+    .sel-wrap > .select { padding-left: 34px; }
+    .sync { margin-left: auto; font-size: 12px; color: var(--text-3); display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+    .sync .dot { background: var(--success); width: 6px; height: 6px; }
+    .src { display: inline-flex; align-items: center; height: 16px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: 600; background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); white-space: nowrap; margin-left: auto; }
+
+    /* Your share */
+    .mine { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 300px; gap: var(--sp-5); align-items: center; padding: var(--sp-5) var(--sp-6); margin-bottom: var(--sp-4); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+    .mine-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--primary-text); display: flex; align-items: center; gap: 6px; }
+    .mine-val { font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -.01em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+    .mine-val small { font-size: 14px; font-weight: 500; color: var(--text-2); margin-left: 4px; letter-spacing: 0; }
+    .mine-sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+    .mine-kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .mine-kv div { font-size: 12px; color: var(--text-3); }
+    .mine-kv b { display: block; font-size: 16px; font-weight: 600; color: var(--text); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .mini-bars { display: flex; align-items: flex-end; gap: 6px; height: 56px; }
+    .mini-bars span { flex: 1; background: var(--chart-3); border-radius: 3px 3px 0 0; position: relative; min-height: 4px; }
+    .mini-bars span:last-child { background: var(--chart-1); }
+    .mini-bars-l { display: flex; gap: 6px; margin-top: 4px; font-size: 11px; color: var(--text-3); }
+    .mini-bars-l span { flex: 1; text-align: center; }
+
+    /* KPI tiles */
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: var(--sp-4); }
+    .kpi { padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .kpi .stat-label { justify-content: flex-start; }
+    .kpi-row { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+    .kpi .stat-value { font-variant-numeric: normal; font-size: 24px; line-height: 30px; margin-top: 0; }
+    .kpi .stat-value small { font-size: 13px; font-weight: 500; color: var(--text-2); letter-spacing: 0; margin-left: 2px; }
+    .kpi-delta { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .kpi-delta .i { width: 12px; height: 12px; stroke-width: 2.25; }
+
+    .row-a { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--sp-4); margin-bottom: var(--sp-4); }
+    .vcard .card-header { padding: 14px 20px 0; border-bottom: 0; }
+    .vcard .card-title { font-size: 14.5px; }
+    .take { display: flex; align-items: center; gap: 6px; padding: 4px 20px 0; font-size: 13px; color: var(--text-2); }
+    .take .i { width: 14px; height: 14px; }
+    .take b { color: var(--text); font-weight: 600; }
+    .vcard .card-body { padding: 14px 20px 16px; }
+    .vcard .card-footer { padding: 10px 20px; font-size: 12px; color: var(--text-3); }
+    .legend { gap: var(--sp-3) var(--sp-4); font-size: 12px; }
+
+    /* Stacked columns, CSS only */
+    .vchart { position: relative; height: 200px; margin: 30px 0 32px 36px; }
+    .vgrid { position: absolute; inset: 0; pointer-events: none; }
+    .vgrid span { position: absolute; left: 0; right: 0; border-top: 1px solid var(--border); }
+    .vgrid span::before { content: attr(data-v); position: absolute; right: calc(100% + 8px); top: -8px; font-size: 11px; line-height: 16px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+    .vgrid span.base { border-top-color: var(--border-strong); }
+    .vcols { position: absolute; inset: 0; display: flex; align-items: flex-end; }
+    .vcol { position: relative; height: 100%; flex: 1; display: flex; align-items: flex-end; justify-content: center; }
+    .vbar { position: relative; width: 36px; }
+    .vstack { height: 100%; display: flex; flex-direction: column-reverse; gap: 2px; }
+    .vstack i { display: block; flex-basis: 0; min-height: 2px; }
+    .vstack i:last-child { border-radius: 4px 4px 0 0; }
+    .vtotal { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .vx { position: absolute; top: calc(100% + 8px); left: 0; right: 0; text-align: center; font-size: 12px; color: var(--text-2); white-space: nowrap; }
+    .vx small { display: block; font-size: 11px; color: var(--text-3); }
+
+    /* Attention list */
+    .att { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .att:first-child { padding-top: 0; }
+    .att:last-child { border-bottom: 0; padding-bottom: 0; }
+    .att-ic { width: 28px; height: 28px; border-radius: var(--r-md); display: grid; place-items: center; flex: none; background: var(--warning-soft); color: var(--warning); }
+    .att-ic.is-danger { background: var(--danger-soft); color: var(--danger); }
+    .att-t { font-weight: 600; color: var(--text); line-height: 18px; }
+    .att-s { font-size: 12px; color: var(--text-3); line-height: 16px; }
+    .att .num { white-space: nowrap; margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+
+    .access-note { display: flex; gap: 8px; align-items: flex-start; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); font-size: 12.5px; color: var(--text-2); line-height: 18px; margin-bottom: var(--sp-4); }
+    .access-note .i { color: var(--text-3); margin-top: 2px; flex: none; }
+    .access-note b { color: var(--text); font-weight: 600; }
+
+    /* Breakdown + reconciliation tables */
+    .grp-bar { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; margin-bottom: var(--sp-3); }
+    .grp-bar .scope-note { font-size: 12.5px; color: var(--text-3); display: inline-flex; gap: 6px; align-items: center; }
+    .gpanel[hidden] { display: none; }
+    .bar-cell { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .bar-cell .b { width: 56px; height: 6px; border-radius: 6px; background: var(--surface-3); position: relative; overflow: hidden; }
+    .bar-cell .b i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--chart-1); border-radius: 6px; }
+    .diff-neg { color: var(--danger); font-weight: 600; }
+    .diff-zero { color: var(--text-3); }
+    .total-row td { background: var(--surface-2); font-weight: 600; }
+    .is-me td { background: var(--primary-soft); }
+
+    .recon-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: var(--sp-4); }
+    .recon-meter { margin-top: 8px; }
+
+    .drop { border: 1.5px dashed var(--border-strong); border-radius: var(--r-lg); background: var(--surface-2); padding: var(--sp-5); display: flex; align-items: center; gap: var(--sp-4); margin-bottom: var(--sp-4); }
+    .drop .ic { width: 40px; height: 40px; border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; flex: none; }
+    .drop b { font-weight: 600; }
+    .drop .sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+    .doc-ic { width: 32px; height: 32px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); flex: none; }
+
+    .export-menu { width: 300px; }
+    .export-note { display: flex; gap: 8px; padding: 8px 10px 10px; font-size: 12px; line-height: 16px; color: var(--text-2); border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+    .export-note .i { color: var(--warning); margin-top: 1px; }
+    .menu-item .menu-sub { display: block; font-size: 11.5px; color: var(--text-3); line-height: 14px; }
+    .menu-item.tall { height: auto; padding: 7px 10px; }
+    .drawer-sec { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: 4px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
+
+    @media (max-width: 1280px) { .mine { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .mine .mini-wrap { display: none; } }
+    @media (max-width: 1100px) { .kpis, .recon-strip { grid-template-columns: 1fr 1fr; } .row-a { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .mine { grid-template-columns: 1fr; } .sync { margin-left: 0; width: 100%; } }
+  </style>
+</head>
+<body data-page="commissions" data-crumb="Commissions|Overview">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Commissions</h1>
+            <p class="page-sub">Brokerage and trail from MF Box MIS, checked against AMC statements</p>
+          </div>
+          <div class="page-actions">
+            <div class="popover-wrap">
+              <button class="btn btn-secondary" data-popover="pop-export" title="Exports need approval and are watermarked">
+                <svg class="i"><use href="#i-download"/></svg>Export<svg class="i i-sm"><use href="#i-chevron-down"/></svg>
+              </button>
+              <div class="popover" id="pop-export">
+                <div class="menu export-menu">
+                  <div class="export-note"><svg class="i i-sm"><use href="#i-lock"/></svg><span>Exports need approval from <b>Rajesh Sharma</b> and are watermarked with your name and the time.</span></div>
+                  <button class="menu-item tall" data-toast="PDF requested · waiting for approval from Rajesh Sharma"><svg class="i"><use href="#i-file"/></svg><span>PDF statement<span class="menu-sub">This view, watermarked</span></span></button>
+                  <button class="menu-item tall" data-toast="Excel requested · waiting for approval from Rajesh Sharma"><svg class="i"><use href="#i-grid"/></svg><span>Excel (data)<span class="menu-sub">Breakdown and reconciliation as sheets</span></span></button>
+                  <button class="menu-item tall" data-toast="Discrepancy report requested · waiting for approval"><svg class="i"><use href="#i-alert"/></svg><span>Discrepancy report<span class="menu-sub">Open differences with AMC and reason</span></span></button>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary" data-open-drawer="drawer-upload"><svg class="i"><use href="#i-upload"/></svg>Upload statement</button>
+          </div>
+        </div>
+
+        <div class="filterbar" role="group" aria-label="Commission filters">
+          <label class="sel-wrap"><svg class="i"><use href="#i-calendar"/></svg>
+            <select class="select" aria-label="Period">
+              <option selected>Nov 2026 (accrued)</option>
+              <option>Oct 2026 (statements received)</option>
+              <option>Sep 2026</option>
+              <option>FY 2026-27 to date</option>
+              <option>FY 2025-26</option>
+              <option>Custom range…</option>
+            </select>
+          </label>
+          <label class="sel-wrap"><svg class="i"><use href="#i-building"/></svg>
+            <select class="select" aria-label="Branch">
+              <option>Firm totals</option>
+              <option selected>Andheri (Mumbai) · detail</option>
+              <option>Thane · totals only</option>
+              <option>Pune · totals only</option>
+            </select>
+          </label>
+          <span class="sync"><span class="dot"></span>Synced from MF Box MIS · 10:42</span>
+        </div>
+
+        <div class="tabs" data-tabs="comm" role="tablist">
+          <button class="tab is-active" data-tab="overview">Overview</button>
+          <button class="tab" data-tab="breakdown">Breakdown</button>
+          <button class="tab" data-tab="recon">Reconciliation <span class="count">4</span></button>
+          <button class="tab" data-tab="statements">Statements &amp; history</button>
+        </div>
+
+        <!-- ================= OVERVIEW ================= -->
+        <div data-tab-panel="overview" data-tab-scope="comm" class="is-active">
+
+          <section class="card mine" aria-label="Your commission share">
+            <div>
+              <div class="mine-label"><svg class="i i-sm"><use href="#i-user"/></svg>Your share · Neha Kapoor</div>
+              <div class="mine-val">₹1,95,000<small>Nov, accrued</small></div>
+              <div class="mine-sub"><span class="delta-up fw-600">+7%</span> vs October · mapped to the 186 clients you look after</div>
+              <div class="faint text-sm" style="margin-top:8px"><svg class="i i-sm" style="vertical-align:-2px"><use href="#i-lock"/></svg> Only you, your reporting line and the owner can see this.</div>
+            </div>
+            <div class="mine-kv">
+              <div>Trail<b>₹1,84,000</b></div>
+              <div>Upfront<b>₹11,000</b></div>
+              <div>Clients<b>186</b></div>
+            </div>
+            <div class="mini-wrap">
+              <div class="mini-bars" aria-label="Your share, last six months: Jun 1.55 L, Jul 1.62 L, Aug 1.70 L, Sep 1.74 L, Oct 1.82 L, Nov 1.95 L">
+                <span style="height:56%" title="Jun ₹1.55 L"></span><span style="height:63%" title="Jul ₹1.62 L"></span><span style="height:73%" title="Aug ₹1.70 L"></span><span style="height:77%" title="Sep ₹1.74 L"></span><span style="height:88%" title="Oct ₹1.82 L"></span><span style="height:100%" title="Nov ₹1.95 L"></span>
+              </div>
+              <div class="mini-bars-l"><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span></div>
+            </div>
+          </section>
+
+          <div class="access-note"><svg class="i i-sm"><use href="#i-shield"/></svg><span><b>Who sees what.</b> Everyone sees their own share. RMs and sub-brokers see no one else's. Branch managers see their branch in detail and firm totals. The owner sees everything. Shares are shown for information, never ranked (AMFI).</span></div>
+
+          <div class="kpis">
+            <div class="stat stat-success kpi">
+              <div class="stat-label">Earned, Nov (accrued) <span class="src">MF Box</span></div>
+              <div class="kpi-row"><div class="stat-value">₹15.4 L</div><span class="kpi-delta delta-up"><svg class="i"><use href="#i-arrow-up"/></svg>4%</span></div>
+              <div class="stat-meta">Trail ₹14.6 L · upfront ₹0.8 L</div>
+            </div>
+            <div class="stat stat-info kpi">
+              <div class="stat-label">Received, Oct <span class="src">Statements</span></div>
+              <div class="kpi-row"><div class="stat-value">₹14.0 L</div></div>
+              <div class="stat-meta">Expected ₹14.3 L · 24 of 28 AMCs match</div>
+            </div>
+            <div class="stat stat-warning kpi">
+              <div class="stat-label">Pending, Oct</div>
+              <div class="kpi-row"><div class="stat-value">₹0.30 L</div></div>
+              <div class="stat-meta">1 statement awaited · 3 differences</div>
+            </div>
+            <div class="stat kpi">
+              <div class="stat-label">Trail share of earned</div>
+              <div class="kpi-row"><div class="stat-value">95<small>%</small></div></div>
+              <div class="stat-meta">Trail is the steady part of the book</div>
+            </div>
+          </div>
+
+          <div class="row-a">
+            <section class="card vcard">
+              <div class="card-header">
+                <div class="card-title">Commission earned, last 6 months</div>
+                <div class="card-actions"><a class="btn btn-ghost btn-sm" href="#" data-goto="breakdown">Breakdown</a></div>
+              </div>
+              <p class="take"><svg class="i text-success"><use href="#i-trending-up"/></svg><span><b>Trail has grown 12% since June</b> (₹13.0 L to ₹14.6 L) while upfront stayed flat.</span></p>
+              <div class="card-body">
+                <div class="legend">
+                  <span class="legend-item"><span class="legend-swatch" style="background:var(--chart-1)"></span>Trail (net of GST)</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:var(--chart-3)"></span>Upfront / brokerage</span>
+                </div>
+                <div class="vchart" role="img" aria-label="Monthly commission, trail and upfront, June to November 2026">
+                  <div class="vgrid"><span style="bottom:100%" data-v="20"></span><span style="bottom:75%" data-v="15"></span><span style="bottom:50%" data-v="10"></span><span style="bottom:25%" data-v="5"></span><span class="base" style="bottom:0" data-v="0"></span></div>
+                  <div class="vcols" id="chart-cols"></div>
+                </div>
+              </div>
+              <div class="card-footer"><svg class="i i-sm"><use href="#i-info"/></svg>₹ in lakh · Nov is accrued; the AMC statements arrive in December.</div>
+            </section>
+
+            <section class="card vcard">
+              <div class="card-header">
+                <div class="card-title">Needs attention</div>
+                <div class="card-actions"><a class="btn btn-ghost btn-sm" href="#" data-goto="recon">Open reconciliation</a></div>
+              </div>
+              <p class="take"><svg class="i text-danger"><use href="#i-alert"/></svg><span><b>₹0.30 L of October trail</b> is not yet received.</span></p>
+              <div class="card-body">
+                <div class="att"><span class="att-ic is-danger"><svg class="i"><use href="#i-clock"/></svg></span><div><div class="att-t">Zenith Mutual Fund · statement awaited</div><div class="att-s">Due 08 Nov · 6 days late · reminder sent to Priya Nair</div></div><span class="num">₹0.09 L</span></div>
+                <div class="att"><span class="att-ic"><svg class="i"><use href="#i-alert"/></svg></span><div><div class="att-t">Orchid Asset Management · short</div><div class="att-s">Rate change not applied on 14 folios</div></div><span class="num diff-neg">−₹0.08 L</span></div>
+                <div class="att"><span class="att-ic"><svg class="i"><use href="#i-alert"/></svg></span><div><div class="att-t">Kaveri Mutual Fund · short</div><div class="att-s">2 SIP folios mapped to a lapsed ARN</div></div><span class="num diff-neg">−₹0.07 L</span></div>
+                <div class="att"><span class="att-ic"><svg class="i"><use href="#i-alert"/></svg></span><div><div class="att-t">Sagar Mutual Fund · short</div><div class="att-s">Exit-load share reversed after a redemption</div></div><span class="num diff-neg">−₹0.06 L</span></div>
+              </div>
+              <div class="card-footer"><svg class="i i-sm"><use href="#i-info"/></svg>Reminders go to Priya Nair. Differences over ₹0.05 L are shared with the owner.</div>
+            </section>
+          </div>
+        </div>
+
+        <!-- ================= BREAKDOWN ================= -->
+        <div data-tab-panel="breakdown" data-tab-scope="comm">
+          <div class="grp-bar">
+            <span class="sec-label" style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--text-3)">Group by</span>
+            <div class="segmented" id="grp-seg" data-segmented>
+              <button aria-pressed="true" data-g="amc">AMC</button>
+              <button data-g="scheme">Scheme</button>
+              <button data-g="investor">Investor</button>
+              <button data-g="employee">Employee</button>
+            </div>
+            <span class="scope-note" id="grp-note"><svg class="i i-sm"><use href="#i-building"/></svg>Firm totals · Nov 2026 accrued</span>
+          </div>
+
+          <div class="table-card">
+            <!-- AMC -->
+            <div class="gpanel table-wrap" id="g-amc" style="border:0;box-shadow:none">
+              <table class="table">
+                <thead><tr><th>AMC</th><th class="num">AUM</th><th class="num">Trail</th><th class="num">Upfront</th><th class="num">Total earned</th><th class="num">Share</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-title">Bharat Mutual Fund</td><td class="num">₹92 Cr</td><td class="num">₹3.60 L</td><td class="num">₹0.20 L</td><td class="num fw-600">₹3.80 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:100%"></i></span>24.7%</span></td></tr>
+                  <tr><td class="cell-title">Himalaya AMC</td><td class="num">₹66 Cr</td><td class="num">₹2.50 L</td><td class="num">₹0.15 L</td><td class="num fw-600">₹2.65 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:70%"></i></span>17.2%</span></td></tr>
+                  <tr><td class="cell-title">Kaveri Mutual Fund</td><td class="num">₹54 Cr</td><td class="num">₹2.10 L</td><td class="num">₹0.10 L</td><td class="num fw-600">₹2.20 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:58%"></i></span>14.3%</span></td></tr>
+                  <tr><td class="cell-title">Lotus Asset Management</td><td class="num">₹46 Cr</td><td class="num">₹1.80 L</td><td class="num">₹0.10 L</td><td class="num fw-600">₹1.90 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:50%"></i></span>12.3%</span></td></tr>
+                  <tr><td class="cell-title">Meridian Mutual Fund</td><td class="num">₹38 Cr</td><td class="num">₹1.50 L</td><td class="num">₹0.10 L</td><td class="num fw-600">₹1.60 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:42%"></i></span>10.4%</span></td></tr>
+                  <tr><td class="cell-title">Orion Asset Management</td><td class="num">₹28 Cr</td><td class="num">₹1.10 L</td><td class="num">₹0.05 L</td><td class="num fw-600">₹1.15 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:30%"></i></span>7.5%</span></td></tr>
+                  <tr><td class="cell-title">Sagar Mutual Fund</td><td class="num">₹20 Cr</td><td class="num">₹0.80 L</td><td class="num">₹0.05 L</td><td class="num fw-600">₹0.85 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:22%"></i></span>5.5%</span></td></tr>
+                  <tr><td class="cell-title">Tulsi Mutual Fund</td><td class="num">₹12 Cr</td><td class="num">₹0.50 L</td><td class="num faint">—</td><td class="num fw-600">₹0.50 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:13%"></i></span>3.2%</span></td></tr>
+                  <tr><td class="cell-title">20 other AMCs</td><td class="num">₹56 Cr</td><td class="num">₹0.70 L</td><td class="num">₹0.05 L</td><td class="num fw-600">₹0.75 L</td><td class="num"><span class="bar-cell"><span class="b"><i style="width:20%"></i></span>4.9%</span></td></tr>
+                  <tr class="total-row"><td>Firm total</td><td class="num">₹412 Cr</td><td class="num">₹14.60 L</td><td class="num">₹0.80 L</td><td class="num">₹15.40 L</td><td class="num">100%</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Scheme -->
+            <div class="gpanel table-wrap" id="g-scheme" style="border:0;box-shadow:none" hidden>
+              <table class="table">
+                <thead><tr><th>Scheme</th><th>AMC</th><th>Category</th><th class="num">AUM</th><th class="num">Trail rate p.a.</th><th class="num">Total earned</th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-title">Large Cap Fund – Regular</td><td>Bharat</td><td>Equity</td><td class="num">₹34 Cr</td><td class="num">0.60%</td><td class="num fw-600">₹1.62 L</td></tr>
+                  <tr><td class="cell-title">Flexi Cap Fund – Regular</td><td>Himalaya</td><td>Equity</td><td class="num">₹28 Cr</td><td class="num">0.58%</td><td class="num fw-600">₹1.34 L</td></tr>
+                  <tr><td class="cell-title">Mid Cap Opportunities – Regular</td><td>Kaveri</td><td>Equity</td><td class="num">₹22 Cr</td><td class="num">0.55%</td><td class="num fw-600">₹1.12 L</td></tr>
+                  <tr><td class="cell-title">Balanced Advantage – Regular</td><td>Lotus</td><td>Hybrid</td><td class="num">₹19 Cr</td><td class="num">0.62%</td><td class="num fw-600">₹0.98 L</td></tr>
+                  <tr><td class="cell-title">ELSS Tax Saver – Regular</td><td>Meridian</td><td>Equity</td><td class="num">₹17 Cr</td><td class="num">0.50%</td><td class="num fw-600">₹0.86 L</td></tr>
+                  <tr><td class="cell-title">Short Duration Fund – Regular</td><td>Orion</td><td>Debt</td><td class="num">₹13 Cr</td><td class="num">0.40%</td><td class="num fw-600">₹0.74 L</td></tr>
+                  <tr><td class="cell-title">Small Cap Fund – Regular</td><td>Sagar</td><td>Equity</td><td class="num">₹11 Cr</td><td class="num">0.55%</td><td class="num fw-600">₹0.62 L</td></tr>
+                  <tr><td class="cell-title">Liquid Fund – Regular</td><td>Tulsi</td><td>Debt</td><td class="num">₹6 Cr</td><td class="num">0.25%</td><td class="num fw-600">₹0.40 L</td></tr>
+                  <tr><td class="cell-title">168 other schemes</td><td>—</td><td>Mixed</td><td class="num">₹262 Cr</td><td class="num faint">—</td><td class="num fw-600">₹7.72 L</td></tr>
+                  <tr class="total-row"><td>Firm total</td><td></td><td></td><td class="num">₹412 Cr</td><td class="num"></td><td class="num">₹15.40 L</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Investor -->
+            <div class="gpanel table-wrap" id="g-investor" style="border:0;box-shadow:none" hidden>
+              <table class="table">
+                <thead><tr><th>Client</th><th>Mapped to</th><th class="num">AUM</th><th class="num">Earned, Nov</th><th class="num">Share of branch</th></tr></thead>
+                <tbody>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Harish Patel Family</a></td><td>Neha Kapoor</td><td class="num">₹3.4 Cr</td><td class="num fw-600">₹12,600</td><td class="num">1.5%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Farhan Qureshi</a></td><td>Rohan Mehta</td><td class="num">₹2.1 Cr</td><td class="num fw-600">₹8,100</td><td class="num">1.0%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Verma Family</a></td><td>Neha Kapoor</td><td class="num">₹1.86 Cr</td><td class="num fw-600">₹7,100</td><td class="num">0.9%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Suresh Iyer</a></td><td>Rohan Mehta</td><td class="num">₹86.5 L</td><td class="num fw-600">₹3,300</td><td class="num">0.4%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Lakshmi Narayanan</a></td><td>Sneha Iyer</td><td class="num">₹67.8 L</td><td class="num fw-600">₹2,500</td><td class="num">0.3%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Meera Joshi</a></td><td>Sneha Iyer</td><td class="num">₹42.3 L</td><td class="num fw-600">₹1,600</td><td class="num">0.2%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Deepak Agarwal</a></td><td>Neha Kapoor</td><td class="num">₹15.2 L</td><td class="num fw-600">₹560</td><td class="num">0.1%</td></tr>
+                  <tr><td><a class="cell-title" href="08-client-360.html">Pooja Bansal</a></td><td>Sneha Iyer</td><td class="num">₹9.8 L</td><td class="num fw-600">₹380</td><td class="num">0.0%</td></tr>
+                  <tr><td class="cell-title">704 other clients</td><td>—</td><td class="num">₹208 Cr</td><td class="num fw-600">₹7,78,860</td><td class="num">95.6%</td></tr>
+                  <tr class="total-row"><td>Andheri total</td><td></td><td class="num">₹218 Cr</td><td class="num">₹8,15,000</td><td class="num">100%</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Employee -->
+            <div class="gpanel table-wrap" id="g-employee" style="border:0;box-shadow:none" hidden>
+              <table class="table">
+                <thead><tr><th>Person</th><th>Role</th><th class="num">Clients</th><th class="num">AUM</th><th class="num">Commission mapped to clients</th><th class="num">Payout share</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a4">IS</span><span><span class="person-name">Imran Sheikh</span><span class="person-sub" style="display:block"><span class="text-danger">ARN lapsed</span> · existing trail only</span></span></span></td><td>Sub-broker</td><td class="num">33</td><td class="num">₹9 Cr</td><td class="num">₹72,250</td><td class="num">₹28,900 <span class="faint">· 40%</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">KM</span><span class="person-name">Kavya Menon</span></span></td><td>Sub-broker</td><td class="num">55</td><td class="num">₹14 Cr</td><td class="num">₹91,700</td><td class="num">₹41,250 <span class="faint">· 45%</span></td></tr>
+                  <tr class="is-me"><td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor <span class="faint fw-500">(you)</span></span></span></td><td>Branch Mgr</td><td class="num">186</td><td class="num">₹52 Cr</td><td class="num">₹1,95,000</td><td class="num faint">—</td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a3">RP</span><span class="person-name">Ravi Pillai</span></span></td><td>Sub-broker</td><td class="num">18</td><td class="num">₹5 Cr</td><td class="num">₹47,700</td><td class="num">₹16,700 <span class="faint">· 35%</span></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">RM</span><span class="person-name">Rohan Mehta</span></span></td><td>RM</td><td class="num">160</td><td class="num">₹46 Cr</td><td class="num">₹1,80,000</td><td class="num faint">—</td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">SI</span><span class="person-name">Sneha Iyer</span></span></td><td>RM</td><td class="num">149</td><td class="num">₹41 Cr</td><td class="num">₹1,62,000</td><td class="num faint">—</td></tr>
+                  <tr><td><span class="cell-title">House accounts</span><span class="cell-sub" style="display:block">No RM mapped · Neha to reassign</span></td><td>—</td><td class="num">111</td><td class="num">₹51 Cr</td><td class="num">₹66,350</td><td class="num faint">—</td></tr>
+                  <tr class="total-row"><td>Andheri total</td><td></td><td class="num">712</td><td class="num">₹218 Cr</td><td class="num">₹8,15,000</td><td class="num">₹86,850</td></tr>
+                </tbody>
+              </table>
+              <div style="border-top:1px solid var(--border);padding:10px 20px;font-size:12px;color:var(--text-3)"><svg class="i i-sm" style="vertical-align:-2px"><use href="#i-info"/></svg> Sorted by name, not ranked. "Mapped" shows which client owner the commission belongs to, for reporting only. It is not a sales credit.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= RECONCILIATION ================= -->
+        <div data-tab-panel="recon" data-tab-scope="comm">
+          <div class="recon-strip">
+            <div class="stat kpi"><div class="stat-label">Expected, Oct <span class="src">MF Box MIS</span></div><div class="kpi-row"><div class="stat-value">₹14.30 L</div></div><div class="stat-meta">Calculated from AUM and trail rates</div></div>
+            <div class="stat stat-info kpi"><div class="stat-label">Received, Oct <span class="src">AMC statements</span></div><div class="kpi-row"><div class="stat-value">₹14.00 L</div></div><div class="stat-meta">27 of 28 statements in</div></div>
+            <div class="stat stat-danger kpi"><div class="stat-label">Difference</div><div class="kpi-row"><div class="stat-value diff-neg">−₹0.30 L</div></div><div class="stat-meta">2.1% of expected</div></div>
+            <div class="stat kpi"><div class="stat-label">AMCs matched</div><div class="kpi-row"><div class="stat-value">24 <small>of 28</small></div></div><div class="progress recon-meter"><span style="width:86%"></span></div></div>
+          </div>
+
+          <div class="table-card">
+            <div class="card-header">
+              <div class="card-title">October 2026 · by AMC</div>
+              <div class="card-actions"><span class="faint text-sm">Needs attention first</span><button class="btn btn-secondary btn-sm" data-toast="Discrepancy report requested · waiting for approval"><svg class="i"><use href="#i-download"/></svg>Discrepancy report</button></div>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>AMC</th><th class="num">Expected</th><th class="num">Received</th><th class="num">Difference</th><th>Status</th><th>Reason / note</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td class="cell-title">Zenith Mutual Fund</td><td class="num">₹0.09 L</td><td class="num faint">—</td><td class="num diff-neg">−₹0.09 L</td><td><span class="badge badge-dot badge-danger">Awaited</span></td><td class="text-sm">Statement due 08 Nov · reminder sent</td><td><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-upload">Upload</button></td></tr>
+                  <tr><td class="cell-title">Orchid Asset Management</td><td class="num">₹0.30 L</td><td class="num">₹0.22 L</td><td class="num diff-neg">−₹0.08 L</td><td><span class="badge badge-dot badge-warning">Difference</span></td><td class="text-sm">Rate change not applied on 14 folios</td><td><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-recon">Review</button></td></tr>
+                  <tr><td class="cell-title">Kaveri Mutual Fund</td><td class="num">₹2.05 L</td><td class="num">₹1.98 L</td><td class="num diff-neg">−₹0.07 L</td><td><span class="badge badge-dot badge-warning">Difference</span></td><td class="text-sm">2 SIP folios mapped to a lapsed ARN</td><td><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-recon">Review</button></td></tr>
+                  <tr><td class="cell-title">Sagar Mutual Fund</td><td class="num">₹0.80 L</td><td class="num">₹0.74 L</td><td class="num diff-neg">−₹0.06 L</td><td><span class="badge badge-dot badge-warning">Difference</span></td><td class="text-sm">Exit-load share reversed after a redemption</td><td><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-recon">Review</button></td></tr>
+                  <tr><td class="cell-title">Bharat Mutual Fund</td><td class="num">₹3.50 L</td><td class="num">₹3.50 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr><td class="cell-title">Himalaya AMC</td><td class="num">₹2.40 L</td><td class="num">₹2.40 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr><td class="cell-title">Lotus Asset Management</td><td class="num">₹1.75 L</td><td class="num">₹1.75 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr><td class="cell-title">Meridian Mutual Fund</td><td class="num">₹1.50 L</td><td class="num">₹1.50 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr><td class="cell-title">Orion Asset Management</td><td class="num">₹1.05 L</td><td class="num">₹1.05 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr><td class="cell-title">Tulsi Mutual Fund</td><td class="num">₹0.50 L</td><td class="num">₹0.50 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr><td class="cell-title">18 other AMCs</td><td class="num">₹0.36 L</td><td class="num">₹0.36 L</td><td class="num diff-zero">₹0</td><td><span class="badge badge-dot badge-success">Matched</span></td><td class="text-sm faint">—</td><td></td></tr>
+                  <tr class="total-row"><td>Total</td><td class="num">₹14.30 L</td><td class="num">₹14.00 L</td><td class="num diff-neg">−₹0.30 L</td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= STATEMENTS & HISTORY ================= -->
+        <div data-tab-panel="statements" data-tab-scope="comm">
+          <div class="drop">
+            <span class="ic"><svg class="i i-lg"><use href="#i-upload"/></svg></span>
+            <div><b>Drop AMC statements here</b><div class="sub">PDF or Excel · 22 of 28 AMCs arrive automatically through MF Box MIS · the rest are uploaded by hand · files go to Documents › Commission statements</div></div>
+            <button class="btn btn-primary ml-auto" data-open-drawer="drawer-upload"><svg class="i"><use href="#i-upload"/></svg>Upload statement</button>
+          </div>
+
+          <div class="grid-2" style="grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start">
+            <section class="table-card">
+              <div class="card-header"><div class="card-title">Stored statements</div><span class="faint text-sm ml-auto">Oct 2026</span></div>
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Statement</th><th>Added</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Kaveri_MF_Oct2026.pdf</div><div class="cell-sub">142 lines · 1.2 MB</div></span></span></td><td>08 Nov<div class="cell-sub">Uploaded · Priya Nair</div></td><td><span class="badge badge-dot badge-warning">Needs review</span></td></tr>
+                    <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Orchid_AMC_Oct2026.xlsx</div><div class="cell-sub">96 lines · 380 KB</div></span></span></td><td>09 Nov<div class="cell-sub">Uploaded · Priya Nair</div></td><td><span class="badge badge-dot badge-warning">Needs review</span></td></tr>
+                    <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Bharat_MF_Oct2026</div><div class="cell-sub">1,104 lines</div></span></span></td><td>08 Nov<div class="cell-sub">MF Box MIS · auto</div></td><td><span class="badge badge-dot badge-success">Matched</span></td></tr>
+                    <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-file"/></svg></span><span><div class="cell-title">Himalaya_AMC_Oct2026</div><div class="cell-sub">842 lines</div></span></span></td><td>08 Nov<div class="cell-sub">MF Box MIS · auto</div></td><td><span class="badge badge-dot badge-success">Matched</span></td></tr>
+                    <tr><td><span class="row gap-3"><span class="doc-ic"><svg class="i"><use href="#i-clock"/></svg></span><span><div class="cell-title">Zenith_MF_Oct2026</div><div class="cell-sub">Not received</div></span></span></td><td>—<div class="cell-sub">Reminder sent</div></td><td><span class="badge badge-dot badge-danger">Awaited</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination"><span>5 of 28 for October</span><a class="ml-auto" href="17-documents.html">Open in Documents</a></div>
+            </section>
+
+            <section class="table-card">
+              <div class="card-header"><div class="card-title">Month history · trail, FY 2026-27</div><span class="faint text-sm ml-auto">₹ lakh</span></div>
+              <div class="table-wrap">
+                <table class="table">
+                  <thead><tr><th>Month</th><th class="num">Expected</th><th class="num">Received</th><th class="num">Diff.</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td class="cell-title">Nov 2026</td><td class="num">14.60</td><td class="num faint">—</td><td class="num faint">—</td><td><span class="badge badge-dot badge-info">Accruing</span></td></tr>
+                    <tr><td class="cell-title">Oct 2026</td><td class="num">14.30</td><td class="num">14.00</td><td class="num diff-neg">−0.30</td><td><span class="badge badge-dot badge-warning">4 open</span></td></tr>
+                    <tr><td class="cell-title">Sep 2026</td><td class="num">13.90</td><td class="num">13.80</td><td class="num diff-neg">−0.10</td><td><span class="badge badge-dot badge-success">Closed</span></td></tr>
+                    <tr><td class="cell-title">Aug 2026</td><td class="num">13.70</td><td class="num">13.70</td><td class="num diff-zero">0.00</td><td><span class="badge badge-dot badge-success">Closed</span></td></tr>
+                    <tr><td class="cell-title">Jul 2026</td><td class="num">13.40</td><td class="num">13.35</td><td class="num diff-neg">−0.05</td><td><span class="badge badge-dot badge-success">Closed</span></td></tr>
+                    <tr><td class="cell-title">Jun 2026</td><td class="num">13.00</td><td class="num">13.00</td><td class="num diff-zero">0.00</td><td><span class="badge badge-dot badge-success">Closed</span></td></tr>
+                    <tr><td class="cell-title">May 2026</td><td class="num">12.70</td><td class="num">12.70</td><td class="num diff-zero">0.00</td><td><span class="badge badge-dot badge-success">Closed</span></td></tr>
+                    <tr><td class="cell-title">Apr 2026</td><td class="num">12.40</td><td class="num">12.40</td><td class="num diff-zero">0.00</td><td><span class="badge badge-dot badge-success">Closed</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination"><span>Earlier years</span><select class="select ml-auto" style="width:auto;height:30px"><option>FY 2025-26</option><option>FY 2024-25</option><option>FY 2023-24</option></select></div>
+            </section>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= Drawer: Upload statement ================= -->
+  <aside class="drawer" id="drawer-upload" aria-label="Upload statement">
+    <div class="drawer-header"><div><div class="drawer-title">Upload AMC statement</div><div class="drawer-sub">Stored in Documents › Commission statements</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field"><label class="label">Statement month <span class="req">*</span></label><select class="select"><option>Oct 2026</option><option>Nov 2026</option><option>Sep 2026</option></select></div>
+        <div class="field"><label class="label">AMC <span class="req">*</span></label><select class="select"><option>Zenith Mutual Fund</option><option>Orchid Asset Management</option><option>Detect from file</option></select></div>
+        <div class="field span-2"><label class="label">File <span class="req">*</span></label>
+          <div class="drop" style="margin:0;flex-direction:column;text-align:center;padding:var(--sp-6)"><span class="ic"><svg class="i i-lg"><use href="#i-upload"/></svg></span><div><b>Drop a file or browse</b><div class="sub">PDF or Excel, up to 20 MB</div></div></div>
+        </div>
+        <div class="field span-2 drawer-sec">After upload</div>
+        <div class="field span-2">
+          <label class="check"><input type="checkbox" checked> Match the lines to MF Box expected commission</label>
+          <label class="check mt-2"><input type="checkbox" checked> Save a copy in Documents (Ops and owner only)</label>
+          <label class="check mt-2"><input type="checkbox" checked> Tell Rajesh Sharma if a difference is found</label>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to upload</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-upload');AK.toast('Statement uploaded · matching started')">Upload and match</button></div>
+  </aside>
+
+  <!-- ================= Drawer: Review difference ================= -->
+  <aside class="drawer" id="drawer-recon" aria-label="Review difference">
+    <div class="drawer-header"><div><div class="drawer-title">Kaveri Mutual Fund · Oct 2026</div><div class="drawer-sub">Expected ₹2.05 L · received ₹1.98 L · short ₹0.07 L</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="banner banner-warning"><svg class="i"><use href="#i-alert"/></svg><span>2 SIP folios are mapped to <b>Imran Sheikh</b>, whose ARN lapsed on 02 Nov. The AMC held the trail.</span></div>
+      <div class="table-wrap" style="margin-top:var(--sp-4)">
+        <table class="table">
+          <thead><tr><th>Folio</th><th>Client</th><th class="num">Expected</th><th class="num">Received</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">••6120</td><td>Imran's client · SIP</td><td class="num">₹4,100</td><td class="num diff-neg">₹0</td></tr>
+            <tr><td class="mono">••6188</td><td>Imran's client · SIP</td><td class="num">₹2,900</td><td class="num diff-neg">₹0</td></tr>
+            <tr><td colspan="2" class="faint">Other 138 lines</td><td class="num">₹1,98,000</td><td class="num">₹1,98,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="form-grid" style="margin-top:var(--sp-4)">
+        <div class="field span-2"><label class="label">Action</label>
+          <div class="choice-group" data-segmented><button class="choice" aria-pressed="true">Raise query with AMC</button><button class="choice">Re-map to a new ARN</button><button class="choice">Write off</button></div>
+        </div>
+        <div class="field span-2"><label class="label">Note</label><textarea class="textarea" rows="3">Ask Kaveri MF to release the held trail once the ARN is renewed.</textarea></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-recon');AK.toast('Query raised · task created for Priya Nair')">Save and create task</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      // Stacked chart: trail + upfront, ₹ lakh, Jun to Nov
+      var data = [['Jun', 13.0, 0.7], ['Jul', 13.4, 0.8], ['Aug', 13.7, 0.6], ['Sep', 13.8, 0.9], ['Oct', 14.0, 0.7], ['Nov', 14.6, 0.8]];
+      var el = document.getElementById('chart-cols'), h = '';
+      data.forEach(function (d) {
+        var tot = (d[1] + d[2]).toFixed(1), max = 20;
+        h += '<div class="vcol" title="' + d[0] + ': trail ₹' + d[1].toFixed(1) + ' L, upfront ₹' + d[2].toFixed(1) + ' L"><div class="vbar" style="height:' + (tot / max * 100) + '%"><span class="vtotal">' + tot + '</span><div class="vstack">' +
+          '<i style="flex-grow:' + d[1] + ';background:var(--chart-1)"></i><i style="flex-grow:' + d[2] + ';background:var(--chart-3)"></i></div></div><span class="vx">' + d[0] + (d[0] === 'Nov' ? '<small>accrued</small>' : '') + '</span></div>';
+      });
+      el.innerHTML = h;
+
+      // Group-by switch on Breakdown
+      var notes = { amc: 'Firm totals · Nov 2026 accrued', scheme: 'Firm totals · top schemes', investor: 'Andheri branch detail · you see your branch only', employee: 'Andheri branch detail · you see your branch only' };
+      document.getElementById('grp-seg').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-g]'); if (!b) return;
+        document.querySelectorAll('.gpanel').forEach(function (p) { p.hidden = p.id !== 'g-' + b.dataset.g; });
+        document.getElementById('grp-note').lastChild.textContent = notes[b.dataset.g];
+      });
+
+      // Jump between tabs from links
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('[data-goto]'); if (!a) return; e.preventDefault();
+        var t = document.querySelector('[data-tabs="comm"] [data-tab="' + a.dataset.goto + '"]'); if (t) t.click();
+      });
+      var q = new URLSearchParams(location.search).get('tab');
+      if (q) document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { var t = document.querySelector('[data-tabs="comm"] [data-tab="' + q + '"]'); if (t) t.click(); }, 0); });
+    })();
+  </script>
+</body>
+</html>

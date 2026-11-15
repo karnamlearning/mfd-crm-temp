@@ -139,8 +139,8 @@ Dark-theme rules: no pure black (`#000`) and no pure white text. Card edges come
 
 - **Sidebar** (`--surface`, right border): tenant logo mark "SW" + "Sharma Wealth" with the product label "CRM · MF Box". Nav groups with overline labels:
   - **Work:** Home, My Day, Team Activity, Calendar, Inbox (WhatsApp + email)
-  - **CRM:** Leads, Clients, Opportunities, Tasks, Meetings, Service Requests
-  - **Library:** Documents, Reports & MIS
+  - **CRM:** Leads, Clients, Opportunities, Campaigns, Tasks, Meetings, Service Requests
+  - **Library:** Documents, Commissions, Reports & MIS
   - **Admin:** Team & Hierarchy, Automations, Settings (the last two open tabs of `20-settings.html`)
   - Footer: the user card (avatar, name, role) and a collapse button.
   - **Active item:** `--primary-soft` background, `--primary-text` text and icon, weight 600, radius 8. *This replaces Investwell's solid red block.* Hover: `--surface-2`. Counts sit on the right as small neutral pills (e.g. Tasks 12); overdue counts use the danger pill.
@@ -259,7 +259,9 @@ Dark-theme rules: no pure black (`#000`) and no pure white text. Card edges come
 | 17 | `17-documents.html` | Documents (Investwell says "Coming soon"; we fill it) |
 | 18 | `18-team-activity.html` | **Team Activity tracker (MVP core):** daily activity of RMs, branches and sub-brokers |
 | 19 | `19-reports.html` | Reports & MIS (activity, pipeline, SIP book, commissions from MF Box) |
-| 20 | `20-settings.html` | Settings: team & hierarchy, roles, configurations, automations, lead capture, MF Box sync |
+| 20 | `20-settings.html` | Settings: team & hierarchy (with departments), roles, configurations, automations, lead capture, MF Box sync |
+| 21 | `21-commissions.html` | Commissions: own share, breakdown, AMC reconciliation, statements (read from MF Box MIS) |
+| 22 | `22-campaigns.html` | Campaigns and referrals: spend, leads, clients, business, thank-you tracking |
 | — | `index.html` | Hub linking all screens, with a theme preview |
 
 ## 11. Page contract (tools: `_template.html` is a working starter; `bash tools/shot.sh <page>.html [light|dark] [w] [h] [open=drawer-id]` renders a screenshot into `_shots/`) (for every wireframe file)
@@ -288,7 +290,7 @@ Dark-theme rules: no pure black (`#000`) and no pure white text. Card edges come
 </html>
 ```
 
-- `data-page` sets the active nav item: `home, my-day, activity, calendar, inbox, leads, clients, opportunities, tasks, meetings, service, documents, reports, team, workflows, settings`.
+- `data-page` sets the active nav item: `home, my-day, activity, calendar, inbox, leads, clients, opportunities, campaigns, tasks, meetings, service, documents, commissions, reports, team, workflows, settings`.
 - `data-crumb` takes breadcrumb parts separated by `|`.
 - Page-specific CSS goes in one `<style>` block and uses tokens only. Small page JavaScript (tab switching, opening a drawer) goes in one inline `<script>` at the end of the body.
 - Shared helpers in `app.js`: `AK.toast(msg)`, `AK.openDrawer(id)` / `AK.closeDrawer(id)`, `[data-tabs]` auto tab switching, `[data-segmented]` toggling, `.choice-group[data-single]` single-select, `AK.toast(msg, {onUndo})`, `?` shortcuts overlay, `[data-open-drawer="id"]` / `[data-close-drawer]` attributes, and the Ctrl+K palette.

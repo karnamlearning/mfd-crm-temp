@@ -53,6 +53,8 @@ Opens from the right, so the page behind stays in view. Four numbered sections:
 
 Footer: "Ctrl + Enter to create", **Cancel**, **Create & add another** (keeps the panel open for the next one) and **Create lead**.
 
+The form and the Details card also carry a **Campaign** field (None, or a live campaign), so the lead counts toward [Campaigns](22_Campaigns.md).
+
 ## Better than Investwell
 | Investwell today | Our version |
 |---|---|

@@ -141,12 +141,14 @@
       { id: 'leads', text: 'Leads', icon: 'user-plus', href: '04-leads-list.html' },
       { id: 'clients', text: 'Clients', icon: 'users', href: '07-clients-list.html' },
       { id: 'opportunities', text: 'Opportunities', icon: 'target', href: '12-opportunities.html' },
+      { id: 'campaigns', text: 'Campaigns', icon: 'send', href: '22-campaigns.html' },
       { id: 'tasks', text: 'Tasks', icon: 'check-square', href: '09-tasks-list.html', count: '3', danger: true },
       { id: 'meetings', text: 'Meetings', icon: 'video', href: '13-meetings.html' },
       { id: 'service', text: 'Service Requests', icon: 'life-buoy', href: '16-service-requests.html', count: '3' },
     ]},
     { label: 'Library', items: [
       { id: 'documents', text: 'Documents', icon: 'folder', href: '17-documents.html' },
+      { id: 'commissions', text: 'Commissions', icon: 'rupee', href: '21-commissions.html' },
       { id: 'reports', text: 'Reports & MIS', icon: 'bar-chart', href: '19-reports.html' },
     ]},
     { label: 'Admin', items: [

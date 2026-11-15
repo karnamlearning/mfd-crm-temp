@@ -91,6 +91,6 @@ Screen list and guide file names (for the Prev/Next links):
 | 19 | 19_Reports_and_MIS.md | Reports & MIS | 19-reports.html |
 | 20 | 20_Settings.md | Settings | 20-settings.html |
 
-For 01 the Prev link goes to `00_Overview.md`; for 20 the Next link goes to `21_Design_System.md`.
+For 01 the Prev link goes to `00_Overview.md`; for 20 the Next link goes to `21_Commissions.md`, and 22 goes on to `23_Design_System.md`.
 
 When done, reply with ≤ 60 words: the files you wrote and anything on the screens that looked inconsistent.

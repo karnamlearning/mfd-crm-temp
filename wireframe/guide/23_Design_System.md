@@ -59,4 +59,4 @@ A: The layout adapts to smaller screens, and the menu collapses. A proper mobile
 A: It follows the main WCAG 2.2 AA rules (the common accessibility standard): readable contrast, labels as well as colour, and big enough click targets.
 
 ---
-Prev: [Settings](20_Settings.md) · [All screens](00_Overview.md) · Next: [Glossary](22_Glossary.md)
+Prev: [Campaigns](22_Campaigns.md) · [All screens](00_Overview.md) · Next: [Glossary](24_Glossary.md)

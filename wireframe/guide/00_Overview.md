@@ -2,7 +2,7 @@
 
 ![Wireframe hub](../_shots/index-light-1440x1500.png)
 
-> **In one line:** a clickable picture of the CRM we plan to build for MFD firms that use MF Box Back Office. It has 20 screens, in light and dark themes.
+> **In one line:** a clickable picture of the CRM we plan to build for MFD firms that use MF Box Back Office. It has 22 screens, in light and dark themes.
 >
 > **Open it:** double-click `wireframe/index.html`. It opens in any browser; nothing needs to be installed.
 
@@ -21,7 +21,7 @@ Investwell's CRM (shown in the DoItNow demo video) does the same job for Investw
 2. **Make it calmer and faster:** a white and blue design instead of heavy red blocks. Forms open in a side panel, so you never lose your place. Ctrl+K search works from anywhere.
 3. **Add what Investwell lacks:** My Day, Team Activity, Service Requests, Client 360, real Documents, Reports & MIS, plus the MF Box link everywhere.
 
-## The 20 screens, grouped
+## The 22 screens, grouped
 
 | # | Screen | What it is, in one line |
 |---|---|---|
@@ -36,6 +36,7 @@ Investwell's CRM (shown in the DoItNow demo video) does the same job for Investw
 | 05 | [Lead detail & create](05_Lead_Detail_and_Create.md) | One prospect's full story, and the form to add a new one. |
 | 06 | [Leads pipeline](06_Leads_Pipeline.md) | Prospects as cards moving across stages; set up stages and products. |
 | 12 | [Opportunities](12_Opportunities.md) | Chances to grow existing clients, some suggested by AI, all approved by a person. |
+| 22 | [Campaigns](22_Campaigns.md) | Which campaigns and referrals bring in clients, and what each costs. |
 | **Clients & service** | | |
 | 07 | [Clients list](07_Clients_List.md) | Every client with AUM, SIPs, tier, last contact and health, read from MF Box. |
 | 08 | [Client 360](08_Client_360.md) | Everything about one client and family on one page. |
@@ -49,13 +50,14 @@ Investwell's CRM (shown in the DoItNow demo video) does the same job for Investw
 | 14 | [Meeting detail](14_Meeting_Detail.md) | Log the meeting outcome; AI drafts the summary and follow-up tasks. |
 | **Management** | | |
 | 19 | [Reports & MIS](19_Reports_and_MIS.md) | Charts for the owner: activity, pipeline, coverage, SIP book, commissions. |
+| 21 | [Commissions](21_Commissions.md) | What the firm earned, everyone's own share, and AMC statement reconciliation. |
 | 20 | [Settings](20_Settings.md) | Team and hierarchy, permissions, configurations, automations, MF Box link. |
-| — | [Design system](21_Design_System.md) | Why it looks the way it does: colours, dark theme, status colours. |
-| — | [Glossary](22_Glossary.md) | Simple meanings of every term used in these guides. |
+| — | [Design system](23_Design_System.md) | Why it looks the way it does: colours, dark theme, status colours. |
+| — | [Glossary](24_Glossary.md) | Simple meanings of every term used in these guides. |
 
 ## Suggested 10-minute CEO walkthrough
 
-1. **Hub page (30 s):** "20 screens, one design, light and dark." Click the moon icon to show dark mode.
+1. **Hub page (30 s):** "22 screens, one design, light and dark." Click the moon icon to show dark mode.
 2. **Team Activity (2 min):** "This is the main purpose of the CRM, as you told us on 13 Nov." Show the hourly strip, the idle and no-activity alerts, and the Log activity panel.
 3. **My Day (1.5 min):** the RM's view. Tick an item off, then type "Call Rahul kal 4pm" in the quick-add box.
 4. **Home dashboard (1 min):** "Same layout as Investwell, but calmer."

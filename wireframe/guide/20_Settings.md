@@ -22,8 +22,9 @@ Every other screen depends on what is set here: who reports to whom decides the 
 - Four small tiles: 14 active users (+1 invited), 3 branches, 4 sub-brokers (see own clients only), and **2 ARN / EUIN alerts** (ARN is the distributor's licence code; EUIN is each salesperson's code; here 1 ARN lapsed (Imran Sheikh), 1 due for renewal).
 - **Organisation chart:** owner Rajesh Sharma at the top ("Sees all branches"), then one column per branch (Andheri, Thane, Pune) with branch manager, RMs, sub-brokers, ops and service desk. You can drag a person onto a new manager. Each branch shows its people and AUM: Andheri 8 people · ₹218 Cr, Thane 1 person + 1 invited · ₹74 Cr, Pune 4 people · ₹120 Cr. Thane shows "No branch manager yet" and an **Assign branch manager** button. A "My Team depth" choice sets how far down a manager can see (1 level, 2 levels, whole branch). Chart or List view.
 - **Solo MFD? Skip branches.** A **Use branches** switch at the bottom. With one user, the CRM hides teams, approvals and hierarchy. So a one-person MFD never has to deal with branches.
-- **Users table:** name, role, branch, reports to, ARN / EUIN with validity (green valid, amber "renew by", red "ARN lapsed 02 Nov 2026"), last active and status (Active, Restricted, Invited). Under Imran Sheikh's row an amber note reads: "ARN lapsed: restricted from new MF transactions, can still log activity" (he was last active today at 11:40). Footer: "EUIN lasts 3 years; renewal opens 6 months early. Lapses go to the Owner."
-- **Invite user** opens a side form: name, work email, mobile, role, branch, reports to, EUIN and its validity ("we check validity with AMFI"). It advises using Re-sync if the person is already in MF Box.
+- **Departments:** four cards (Sales, Operations, Service desk, Management) with head, headcount and what each department is used for. Departments cut across branches and route work: default owners for task categories, service-request triage and the Team Activity role filter. **Add department** opens a side form.
+- **Users table:** name, role and department, branch, reports to, ARN / EUIN with validity (green valid, amber "renew by", red "ARN lapsed 02 Nov 2026"), last active and status (Active, Restricted, Invited). Under Imran Sheikh's row an amber note reads: "ARN lapsed: restricted from new MF transactions, can still log activity" (he was last active today at 11:40). Footer: "EUIN lasts 3 years; renewal opens 6 months early. Lapses go to the Owner."
+- **Invite user** opens a side form: name, work email, mobile, role, department, branch, reports to, EUIN and its validity ("we check validity with AMFI"). It advises using Re-sync if the person is already in MF Box.
 
 ### 3. Roles & permissions
 "What each role can see and do."
@@ -105,7 +106,7 @@ A: The owner uses the kill switch: access ends on every device, the book moves t
 A: No. The MF Box link is read-only. Corrections are made in MF Box and flow in on the next sync.
 
 **Q: Who can see commission?**
-A: Set in Roles: the owner sees all; branch managers see firm totals and per-person detail for their own branch; sub-brokers only their own payout; RMs and ops none by default.
+A: Set in Roles: everyone sees their own share (RMs their mapped commission, sub-brokers their payout); branch managers also see firm totals and detail for their own branch; the owner sees all. Only owner, branch managers and ops reach reconciliation and statements. See [Commissions](21_Commissions.md).
 
 ## Decisions needed
 - **Email inbox** is marked "Later" (WhatsApp Business is already connected). In which phase should email come in?
@@ -114,4 +115,4 @@ A: Set in Roles: the owner sees all; branch managers see firm totals and per-per
 - **Kill switch "90-day watch"** and EUIN validity checks with AMFI: in MVP or later, and the data source.
 
 ---
-Prev: [Reports & MIS](19_Reports_and_MIS.md) · [All screens](00_Overview.md) · Next: [Design system](21_Design_System.md)
+Prev: [Reports & MIS](19_Reports_and_MIS.md) · [All screens](00_Overview.md) · Next: [Commissions](21_Commissions.md)

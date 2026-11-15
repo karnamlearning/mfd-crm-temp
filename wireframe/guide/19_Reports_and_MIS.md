@@ -18,7 +18,7 @@ An MFD owner today checks activity in one place, the SIP book in the back office
 
 ### 2. Report library (left)
 - Activity reports: Overview, Team activity, Task SLA & ageing, Lead funnel, Opportunity pipeline, Client coverage.
-- Book reports marked **MF Box**: SIP book, Commissions. Plus Sub-broker activity.
+- Book reports marked **MF Box**: SIP book, and Commissions (opens the [Commissions](21_Commissions.md) page). Plus Sub-broker activity.
 - **Saved reports** (3): "Andheri stand-up", "SIP stoppages > ₹5,000", "Overdue A-tier reviews".
 - A note: "Teams are compared on service and activity. No MF sales contests (AMFI rule)." AMFI (the mutual fund industry body) does not allow sales contests, so the page compares service, not sales.
 
@@ -32,7 +32,7 @@ KPI means a key number to watch. Each tile shows the change from last period and
 - **Coverage compliance 74%:** share of clients contacted as often as their plan says; target 85%, 334 clients still due.
 - **Net SIP book +₹3.2 L/month (MF Box):** new monthly SIP money (₹5.9 L) minus SIPs stopped (₹2.7 L).
 - **Lead conversion 18%:** 41 of 228 new leads became clients.
-- **Trail commission ₹14.6 L (MF Box):** this month's trail (the ongoing commission fund houses pay on invested money), after GST.
+- **Trail commission ₹14.6 L (MF Box), opens [Commissions](21_Commissions.md):** this month's trail (the ongoing commission fund houses pay on invested money), after GST.
 
 ### 5. Activity trend (chart)
 Weekly bars for the last five weeks, split into calls, meetings, WhatsApp and tasks done, with a line for the previous period. The headline reads it for you: "Calls fell 12% in week 45 (204 → 180) while WhatsApp rose 8%." A button switches the chart to a table.

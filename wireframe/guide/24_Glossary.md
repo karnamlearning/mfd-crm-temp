@@ -76,4 +76,4 @@ Words used on the screens and in these guides, in plain English.
 | **Wireframe / mock-up** | A clickable picture of the product used to agree the design before building it. Nothing is saved. |
 
 ---
-Prev: [Design system](21_Design_System.md) · [All screens](00_Overview.md)
+Prev: [Design system](23_Design_System.md) · [All screens](00_Overview.md)

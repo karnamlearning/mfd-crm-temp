@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campaigns · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Campaigns: page-specific styles (tokens only) ---- */
+    .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: var(--sp-4); }
+    .kpi { padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .kpi .stat-label { justify-content: flex-start; }
+    .kpi .stat-value { font-variant-numeric: normal; font-size: 24px; line-height: 30px; margin-top: 4px; }
+    .kpi .stat-value small { font-size: 13px; font-weight: 500; color: var(--text-2); letter-spacing: 0; margin-left: 2px; }
+    .sync { font-size: 12px; color: var(--text-3); display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+    .sync .dot { background: var(--success); width: 6px; height: 6px; }
+
+    .ch { display: inline-flex; align-items: center; gap: 8px; }
+    .ch-ic { width: 28px; height: 28px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--primary-soft); color: var(--primary-text); flex: none; }
+    .ch-ic .i { width: 15px; height: 15px; }
+    .seg-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--text-2); }
+    .diff-neg { color: var(--danger); font-weight: 600; }
+    .rate { font-variant-numeric: tabular-nums; }
+    .rate.is-good { color: var(--success); font-weight: 600; }
+    .rate.is-low { color: var(--danger); font-weight: 600; }
+    .camp-link { font-weight: 600; color: var(--text); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; font-weight: 600; }
+    .camp-link:hover { color: var(--primary-text); text-decoration: underline; }
+    .total-row td { background: var(--surface-2); font-weight: 600; }
+
+    .row-b { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); margin-top: var(--sp-4); }
+    .vcard .card-header { padding: 14px 20px 0; border-bottom: 0; }
+    .vcard .card-title { font-size: 14.5px; }
+    .take { display: flex; align-items: center; gap: 6px; padding: 4px 20px 0; font-size: 13px; color: var(--text-2); }
+    .take .i { width: 14px; height: 14px; }
+    .take b { color: var(--text); font-weight: 600; }
+    .vcard .card-body { padding: 14px 20px 16px; }
+    .vcard .card-footer { padding: 10px 20px; font-size: 12px; color: var(--text-3); }
+    .cbars { display: grid; grid-template-columns: 110px minmax(0, 1fr); column-gap: 12px; row-gap: 4px; align-items: center; margin-top: 6px; }
+    .cbars .nm { font-size: 13px; color: var(--text-2); white-space: nowrap; }
+    .cbar { display: flex; align-items: center; height: 36px; }
+    .cbar i { display: block; height: 20px; width: calc((100% - 64px) * var(--w)); background: var(--chart-1); border-radius: 0 4px 4px 0; }
+    .cbar i.hot { background: var(--danger); }
+    .cbar b { margin-left: 8px; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    /* Referrals */
+    .thank { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; }
+    .tabs-tools { display: flex; gap: var(--sp-2); align-items: center; margin-bottom: var(--sp-3); flex-wrap: wrap; }
+
+    /* Detail drawer */
+    .dd-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; font-size: 13px; }
+    .dd-meta div { color: var(--text-3); font-size: 12px; }
+    .dd-meta b { display: block; color: var(--text); font-weight: 600; font-size: 13.5px; margin-top: 2px; }
+    .dd-sec { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: 18px 0 8px; display: flex; align-items: center; }
+    .dd-sec .ml-auto { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    .fun { display: grid; grid-template-columns: 82px minmax(0, 1fr) 56px; gap: 8px 12px; align-items: center; font-size: 13px; }
+    .fun .l { color: var(--text-2); }
+    .fun .t { height: 20px; background: var(--surface-2); border-radius: 4px; position: relative; overflow: hidden; }
+    .fun .t i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--chart-1); border-radius: 0 4px 4px 0; width: calc(var(--w) * 100%); }
+    .fun .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .dd-kv3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .dd-kv3 > div { border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; font-size: 12px; color: var(--text-3); }
+    .dd-kv3 b { display: block; font-size: 16px; font-weight: 600; color: var(--text); margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .exp-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .exp-row:last-child { border-bottom: 0; }
+    .exp-row .num { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .drawer-sec { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: 4px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
+
+    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 1100px) { .row-b { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .kpis { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body data-page="campaigns" data-crumb="Campaigns|Overview">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Campaigns</h1>
+            <p class="page-sub">Which campaigns and referrals bring in new business, and what each one costs</p>
+          </div>
+          <div class="page-actions">
+            <span class="sync"><span class="dot"></span>Business generated from MF Box · 10:42</span>
+            <button class="btn btn-primary" data-open-drawer="drawer-create"><svg class="i"><use href="#i-plus"/></svg>Create campaign</button>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="stat stat-info kpi"><div class="stat-label">Active campaigns</div><div class="stat-value">2</div><div class="stat-meta">1 scheduled · 4 completed</div></div>
+          <div class="stat kpi"><div class="stat-label">Leads generated</div><div class="stat-value">194</div><div class="stat-meta">Last 90 days · 6 campaigns</div></div>
+          <div class="stat stat-success kpi"><div class="stat-label">Clients converted</div><div class="stat-value">31</div><div class="stat-meta"><span class="delta-up fw-600">16.0%</span> of campaign leads</div></div>
+          <div class="stat kpi"><div class="stat-label">Business generated</div><div class="stat-value">₹3.53 Cr</div><div class="stat-meta">Lump sums, SIPs and first-year premium</div></div>
+          <div class="stat stat-warning kpi"><div class="stat-label">Spend · per client</div><div class="stat-value">₹1.72 L</div><div class="stat-meta">₹5,548 per converted client</div></div>
+        </div>
+
+        <div class="tabs" data-tabs="camp" role="tablist">
+          <button class="tab is-active" data-tab="campaigns">Campaigns <span class="count">7</span></button>
+          <button class="tab" data-tab="referrals">Referrals <span class="count">11</span></button>
+        </div>
+
+        <!-- ================= CAMPAIGNS ================= -->
+        <div data-tab-panel="campaigns" data-tab-scope="camp" class="is-active">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search campaign or channel"></label>
+              <div class="segmented" data-segmented><button aria-pressed="true">All</button><button>Active <span class="faint">2</span></button><button>Scheduled <span class="faint">1</span></button><button>Completed <span class="faint">4</span></button></div>
+            </div>
+            <div class="toolbar-right">
+              <select class="select" style="width:auto" aria-label="Period"><option>Last 90 days</option><option>This financial year</option><option>Last 12 months</option><option>Custom range…</option></select>
+              <button class="btn btn-secondary"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Campaign</th><th>Target</th><th>Status · dates</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">Clients</th><th class="num">Conv.</th><th class="num">Business</th><th class="num">Per client</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Diwali SIP Drive</button><div class="cell-sub">WhatsApp broadcast + QR poster</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>Clients with no SIP · 84</span></td>
+                    <td><span class="badge badge-dot badge-info">Active</span><div class="cell-sub">20 Oct – 15 Nov</div></td>
+                    <td class="num">₹32,000</td><td class="num">58</td><td class="num">9</td><td class="num rate">15.5%</td><td class="num fw-600">₹86 L</td><td class="num">₹3,556</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Term cover cross-sell</button><div class="cell-sub">WhatsApp · RM-led follow-up</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>SIP above ₹25k, no term cover · 41</span></td>
+                    <td><span class="badge badge-dot badge-info">Active</span><div class="cell-sub">10 – 30 Nov</div></td>
+                    <td class="num">₹4,000</td><td class="num">7</td><td class="num">2</td><td class="num rate is-good">28.6%</td><td class="num fw-600">₹3 L</td><td class="num">₹2,000</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-video"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Retirement planning webinar</button><div class="cell-sub">Webinar · registrations open</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>Tier A and B, age 45+ · 128</span></td>
+                    <td><span class="badge badge-dot badge-neutral">Scheduled</span><div class="cell-sub">2 Dec</div></td>
+                    <td class="num faint">₹6,000 <span class="text-sm">planned</span></td><td class="num">34 <span class="faint text-sm">reg.</span></td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-users"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Tax-saving ELSS seminar</button><div class="cell-sub">Seminar · Andheri club hall</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-globe"/></svg>Open invitation</span></td>
+                    <td><span class="badge badge-dot badge-success">Completed</span><div class="cell-sub">5 – 10 Nov</div></td>
+                    <td class="num">₹58,000</td><td class="num">41</td><td class="num">7</td><td class="num rate">17.1%</td><td class="num fw-600">₹92 L</td><td class="num">₹8,286</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-globe"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Website SIP calculator</button><div class="cell-sub">Website · paid search</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-globe"/></svg>Open audience</span></td>
+                    <td><span class="badge badge-dot badge-success">Completed</span><div class="cell-sub">1 Sep – 31 Oct</div></td>
+                    <td class="num">₹24,000</td><td class="num">47</td><td class="num">6</td><td class="num rate">12.8%</td><td class="num fw-600">₹48 L</td><td class="num">₹4,000</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-gift"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Client referral month</button><div class="cell-sub">Referral · thank-you gifts</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>Tier A and B clients · 396</span></td>
+                    <td><span class="badge badge-dot badge-success">Completed</span><div class="cell-sub">1 – 31 Oct</div></td>
+                    <td class="num">₹18,000</td><td class="num">22</td><td class="num">5</td><td class="num rate is-good">22.7%</td><td class="num fw-600">₹1.10 Cr</td><td class="num">₹3,600</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-hash"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">NPS awareness, salaried</button><div class="cell-sub">Social media · paid</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-globe"/></svg>Salaried, Mumbai, 28–45</span></td>
+                    <td><span class="badge badge-dot badge-success">Completed</span><div class="cell-sub">15 Sep – 15 Oct</div></td>
+                    <td class="num">₹36,000</td><td class="num">19</td><td class="num">2</td><td class="num rate is-low">10.5%</td><td class="num fw-600">₹14 L</td><td class="num diff-neg">₹18,000</td>
+                  </tr>
+                  <tr class="total-row"><td>All campaigns · last 90 days</td><td></td><td></td><td class="num">₹1,72,000</td><td class="num">194</td><td class="num">31</td><td class="num">16.0%</td><td class="num">₹3.53 Cr</td><td class="num">₹5,548</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination"><span>7 campaigns · expenses are entered by the campaign owner, business generated comes from MF Box</span></div>
+          </div>
+
+          <div class="row-b">
+            <section class="card vcard">
+              <div class="card-header"><div class="card-title">Cost per converted client, by channel</div></div>
+              <p class="take"><svg class="i text-danger"><use href="#i-alert"/></svg><span><b>Social media costs ₹18,000 per client</b>, about 5× the WhatsApp campaigns.</span></p>
+              <div class="card-body">
+                <div class="cbars">
+                  <span class="nm">Social media</span><div class="cbar"><i class="hot" style="--w:1"></i><b>₹18,000</b></div>
+                  <span class="nm">Seminar</span><div class="cbar"><i style="--w:.46"></i><b>₹8,286</b></div>
+                  <span class="nm">Website</span><div class="cbar"><i style="--w:.22"></i><b>₹4,000</b></div>
+                  <span class="nm">Referral</span><div class="cbar"><i style="--w:.2"></i><b>₹3,600</b></div>
+                  <span class="nm">WhatsApp</span><div class="cbar"><i style="--w:.18"></i><b>₹3,273</b></div>
+                </div>
+              </div>
+              <div class="card-footer"><svg class="i i-sm"><use href="#i-info"/></svg>Spend divided by clients who invested through MF Box. Last 90 days.</div>
+            </section>
+            <section class="card vcard">
+              <div class="card-header"><div class="card-title">Lead to client conversion, by channel</div></div>
+              <p class="take"><svg class="i text-success"><use href="#i-trending-up"/></svg><span><b>Referrals convert best</b> at 22.7%, then seminars at 17.1%.</span></p>
+              <div class="card-body">
+                <div class="cbars">
+                  <span class="nm">Referral</span><div class="cbar"><i style="--w:1"></i><b>22.7% <span class="faint">5 of 22</span></b></div>
+                  <span class="nm">Seminar</span><div class="cbar"><i style="--w:.75"></i><b>17.1% <span class="faint">7 of 41</span></b></div>
+                  <span class="nm">WhatsApp</span><div class="cbar"><i style="--w:.74"></i><b>16.9% <span class="faint">11 of 65</span></b></div>
+                  <span class="nm">Website</span><div class="cbar"><i style="--w:.56"></i><b>12.8% <span class="faint">6 of 47</span></b></div>
+                  <span class="nm">Social media</span><div class="cbar"><i style="--w:.46"></i><b>10.5% <span class="faint">2 of 19</span></b></div>
+                </div>
+              </div>
+              <div class="card-footer"><svg class="i i-sm"><use href="#i-info"/></svg>Leads are tagged to a campaign at capture: QR scan, form link or manual pick.</div>
+            </section>
+          </div>
+        </div>
+
+        <!-- ================= REFERRALS ================= -->
+        <div data-tab-panel="referrals" data-tab-scope="camp">
+          <div class="grid-4" style="margin-bottom:var(--sp-4)">
+            <div class="stat"><div class="stat-label">Referrers</div><div class="stat-value">11</div><div class="stat-meta">Last 12 months</div></div>
+            <div class="stat stat-info"><div class="stat-label">Referred leads</div><div class="stat-value">31</div><div class="stat-meta">Including the October referral month</div></div>
+            <div class="stat stat-success"><div class="stat-label">Became clients</div><div class="stat-value">8</div><div class="stat-meta">26% conversion · 17 days on average</div></div>
+            <div class="stat"><div class="stat-label">Business generated</div><div class="stat-value">₹1.64 Cr</div><div class="stat-meta">From referred clients</div></div>
+          </div>
+
+          <div class="table-card">
+            <div class="card-header">
+              <div class="card-title">Referral history</div>
+              <div class="card-actions"><span class="faint text-sm">Most recent referral first · one referrer per lead</span></div>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Referrer</th><th>Type</th><th class="num">Referred</th><th class="num">Clients</th><th class="num">Business</th><th>Last referral</th><th>Thank-you</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">SI</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Suresh Iyer</button><span class="person-sub" style="display:block">Iyer Family · Tier B</span></span></span></td><td>Client</td><td class="num">4</td><td class="num">2</td><td class="num fw-600">₹44 L</td><td><span class="badge badge-dot badge-warning">Pending</span><div class="cell-sub">11 Nov</div></td><td><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-referrer">Thank</button></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a3">FQ</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Farhan Qureshi</button><span class="person-sub" style="display:block">Tier A</span></span></span></td><td>Client</td><td class="num">3</td><td class="num">1</td><td class="num fw-600">₹25 L</td><td><span class="badge badge-dot badge-success">Sent 10 Nov</span><div class="cell-sub">09 Nov</div></td><td></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm">RV</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Rahul Verma</button><span class="person-sub" style="display:block">Verma Family · Tier A</span></span></span></td><td>Client</td><td class="num">3</td><td class="num">1</td><td class="num fw-600">₹18 L</td><td><span class="badge badge-dot badge-success">Sent 03 Nov</span><div class="cell-sub">02 Nov</div></td><td></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">KM</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Kavya Menon</button><span class="person-sub" style="display:block">Sub-broker · Andheri</span></span></span></td><td>Sub-broker</td><td class="num">5</td><td class="num">1</td><td class="num fw-600">₹12 L</td><td>30 Oct</td><td><span class="faint text-sm">Not applicable</span></td><td></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a4">HP</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Harish Patel Family</button><span class="person-sub" style="display:block">Tier A</span></span></span></td><td>Client</td><td class="num">4</td><td class="num">1</td><td class="num fw-600">₹32 L</td><td><span class="badge badge-dot badge-success">Sent 25 Oct</span><div class="cell-sub">24 Oct</div></td><td></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a5">MJ</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Meera Joshi</button><span class="person-sub" style="display:block">Tier B</span></span></span></td><td>Client</td><td class="num">2</td><td class="num">1</td><td class="num fw-600">₹9 L</td><td><span class="badge badge-dot badge-success">Sent 22 Oct</span><div class="cell-sub">21 Oct</div></td><td></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a5">CM</span><span><button class="camp-link" data-open-drawer="drawer-referrer">CA Mehta &amp; Co.</button><span class="person-sub" style="display:block">Tax consultant, Thane</span></span></span></td><td>Partner</td><td class="num">6</td><td class="num">1</td><td class="num fw-600">₹24 L</td><td><span class="badge badge-dot badge-success">Sent 16 Oct</span><div class="cell-sub">15 Oct</div></td><td></td></tr>
+                  <tr><td><span class="person"><span class="avatar avatar-sm a2">DA</span><span><button class="camp-link" data-open-drawer="drawer-referrer">Deepak Agarwal</button><span class="person-sub" style="display:block">Tier C</span></span></span></td><td>Client</td><td class="num">1</td><td class="num">0</td><td class="num faint">—</td><td><span class="badge badge-dot badge-warning">Pending</span><div class="cell-sub">06 Oct</div></td><td><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-referrer">Thank</button></td></tr>
+                  <tr><td><span class="cell-title">3 other referrers</span></td><td>Mixed</td><td class="num">3</td><td class="num">0</td><td class="num faint">—</td><td>Sep</td><td><span class="faint text-sm">—</span></td><td></td></tr>
+                  <tr class="total-row"><td>All referrers</td><td></td><td class="num">31</td><td class="num">8</td><td class="num">₹1.64 Cr</td><td></td><td></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="banner banner-info mt-4"><svg class="i"><use href="#i-info"/></svg><span>A referred lead carries its referrer from the first touch. The referrer shows on the lead, then on the client's Client 360 under Source. Thank-you messages use an approved WhatsApp template and respect opt-out.</span></div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= Drawer: Create campaign ================= -->
+  <aside class="drawer" id="drawer-create" aria-label="Create campaign">
+    <div class="drawer-header"><div><div class="drawer-title">Create campaign</div><div class="drawer-sub">Fields marked * are required</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Campaign name <span class="req">*</span></label><input class="input" placeholder="e.g. New Year SIP drive"></div>
+        <div class="field span-2"><label class="label">Description</label><textarea class="textarea" rows="2" placeholder="What is the offer or message? What should success look like?"></textarea></div>
+        <div class="field span-2"><label class="label">Channel <span class="req">*</span></label>
+          <div class="choice-group" data-segmented>
+            <button class="choice" aria-pressed="true"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</button>
+            <button class="choice"><svg class="i"><use href="#i-mail"/></svg>Email</button>
+            <button class="choice"><svg class="i"><use href="#i-users"/></svg>Seminar</button>
+            <button class="choice"><svg class="i"><use href="#i-video"/></svg>Webinar</button>
+            <button class="choice"><svg class="i"><use href="#i-globe"/></svg>Website</button>
+            <button class="choice"><svg class="i"><use href="#i-hash"/></svg>Social</button>
+            <button class="choice"><svg class="i"><use href="#i-gift"/></svg>Referral</button>
+          </div>
+        </div>
+        <div class="field"><label class="label">Lead source <span class="req">*</span></label><select class="select"><option>WhatsApp</option><option>Seminar</option><option>QR</option><option>Website</option><option>Referral</option></select><span class="help">Same list as in Leads › Configurations</span></div>
+        <div class="field"><label class="label">Owner</label><select class="select"><option>Neha Kapoor</option><option>Rohan Mehta</option><option>Sneha Iyer</option></select></div>
+
+        <div class="field span-2 drawer-sec">Who to reach</div>
+        <div class="field span-2"><label class="label">Target segment</label><select class="select"><option>Saved view: Clients with no SIP · 84</option><option>Saved view: Tier A and B clients · 396</option><option>Saved view: SIP above ₹25k, no term cover · 41</option><option>Open audience (new leads)</option></select><span class="help">Saved views come from Clients. Clients who opted out of marketing are skipped.</span></div>
+
+        <div class="field span-2 drawer-sec">When and how much</div>
+        <div class="field"><label class="label">Start date <span class="req">*</span></label><input class="input" value="01 Jan 2027"></div>
+        <div class="field"><label class="label">End date</label><input class="input" value="31 Jan 2027"></div>
+        <div class="field"><label class="label">Budget</label><input class="input" placeholder="₹"></div>
+        <div class="field"><label class="label">Target leads</label><input class="input" placeholder="e.g. 60"></div>
+
+        <div class="field span-2 drawer-sec">Tracking</div>
+        <div class="field span-2">
+          <label class="check"><input type="checkbox" checked> Tag new leads automatically (QR code and form link carry the campaign)</label>
+          <label class="check mt-2"><input type="checkbox" checked> Let staff pick this campaign when creating a lead</label>
+          <label class="check mt-2"><input type="checkbox" checked> Send through approved WhatsApp templates <span class="faint">· marketing ₹1.0 per message</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-create');AK.toast('Campaign created · scheduled for 01 Jan 2027')">Create campaign</button></div>
+  </aside>
+
+  <!-- ================= Drawer: Campaign detail ================= -->
+  <aside class="drawer" id="drawer-detail" aria-label="Campaign detail">
+    <div class="drawer-header"><div><div class="drawer-title">Diwali SIP Drive</div><div class="drawer-sub"><span class="badge badge-dot badge-info">Active</span> · WhatsApp broadcast + QR poster · owner Neha Kapoor</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="dd-meta">
+        <div>Dates<b>20 Oct – 15 Nov 2026</b></div>
+        <div>Lead source<b>WhatsApp · QR</b></div>
+        <div>Target segment<b>Clients with no SIP · 84</b></div>
+        <div>Audience reached<b>1,240 messages sent</b></div>
+      </div>
+      <p class="muted text-sm" style="margin:12px 0 0">Invite clients with no SIP to start a small monthly plan before the new year. Staff follow up every interested reply within a day.</p>
+
+      <div class="dd-sec">Results</div>
+      <div class="dd-kv3">
+        <div>Leads<b>58</b></div>
+        <div>Clients<b>9 <span class="faint text-sm">15.5%</span></b></div>
+        <div>Business<b>₹86 L</b></div>
+        <div>Cost per lead<b>₹552</b></div>
+        <div>Cost per client<b>₹3,556</b></div>
+        <div>Open leads<b>14</b></div>
+      </div>
+
+      <div class="dd-sec">Funnel</div>
+      <div class="fun">
+        <span class="l">Messages</span><span class="t"><i style="--w:1"></i></span><span class="v">1,240</span>
+        <span class="l">Replied</span><span class="t"><i style="--w:.2"></i></span><span class="v">212</span>
+        <span class="l">Leads</span><span class="t"><i style="--w:.05"></i></span><span class="v">58</span>
+        <span class="l">Contacted</span><span class="t"><i style="--w:.04"></i></span><span class="v">49</span>
+        <span class="l">Clients</span><span class="t"><i style="--w:.01"></i></span><span class="v">9</span>
+      </div>
+
+      <div class="dd-sec">Spend <span class="ml-auto">₹32,000 of ₹40,000 budget</span></div>
+      <div class="progress p-success"><span style="width:80%"></span></div>
+      <div style="margin-top:10px">
+        <div class="exp-row"><span>WhatsApp broadcast · 1,240 messages</span><span class="num">₹12,400</span></div>
+        <div class="exp-row"><span>QR posters and printing</span><span class="num">₹8,000</span></div>
+        <div class="exp-row"><span>Branch event day</span><span class="num">₹11,600</span></div>
+      </div>
+      <button class="btn btn-secondary btn-sm mt-3" onclick="AK.toast('Add expense: description, amount and bill')"><svg class="i"><use href="#i-plus"/></svg>Add expense</button>
+
+      <div class="dd-sec">Latest leads <span class="ml-auto"><a href="04-leads-list.html">Open in Leads</a></span></div>
+      <div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a2">KM</span><span><a class="cell-title" href="05-lead-create.html">Karan Malhotra</a><div class="cell-sub">MF-SIP · ₹5,00,000</div></span></span><span class="num"><span class="badge badge-dot badge-danger">Hot lead</span></span></div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a5">SK</span><span><a class="cell-title" href="05-lead-create.html">Sameer Khan</a><div class="cell-sub">MF-SIP</div></span></span><span class="num"><span class="badge badge-dot badge-warning">Follow-up</span></span></div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a4">NR</span><span><a class="cell-title" href="05-lead-create.html">Nisha Reddy</a><div class="cell-sub">ITR e-filing</div></span></span><span class="num"><span class="badge badge-dot badge-neutral">Contacted</span></span></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><button class="btn btn-ghost" onclick="AK.toast('Campaign ended · leads stay tagged')">End campaign</button><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Close</button><button class="btn btn-primary" data-close-drawer onclick="AK.toast('Edit campaign: opens the same form')"><svg class="i"><use href="#i-edit"/></svg>Edit</button></div>
+  </aside>
+
+  <!-- ================= Drawer: Referrer ================= -->
+  <aside class="drawer" id="drawer-referrer" aria-label="Referrer">
+    <div class="drawer-header"><div><div class="drawer-title">Suresh Iyer</div><div class="drawer-sub">Client · Tier B · Iyer Family · <a href="08-client-360.html">Open Client 360</a></div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="dd-kv3">
+        <div>Referred<b>4</b></div>
+        <div>Became clients<b>2</b></div>
+        <div>Business<b>₹44 L</b></div>
+      </div>
+      <div class="dd-sec">Referral history</div>
+      <div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a4">NR</span><span><a class="cell-title" href="05-lead-create.html">Nisha Reddy</a><div class="cell-sub">ITR e-filing · referred 11 Nov</div></span></span><span class="num"><span class="badge badge-dot badge-neutral">Contacted</span></span></div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a3">TB</span><span><a class="cell-title" href="08-client-360.html">Tarun Bhide</a><div class="cell-sub">MF-SIP · referred 28 Oct · ₹30 L</div></span></span><span class="num"><span class="badge badge-dot badge-success">Client</span></span></div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a5">KJ</span><span><a class="cell-title" href="08-client-360.html">Kiran Joshi</a><div class="cell-sub">MF-Lumpsum · referred 12 Oct · ₹14 L</div></span></span><span class="num"><span class="badge badge-dot badge-success">Client</span></span></div>
+        <div class="exp-row"><span class="person"><span class="avatar avatar-sm a2">AK</span><span><a class="cell-title" href="05-lead-create.html">Amit Kulkarni</a><div class="cell-sub">Health Insurance · referred 02 Oct</div></span></span><span class="num"><span class="badge badge-dot badge-neutral">Cold</span></span></div>
+      </div>
+      <div class="dd-sec">Thank-you</div>
+      <div class="banner banner-warning"><svg class="i"><use href="#i-clock"/></svg><span>Tarun Bhide invested on 05 Nov. A thank-you is still pending.</span></div>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field span-2"><label class="label">WhatsApp message <span class="faint">· approved template</span></label><textarea class="textarea" rows="3">Hi Suresh, thank you for introducing Tarun to us. We will look after him as we do you. Warm regards, Neha, Sharma Wealth Partners.</textarea><div class="help">Utility template · ₹0.15 per message · Suresh has WhatsApp opt-in.</div></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-referrer');AK.toast('Thank-you sent to Suresh Iyer')"><svg class="i"><use href="#i-send"/></svg>Send thank-you</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search).get('tab');
+      if (q) document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { var t = document.querySelector('[data-tabs="camp"] [data-tab="' + q + '"]'); if (t) t.click(); }, 0); });
+    })();
+  </script>
+</body>
+</html>

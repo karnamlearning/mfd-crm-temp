@@ -14,8 +14,8 @@ WINPATH="$(cygpath -m "$DIR/$PAGE" 2>/dev/null || echo "$DIR/$PAGE")"
 URL="file:///${WINPATH}?theme=${THEME}"
 [ -n "$EXTRA" ] && URL="${URL}&${EXTRA}"
 OUT="$(cygpath -w "$DIR/_shots/$NAME.png" 2>/dev/null || echo "$DIR/_shots/$NAME.png")"
-CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"
-[ -x "$CHROME" ] || CHROME="/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+[ -x "$CHROME" ] || CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"
 PROFILE="$(cygpath -w "${TMPDIR:-/tmp}/ak-chrome-$$-$RANDOM" 2>/dev/null || echo /tmp/ak-chrome-$$)"
 "$CHROME" --headless=new --disable-gpu --hide-scrollbars --user-data-dir="$PROFILE" --window-size="$W,$H" \
   --virtual-time-budget=4000 --screenshot="$OUT" "$URL" >/dev/null 2>&1 || true
