@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Events · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Events list: page-specific styles (tokens only) ---- */
+    .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-bottom: var(--sp-4); }
+    .kpi { padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .kpi .stat-value { font-size: 24px; line-height: 30px; margin-top: 4px; font-variant-numeric: normal; }
+    .kpi .stat-value small { font-size: 13px; font-weight: 500; color: var(--text-2); margin-left: 2px; }
+
+    /* Live banner */
+    .live { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border: 1px solid var(--primary); background: var(--primary-soft); border-radius: var(--r-lg); margin-bottom: var(--sp-4); flex-wrap: wrap; }
+    .live-pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 4px var(--success-soft); flex: none; }
+    .live-main { flex: 1; min-width: 240px; }
+    .live-title { font-weight: 600; font-size: 15px; color: var(--text); }
+    .live-sub { font-size: 13px; color: var(--text-2); margin-top: 2px; }
+    .live-stats { display: flex; gap: 22px; }
+    .live-stats div { font-size: 12px; color: var(--text-2); }
+    .live-stats b { display: block; font-size: 20px; color: var(--text); font-variant-numeric: tabular-nums; line-height: 24px; }
+
+    /* Event rows */
+    .ev { display: inline-flex; align-items: center; gap: 10px; }
+    .ev-date { width: 44px; text-align: center; border: 1px solid var(--border); border-radius: var(--r-md); padding: 3px 0 4px; background: var(--surface); flex: none; }
+    .ev-date b { display: block; font-size: 17px; line-height: 20px; font-variant-numeric: tabular-nums; }
+    .ev-date span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); }
+    .ev-link { font-weight: 600; color: var(--text); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; font-weight: 600; }
+    .ev-link:hover { color: var(--primary-text); text-decoration: underline; }
+    .fmt { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--text-2); }
+    .fmt .i { width: 14px; height: 14px; }
+    .mini-bar { width: 96px; }
+    .mini-bar .progress { height: 6px; }
+    .mini-bar small { display: block; font-size: 11.5px; color: var(--text-3); margin-top: 3px; font-variant-numeric: tabular-nums; }
+    .rate { font-variant-numeric: tabular-nums; }
+    .total-row td { background: var(--surface-2); font-weight: 600; }
+    .rate.is-good { color: var(--success); font-weight: 600; }
+
+    /* Month view */
+    .mgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
+    .mh { padding: 8px 10px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); background: var(--surface-2); border-bottom: 1px solid var(--border); font-weight: 600; }
+    .md { min-height: 92px; padding: 6px 8px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 12px; }
+    .md:nth-child(7n) { border-right: 0; }
+    .md .n { font-variant-numeric: tabular-nums; color: var(--text-2); font-weight: 500; }
+    .md.is-today .n { background: var(--primary); color: var(--on-primary); border-radius: 999px; padding: 1px 7px; }
+    .md.is-off { background: var(--surface-2); color: var(--text-3); }
+    .chipev { display: block; margin-top: 4px; padding: 3px 6px; border-radius: var(--r-sm); font-size: 11.5px; line-height: 15px; font-weight: 500; background: var(--primary-soft); color: var(--primary-text); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chipev.is-done { background: var(--success-soft); color: var(--success); }
+    .chipev.is-draft { background: var(--neutral-soft); color: var(--neutral); }
+    .chipev.is-live { background: var(--success-soft); color: var(--success); }
+
+    /* Create drawer */
+    .tmpl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tmpl button { text-align: left; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--r-md); background: var(--surface); color: var(--text); font: inherit; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; }
+    .tmpl button[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); }
+    .tmpl .i { width: 16px; height: 16px; margin-top: 2px; color: var(--primary-text); flex: none; }
+    .tmpl b { display: block; font-size: 13px; font-weight: 600; }
+    .tmpl span { font-size: 12px; color: var(--text-3); }
+    .aud-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .aud-row:last-child { border-bottom: 0; }
+    .aud-row .num { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .seq { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 40px; gap: 10px 10px; align-items: center; font-size: 13px; }
+    .seq .switch { justify-self: end; }
+    .seq .step { width: 22px; height: 22px; border-radius: 50%; background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; font-size: 11.5px; font-weight: 600; }
+    .seq .when { color: var(--text-3); font-size: 12.5px; white-space: nowrap; }
+    .seq small { display: block; color: var(--text-3); font-size: 12px; }
+
+    @media (max-width: 1280px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 768px) { .kpis { grid-template-columns: 1fr 1fr; } .md { min-height: 64px; } .tmpl { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="events" data-crumb="Events|All events">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Events</h1>
+            <p class="page-sub">Plan investor meets and webinars, invite the right people, check them in with a QR code, and turn attendees into leads</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" data-open-drawer="drawer-event"><svg class="i"><use href="#i-plus"/></svg>Create event</button>
+          </div>
+        </div>
+
+        <!-- Live event banner -->
+        <div class="live" role="status">
+          <span class="live-pulse"></span>
+          <div class="live-main">
+            <div class="live-title">Market Outlook 2027 – Investor Meet · check-in is open</div>
+            <div class="live-sub">Today 1:30–3:00 PM · Andheri office hall · starts in 20 min · hosted by Neha Kapoor</div>
+          </div>
+          <div class="live-stats">
+            <div><b>14</b>Checked in</div>
+            <div><b>62</b>Registered</div>
+            <div><b>~42</b>Expected</div>
+          </div>
+          <a class="btn btn-primary" href="24-event-detail.html?tab=checkin">Live check-in</a>
+        </div>
+
+        <div class="kpis">
+          <div class="stat stat-info kpi"><div class="stat-label">Total events</div><div class="stat-value">9</div><div class="stat-meta">5 upcoming · 3 completed · 1 cancelled</div></div>
+          <div class="stat kpi"><div class="stat-label">Invitations sent</div><div class="stat-value">684</div><div class="stat-meta">97% delivered · WhatsApp and email</div></div>
+          <div class="stat kpi"><div class="stat-label">Registrations</div><div class="stat-value">115</div><div class="stat-meta">Across 3 upcoming events with invitations out</div></div>
+          <div class="stat stat-warning kpi"><div class="stat-label">RSVP responses</div><div class="stat-value">129<small>/ 372</small></div><div class="stat-meta">115 accepted · 14 declined · 243 pending</div></div>
+          <div class="stat stat-success kpi"><div class="stat-label">Attendance</div><div class="stat-value">69%</div><div class="stat-meta">91 of 131 registered came · last 3 events</div></div>
+          <div class="stat kpi"><div class="stat-label">Leads from events</div><div class="stat-value">64</div><div class="stat-meta">9 became clients · 9 follow-ups pending</div></div>
+        </div>
+
+        <div class="tabs" data-tabs="evt" role="tablist">
+          <button class="tab is-active" data-tab="upcoming">Upcoming <span class="count">5</span></button>
+          <button class="tab" data-tab="past">Past <span class="count">4</span></button>
+          <button class="tab" data-tab="calendar">Calendar</button>
+          <button class="tab" data-tab="reports">Reports</button>
+        </div>
+
+        <!-- ================= UPCOMING ================= -->
+        <div data-tab-panel="upcoming" data-tab-scope="evt" class="is-active">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search event, venue or host"></label>
+              <div class="segmented" data-segmented><button aria-pressed="true">All</button><button>In person <span class="faint">3</span></button><button>Online <span class="faint">1</span></button><button>Hybrid <span class="faint">1</span></button></div>
+            </div>
+            <div class="toolbar-right">
+              <select class="select" style="width:auto" aria-label="Status"><option>All statuses</option><option>Draft</option><option>Upcoming</option><option>Completed</option><option>Cancelled</option></select>
+              <select class="select" style="width:auto" aria-label="Category"><option>All categories</option><option>Investor Awareness</option><option>Webinar</option><option>Seminar</option><option>Client Meet</option><option>Workshop</option></select>
+              <select class="select" style="width:auto" aria-label="Branch"><option>All branches</option><option>Andheri</option><option>Thane</option><option>Pune</option></select>
+              <button class="btn btn-secondary"><svg class="i"><use href="#i-columns"/></svg>Columns</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Event</th><th>Format · venue</th><th>Status</th><th>Host</th><th class="num">Invited</th><th>Registered</th><th class="num">Checked in</th><th></th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>14</b><span>Nov</span></span><span><a class="ev-link" href="24-event-detail.html">Market Outlook 2027 – Investor Meet</a><div class="cell-sub">Today 1:30–3:00 PM · Investor Awareness</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-building"/></svg>In person</span><div class="cell-sub">Andheri office hall</div></td>
+                    <td><span class="badge badge-dot badge-info">Upcoming</span><div class="cell-sub">Check-in open now</div></td>
+                    <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                    <td class="num">148</td>
+                    <td><div class="mini-bar"><div class="progress"><span style="width:77%"></span></div><small>62 of 80 seats</small></div></td>
+                    <td class="num fw-600">14</td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-event" title="Edit event"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-confirm" title="Cancel or delete"><svg class="i"><use href="#i-trash"/></svg></button></span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>28</b><span>Nov</span></span><span><a class="ev-link" href="24-event-detail.html">SIP Awareness for Salaried</a><div class="cell-sub">Sat 11:00 AM–1:00 PM · Workshop</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-building"/></svg>In person</span><div class="cell-sub">Pune office</div></td>
+                    <td><span class="badge badge-dot badge-info">Upcoming</span><div class="cell-sub">Invitations live</div></td>
+                    <td><span class="person"><span class="avatar avatar-sm a2">VR</span><span class="person-name">Vikram Rao</span></span></td>
+                    <td class="num">96</td>
+                    <td><div class="mini-bar"><div class="progress"><span style="width:48%"></span></div><small>19 of 40 seats</small></div></td>
+                    <td class="num faint">—</td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-event" title="Edit event"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-confirm" title="Cancel or delete"><svg class="i"><use href="#i-trash"/></svg></button></span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>2</b><span>Dec</span></span><span><a class="ev-link" href="24-event-detail.html">Retirement Planning Webinar</a><div class="cell-sub">Wed 7:00–8:00 PM · Webinar</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-video"/></svg>Online</span><div class="cell-sub">Zoom · link sent with QR pass</div></td>
+                    <td><span class="badge badge-dot badge-info">Upcoming</span><div class="cell-sub">Invitations live</div></td>
+                    <td><span class="person"><span class="avatar avatar-sm a4">SI</span><span class="person-name">Sneha Iyer</span></span></td>
+                    <td class="num">128</td>
+                    <td><div class="mini-bar"><div class="progress"><span style="width:14%"></span></div><small>34 of 250 seats</small></div></td>
+                    <td class="num faint">—</td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-event" title="Edit event"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-confirm" title="Cancel or delete"><svg class="i"><use href="#i-trash"/></svg></button></span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>19</b><span>Dec</span></span><span><a class="ev-link" href="24-event-detail.html">Year-End Client Appreciation Dinner</a><div class="cell-sub">Sat 7:30–10:00 PM · Client Meet</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-building"/></svg>In person</span><div class="cell-sub">Hotel, Powai</div></td>
+                    <td><span class="badge badge-dot badge-neutral">Draft</span><div class="cell-sub">Awaiting approval · Rajesh Sharma</div></td>
+                    <td><span class="person"><span class="avatar avatar-sm">NK</span><span class="person-name">Neha Kapoor</span></span></td>
+                    <td class="num faint">60 planned</td>
+                    <td><div class="mini-bar"><div class="progress"><span style="width:0%"></span></div><small>Opens after approval</small></div></td>
+                    <td class="num faint">—</td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-event" title="Edit event"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-confirm" title="Cancel or delete"><svg class="i"><use href="#i-trash"/></svg></button></span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>9</b><span>Jan</span></span><span><a class="ev-link" href="24-event-detail.html">Budget 2027 Expectations Meet</a><div class="cell-sub">Sat 11:00 AM · Seminar</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-globe"/></svg>Hybrid</span><div class="cell-sub">Thane office + Zoom</div></td>
+                    <td><span class="badge badge-dot badge-neutral">Draft</span></td>
+                    <td><span class="person"><span class="avatar avatar-sm a3">AG</span><span class="person-name">Aman Gupta</span></span></td>
+                    <td class="num faint">—</td>
+                    <td><div class="mini-bar"><div class="progress"><span style="width:0%"></span></div><small>Not published</small></div></td>
+                    <td class="num faint">—</td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-event" title="Edit event"><svg class="i"><use href="#i-edit"/></svg></button><button class="btn btn-ghost btn-icon btn-sm" data-open-drawer="drawer-confirm" title="Cancel or delete"><svg class="i"><use href="#i-trash"/></svg></button></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination"><span>5 upcoming events · Andheri, Thane and Pune. A branch manager sees own-branch events plus firm totals.</span></div>
+          </div>
+        </div>
+
+        <!-- ================= PAST ================= -->
+        <div data-tab-panel="past" data-tab-scope="evt">
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Event</th><th>Format · venue</th><th>Status</th><th class="num">Registered</th><th class="num">Attended</th><th class="num">Attendance</th><th class="num">Leads</th><th class="num">Clients</th><th class="num">Net cost</th><th class="num">Business</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>8</b><span>Nov</span></span><span><a class="ev-link" href="24-event-detail.html">Tax-saving ELSS Seminar</a><div class="cell-sub">Sun · Seminar · <a href="22-campaigns.html">Campaign</a></div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-building"/></svg>In person</span><div class="cell-sub">Andheri club hall</div></td>
+                    <td class="num">78</td><td class="num">52</td><td class="num rate">67%</td><td class="num">41</td><td class="num fw-600">7</td><td class="num">₹58,000</td><td class="num fw-600">₹92 L</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>1</b><span>Nov</span></span><span><a class="ev-link" href="24-event-detail.html">Diwali Branch Day – SIP Drive</a><div class="cell-sub">Sun · Client appreciation</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-building"/></svg>In person</span><div class="cell-sub">Andheri office</div></td>
+                    <td><span class="badge badge-dot badge-success">Completed</span></td>
+                    <td class="num">44</td><td class="num">31</td><td class="num rate">70%</td><td class="num">12</td><td class="num fw-600">2</td><td class="num">₹11,600</td><td class="num fw-600">₹38 L</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>24</b><span>Oct</span></span><span><a class="ev-link" href="24-event-detail.html">Sub-broker Compliance Refresher</a><div class="cell-sub">Sat · Training</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-video"/></svg>Online</span><div class="cell-sub">Google Meet</div></td>
+                    <td><span class="badge badge-dot badge-success">Completed</span></td>
+                    <td class="num">9</td><td class="num">8</td><td class="num rate is-good">89%</td><td class="num faint">—</td><td class="num faint">—</td><td class="num">₹0</td><td class="num faint">—</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ev"><span class="ev-date"><b>17</b><span>Oct</span></span><span><a class="ev-link" href="24-event-detail.html">Mutual Fund Basics Workshop</a><div class="cell-sub">Sat · Investor Awareness · cancelled before invitations</div></span></span></td>
+                    <td><span class="fmt"><svg class="i"><use href="#i-building"/></svg>In person</span><div class="cell-sub">Thane office</div></td>
+                    <td><span class="badge badge-dot badge-danger">Cancelled</span><div class="cell-sub">Venue unavailable</div></td>
+                    <td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num">₹0</td><td class="num faint">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination"><span>Net cost = spend minus AMC sponsorship. Business generated comes from MF Box within 90 days of the event.</span></div>
+          </div>
+        </div>
+
+        <!-- ================= CALENDAR ================= -->
+        <div data-tab-panel="calendar" data-tab-scope="evt">
+          <div class="toolbar">
+            <div class="toolbar-left"><b style="font-size:15px">November – December 2026</b></div>
+            <div class="toolbar-right"><a class="btn btn-secondary" href="03-calendar.html"><svg class="i"><use href="#i-calendar"/></svg>Open full calendar</a></div>
+          </div>
+          <div class="mgrid" id="mgrid"></div>
+        </div>
+
+        <!-- ================= REPORTS ================= -->
+        <div data-tab-panel="reports" data-tab-scope="evt">
+          <div class="toolbar">
+            <div class="toolbar-left"><b style="font-size:15px">Event-wise participation</b><span class="faint text-sm">Invitations, RSVP and attendance for every event</span></div>
+            <div class="toolbar-right">
+              <select class="select" style="width:auto" aria-label="Period"><option>This financial year</option><option>Last 90 days</option><option>Last 12 months</option><option>Custom range…</option></select>
+              <button class="btn btn-secondary" onclick="AK.toast('Event report exported as CSV', {undo:false})"><svg class="i"><use href="#i-download"/></svg>Export CSV</button>
+              <button class="btn btn-secondary" onclick="AK.toast('Event report exported as PDF', {undo:false})"><svg class="i"><use href="#i-download"/></svg>Export PDF</button>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th>Event</th><th>Category</th><th>Status</th><th class="num">Invitations sent</th><th class="num">Delivered</th><th class="num">Accepted</th><th class="num">Declined</th><th class="num">Pending</th><th class="num">Present</th><th class="num">Absent</th><th class="num">Attendance</th></tr></thead>
+                <tbody>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Market Outlook 2027 – Investor Meet</a><div class="cell-sub">14 Nov</div></td><td>Investor Awareness</td><td><span class="badge badge-dot badge-info">Upcoming</span></td><td class="num">148</td><td class="num">146</td><td class="num">62</td><td class="num">9</td><td class="num">77</td><td class="num">14</td><td class="num faint">—</td><td class="num faint">Live</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">SIP Awareness for Salaried</a><div class="cell-sub">28 Nov</div></td><td>Workshop</td><td><span class="badge badge-dot badge-info">Upcoming</span></td><td class="num">96</td><td class="num">94</td><td class="num">19</td><td class="num">3</td><td class="num">74</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Retirement Planning Webinar</a><div class="cell-sub">2 Dec</div></td><td>Webinar</td><td><span class="badge badge-dot badge-info">Upcoming</span></td><td class="num">128</td><td class="num">126</td><td class="num">34</td><td class="num">2</td><td class="num">92</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Year-End Client Appreciation Dinner</a><div class="cell-sub">19 Dec</div></td><td>Client Meet</td><td><span class="badge badge-dot badge-neutral">Draft</span></td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Budget 2027 Expectations Meet</a><div class="cell-sub">9 Jan</div></td><td>Seminar</td><td><span class="badge badge-dot badge-neutral">Draft</span></td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Tax-saving ELSS Seminar</a><div class="cell-sub">8 Nov</div></td><td>Seminar</td><td><span class="badge badge-dot badge-success">Completed</span></td><td class="num">210</td><td class="num">205</td><td class="num">78</td><td class="num">21</td><td class="num">111</td><td class="num">52</td><td class="num">26</td><td class="num rate">67%</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Diwali Branch Day – SIP Drive</a><div class="cell-sub">1 Nov</div></td><td>Client Meet</td><td><span class="badge badge-dot badge-success">Completed</span></td><td class="num">90</td><td class="num">88</td><td class="num">44</td><td class="num">8</td><td class="num">38</td><td class="num">31</td><td class="num">13</td><td class="num rate">70%</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Sub-broker Compliance Refresher</a><div class="cell-sub">24 Oct</div></td><td>Workshop</td><td><span class="badge badge-dot badge-success">Completed</span></td><td class="num">12</td><td class="num">12</td><td class="num">9</td><td class="num">0</td><td class="num">3</td><td class="num">8</td><td class="num">1</td><td class="num rate is-good">89%</td></tr>
+                  <tr><td><a class="ev-link" href="24-event-detail.html">Mutual Fund Basics Workshop</a><div class="cell-sub">17 Oct</div></td><td>Investor Awareness</td><td><span class="badge badge-dot badge-danger">Cancelled</span></td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td></tr>
+                  <tr class="total-row"><td>All events</td><td></td><td></td><td class="num">684</td><td class="num">671</td><td class="num">246</td><td class="num">35</td><td class="num">395</td><td class="num">105</td><td class="num">40</td><td class="num">69%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination"><span>Attendance = present ÷ accepted, for completed events only. “Absent” is set automatically when an event ends, and can be changed by the host.</span></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ================= Drawer: Create event ================= -->
+  <aside class="drawer" id="drawer-event" aria-label="Create event" style="width:min(640px,100vw)">
+    <div class="drawer-header"><div><div class="drawer-title">Create event</div><div class="drawer-sub">Fields marked * are required · saved as a draft until you publish</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+
+      <div class="form-section">
+        <div class="form-section-title">1 · Start from a template</div>
+        <div class="tmpl" data-single-tmpl>
+          <button aria-pressed="true"><svg class="i"><use href="#i-users"/></svg><div><b>Investor meet</b><span>Agenda, venue, QR check-in, follow-up tasks</span></div></button>
+          <button aria-pressed="false"><svg class="i"><use href="#i-video"/></svg><div><b>Webinar</b><span>Zoom or Meet link, attendance by minutes joined</span></div></button>
+          <button aria-pressed="false"><svg class="i"><use href="#i-gift"/></svg><div><b>Client appreciation</b><span>Tier A and B, plus-one, approval needed</span></div></button>
+          <button aria-pressed="false"><svg class="i"><use href="#i-shield"/></svg><div><b>Sub-broker training</b><span>Internal, attendance record for compliance</span></div></button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">2 · Basics</div>
+        <div class="form-grid">
+          <div class="field span-2"><label class="label">Event name <span class="req">*</span></label><input class="input" placeholder="e.g. Market Outlook 2027 – Investor Meet"></div>
+          <div class="field span-2"><label class="label">Description</label><textarea class="textarea" rows="3" placeholder="What the event is about, who should come, what they will learn"></textarea><div class="help">Shown on the registration page and in the invitation.</div></div>
+          <div class="field"><label class="label">Category <span class="req">*</span></label><select class="select"><option>Investor Awareness</option><option>Webinar</option><option>Seminar</option><option>Client Meet</option><option>Workshop</option></select></div>
+          <div class="field"><label class="label">Status</label><select class="select"><option>Draft</option><option>Upcoming</option><option>Completed</option><option>Cancelled</option></select><div class="help">Becomes Upcoming when published.</div></div>
+          <div class="field"><label class="label">Date <span class="req">*</span></label><input class="input" value="19 Dec 2026"></div>
+          <div class="field"><label class="label">Time <span class="req">*</span></label><input class="input" value="7:30 PM – 10:00 PM"></div>
+          <div class="field"><label class="label">Format</label>
+            <div class="choice-group" data-single><button class="choice" aria-pressed="true">In person</button><button class="choice" aria-pressed="false">Online</button><button class="choice" aria-pressed="false">Hybrid</button></div></div>
+          <div class="field"><label class="label">Capacity <span class="req">*</span></label><input class="input" value="60"><div class="help">Extra registrations go to a waitlist.</div></div>
+          <div class="field span-2"><label class="label">Venue or online meeting link</label><input class="input" placeholder="Hotel or office hall with map link, or a Zoom / Meet link"></div>
+          <div class="field"><label class="label">Host <span class="req">*</span></label><select class="select"><option>Neha Kapoor</option><option>Rohan Mehta</option><option>Sneha Iyer</option><option>Vikram Rao</option></select></div>
+          <div class="field"><label class="label">Campaign</label><select class="select"><option>None</option><option>Retirement planning webinar</option><option>Tax-saving ELSS seminar</option></select><div class="help">Links spend and leads to Campaigns.</div></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">3 · Who to invite</div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span><b>Clients</b> · Tier A and B <span class="faint">· Mumbai</span></span><span class="num">396</span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span><b>Open leads</b> · Hot and Follow-up stage</span><span class="num">21</span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox"></label><span><b>Clients with SIP stopped</b> in last 3 months <span class="badge badge-ai">AI suggestion</span></span><span class="num">42</span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox"></label><span><b>Sub-broker contacts</b> · Kavya, Imran, Ravi</span><span class="num">35</span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox"></label><span><b>Upload a list</b> (CSV with name and mobile)</span><button class="btn btn-secondary btn-sm ml-auto"><svg class="i"><use href="#i-upload"/></svg>Upload</button></div>
+        <div class="banner banner-info mt-3"><svg class="i"><use href="#i-info"/></svg><span><b>417 selected.</b> 14 have no WhatsApp opt-in and will get email only. 3 are marked do-not-contact and are skipped.</span></div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">4 · Invitations sent automatically</div>
+        <div class="seq">
+          <span class="step">1</span><span>Invitation with RSVP link<small>WhatsApp + email · personalised with RM name</small></span><span class="when">On publish</span><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Invitation with RSVP link"><span></span></label>
+          <span class="step">2</span><span>Reminder to people who have not replied<small>WhatsApp</small></span><span class="when">7 days before</span><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Reminder to people who have not replied"><span></span></label>
+          <span class="step">3</span><span>Reminder with directions<small>To accepted guests and those who have not decided</small></span><span class="when">1 day before</span><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Reminder with directions"><span></span></label>
+          <span class="step">4</span><span>Registration confirmation<small>Sent the moment a guest registers</small></span><span class="when">On registration</span><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Registration confirmation"><span></span></label>
+          <span class="step">5</span><span>QR pass<small>Unique to each guest, with Add to Calendar</small></span><span class="when">Morning of event</span><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="QR pass"><span></span></label>
+          <span class="step">6</span><span>Thank-you, or “sorry we missed you”<small>Attendees and no-shows get different messages</small></span><span class="when">After event</span><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Thank-you, or “sorry we missed you”"><span></span></label>
+        </div>
+        <div class="help mt-3">Messages use approved WhatsApp templates. Edit wording and timing after you create the event.</div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">5 · Checklist and approval</div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span>Create planning tasks from the template <span class="faint">· 7 tasks, due dates set from the event date</span></span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span>Create follow-up tasks for attendees <span class="faint">· call within 48 hours</span></span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span>Add guests who are not yet in the CRM as leads <span class="faint">· source “Event”</span></span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span>Needs approval from the principal <span class="faint">· budget above ₹25,000</span></span></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="faint text-sm"><span class="kbd">Ctrl</span> + <span class="kbd">↵</span> to save</span><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer onclick="AK.toast('Saved as draft')">Save draft</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-event');AK.toast('Event sent to Rajesh Sharma for approval')">Create and send for approval</button></div>
+  </aside>
+
+  <aside class="drawer" id="drawer-confirm" aria-label="Cancel or delete event" style="width:min(460px,100vw)">
+    <div class="drawer-header"><div><div class="drawer-title">Cancel or delete event</div><div class="drawer-sub">Retirement Planning Webinar · 2 Dec</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="banner banner-warning"><svg class="i"><use href="#i-info"/></svg><span><b>34 people have registered.</b> Cancelling keeps the event and its history, and tells them it is off. Deleting removes it for good.</span></div>
+      <div class="form-grid mt-3">
+        <div class="field span-2"><label class="label">Reason <span class="faint">· shown to guests</span></label><textarea class="textarea" rows="3">The speaker is unavailable on this date. We will share a new date soon.</textarea></div>
+        <div class="field span-2"><label class="choice-group" style="display:flex;gap:8px;align-items:center"><input type="checkbox" checked> Send a cancellation message on WhatsApp and email to the 34 registered guests</label></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><button class="btn btn-danger-ghost" onclick="AK.closeDrawer('drawer-confirm');AK.toast('Event deleted. Only drafts and cancelled events can be deleted.')"><svg class="i"><use href="#i-trash"/></svg>Delete event</button><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Keep event</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-confirm');AK.toast('Event cancelled and 34 guests notified')">Cancel event</button></div>
+  </aside>
+
+  <script>
+    // Month grid (Nov + Dec 2026), sample events only
+    (function () {
+      var EV = {
+        '2026-11-08': [['is-done', 'ELSS Seminar']],
+        '2026-11-14': [['is-live', '1:30 Market Outlook']],
+        '2026-11-28': [['', 'SIP Awareness · Pune']],
+        '2026-12-02': [['', '7 PM Retirement webinar']],
+        '2026-12-19': [['is-draft', 'Client Dinner · approval']],
+        '2027-01-09': [['is-draft', 'Budget meet · draft']]
+      };
+      var heads = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      var h = heads.map(function (d) { return '<div class="mh">' + d + '</div>'; }).join('');
+      var start = new Date(2026, 10, 2); // Mon 2 Nov
+      for (var i = 0; i < 42; i++) {
+        var d = new Date(start.getTime() + i * 86400000);
+        var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        var label = d.getDate() === 1 ? d.toLocaleString('en', { month: 'short' }) + ' 1' : d.getDate();
+        var evs = (EV[key] || []).map(function (e) { return '<a class="chipev ' + e[0] + '" href="24-event-detail.html">' + e[1] + '</a>'; }).join('');
+        h += '<div class="md' + (key === '2026-11-14' ? ' is-today' : '') + '"><span class="n">' + label + '</span>' + evs + '</div>';
+      }
+      document.getElementById('mgrid').innerHTML = h;
+
+      // template picker
+      document.querySelectorAll('[data-single-tmpl] button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          b.parentNode.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

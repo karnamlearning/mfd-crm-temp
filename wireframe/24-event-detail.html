@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Event · Market Outlook 2027 · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Event detail: page-specific styles (tokens only) ---- */
+    .hero { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; margin-bottom: var(--sp-4); }
+    .hero-main { flex: 1; min-width: 280px; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-size: 13px; color: var(--text-2); }
+    .hero-meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .hero-meta .i { width: 14px; height: 14px; color: var(--text-3); }
+    .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: var(--sp-4); }
+    .kpi { padding: 14px 16px; box-shadow: var(--shadow-sm); }
+    .kpi .stat-value { font-size: 24px; line-height: 30px; margin-top: 4px; font-variant-numeric: normal; }
+    .kpi .stat-value small { font-size: 13px; font-weight: 500; color: var(--text-2); margin-left: 2px; }
+
+    .cols { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+    .kv { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px 12px; font-size: 13px; }
+    .kv dt { color: var(--text-3); }
+    .kv dd { margin: 0; color: var(--text); }
+    .funnel { display: grid; grid-template-columns: 96px minmax(0, 1fr) 64px; gap: 8px 12px; align-items: center; font-size: 13px; }
+    .funnel .l { color: var(--text-2); }
+    .funnel .t { height: 22px; background: var(--surface-2); border-radius: 4px; position: relative; overflow: hidden; }
+    .funnel .t i { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--w) * 100%); background: var(--chart-1); border-radius: 0 4px 4px 0; }
+    .funnel .t i.c2 { background: var(--chart-2); }
+    .funnel .t i.c4 { background: var(--chart-4); }
+    .funnel .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .row-link { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .row-link:last-child { border-bottom: 0; }
+    .row-link .num { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .row-link .ic { width: 28px; height: 28px; border-radius: var(--r-md); background: var(--primary-soft); color: var(--primary-text); display: grid; place-items: center; flex: none; }
+    .row-link .ic .i { width: 14px; height: 14px; }
+
+    /* Invitations */
+    .seq-card { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto 40px; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); align-items: center; }
+    .seq-card:last-child { border-bottom: 0; }
+    .seq-n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12.5px; font-weight: 600; background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+    .seq-n.is-done { background: var(--success-soft); color: var(--success); border-color: transparent; }
+    .seq-n.is-next { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+    .seq-t { font-weight: 600; font-size: 13.5px; }
+    .seq-s { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+    .seq-card .switch { justify-self: end; }
+    .seq-stats { display: flex; gap: 16px; font-size: 12px; color: var(--text-3); text-align: right; }
+    .seq-stats b { display: block; font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .wa-preview { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; font-size: 13px; line-height: 20px; white-space: pre-line; }
+    .wa-btn { display: block; margin-top: 8px; padding: 8px; text-align: center; border-top: 1px solid var(--border); color: var(--primary-text); font-weight: 600; }
+
+    /* Check-in */
+    .arr { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end; height: 150px; margin-top: 8px; }
+    .arr div { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: 11px; color: var(--text-3); gap: 4px; }
+    .arr i { width: 100%; border-radius: 4px 4px 0 0; background: var(--chart-1); display: block; height: calc(var(--h) * 1%); }
+    .arr i.fc { background: var(--chart-3); opacity: .6; }
+    .arr b { font-size: 12px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .scan-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .scan-row:last-child { border-bottom: 0; }
+    .scan-row .t { margin-left: auto; color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .vip { display: flex; gap: 10px; align-items: flex-start; }
+
+    /* Budget */
+    .bud td.num { font-variant-numeric: tabular-nums; }
+    .bud .total-row td { background: var(--surface-2); font-weight: 600; }
+    .ev-link { font-weight: 600; color: var(--text); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; font-weight: 600; }
+    .ev-link:hover { color: var(--primary-text); text-decoration: underline; }
+    .aud-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .aud-row:last-child { border-bottom: 0; }
+    .dd-sec { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; color: var(--text-3); margin: 18px 0 8px; }
+    .roi { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .roi > div { border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; font-size: 12px; color: var(--text-3); }
+    .roi b { display: block; font-size: 17px; font-weight: 600; color: var(--text); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .cols { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .kpis { grid-template-columns: 1fr 1fr; } .seq-card { grid-template-columns: 30px 1fr; } .seq-stats { grid-column: 2; text-align: left; } .roi { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="events" data-crumb="Events|Market Outlook 2027 – Investor Meet">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div class="hero-main">
+            <div class="row" style="gap:10px;flex-wrap:wrap"><h1 class="page-title">Market Outlook 2027 – Investor Meet</h1><span class="badge badge-dot badge-info">Upcoming</span><span class="badge badge-success">Check-in open</span><span class="badge badge-outline">Investor Awareness</span></div>
+            <div class="hero-meta">
+              <span><svg class="i"><use href="#i-calendar"/></svg>Today, Sat 14 Nov · 1:30–3:00 PM</span>
+              <span><svg class="i"><use href="#i-building"/></svg>Andheri office hall · <a href="#">Map</a></span>
+              <span><svg class="i"><use href="#i-user"/></svg>Host: Neha Kapoor</span>
+              <span><svg class="i"><use href="#i-send"/></svg><a href="22-campaigns.html">Campaign: Market outlook series</a></span>
+            </div>
+          </div>
+          <div class="page-actions">
+            <div class="popover-wrap"><button class="btn btn-secondary" data-popover="pop-export"><svg class="i"><use href="#i-download"/></svg>Export</button>
+              <div class="popover" id="pop-export"><div class="menu">
+                <button class="menu-item" onclick="AK.toast('Attendee list exported (CSV)', {undo:false})">Attendee list · CSV</button>
+                <button class="menu-item" onclick="AK.toast('Attendee list exported (Excel)', {undo:false})">Attendee list · Excel</button>
+                <button class="menu-item" onclick="AK.toast('Event report exported (PDF)', {undo:false})">Event report · PDF</button>
+              </div></div></div>
+            <button class="btn btn-secondary" data-open-drawer="drawer-edit"><svg class="i"><use href="#i-edit"/></svg>Edit</button>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="stat stat-info kpi"><div class="stat-label">Invited</div><div class="stat-value">148</div><div class="stat-meta">112 clients · 28 leads · 8 via sub-brokers</div></div>
+          <div class="stat kpi"><div class="stat-label">Registered (accepted)</div><div class="stat-value">62<small>/ 80 seats</small></div><div class="stat-meta">Accepted 62 · declined 9 · pending 77</div></div>
+          <div class="stat stat-success kpi"><div class="stat-label">Checked in</div><div class="stat-value">14</div><div class="stat-meta">12 registered · 2 walk-ins</div></div>
+          <div class="stat stat-ai kpi"><div class="stat-label">Expected to attend</div><div class="stat-value">~42</div><div class="stat-meta">AI estimate · based on 69% past attendance</div></div>
+          <div class="stat stat-warning kpi"><div class="stat-label">New leads</div><div class="stat-value">11</div><div class="stat-meta">9 at registration · 2 walk-ins</div></div>
+        </div>
+
+        <div class="tabs" data-tabs="ev" role="tablist">
+          <button class="tab is-active" data-tab="overview">Overview</button>
+          <button class="tab" data-tab="guests">Guests <span class="count">62</span></button>
+          <button class="tab" data-tab="invites">Invitations</button>
+          <button class="tab" data-tab="checkin">Check-in <span class="count">14</span></button>
+          <button class="tab" data-tab="tasks">Tasks &amp; follow-up <span class="count">9</span></button>
+          <button class="tab" data-tab="budget">Budget</button>
+        </div>
+
+        <!-- ================= OVERVIEW ================= -->
+        <div data-tab-panel="overview" data-tab-scope="ev" class="is-active">
+          <div class="cols">
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Event funnel</div><div class="card-actions"><span class="faint text-sm">Updates live</span></div></div>
+                <div class="card-body">
+                  <div class="funnel">
+                    <span class="l">Invited</span><span class="t"><i style="--w:1"></i></span><span class="v">148</span>
+                    <span class="l">Opened</span><span class="t"><i class="c2" style="--w:.79"></i></span><span class="v">117</span>
+                    <span class="l">Registered</span><span class="t"><i style="--w:.42"></i></span><span class="v">62</span>
+                    <span class="l">Checked in</span><span class="t"><i class="c4" style="--w:.095"></i></span><span class="v">14</span>
+                    <span class="l">Follow-up done</span><span class="t"><i class="c4" style="--w:0"></i></span><span class="v">0</span>
+                    <span class="l">Became client</span><span class="t"><i style="--w:0"></i></span><span class="v">0</span>
+                  </div>
+                </div>
+                <div class="card-footer text-sm"><svg class="i i-sm"><use href="#i-info"/></svg>“Became client” is counted when MF Box shows a first investment within 90 days.</div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Registrations by source</div></div>
+                <div class="card-body">
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span>WhatsApp invitation link</span><span class="num">38</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-mail"/></svg></span><span>Email invitation</span><span class="num">6</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-qr"/></svg></span><span>Poster QR at the branch</span><span class="num">7</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-users"/></svg></span><span>Sub-broker referral links <span class="faint">· Kavya 5, Ravi 3, Imran 1</span></span><span class="num">9</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-user"/></svg></span><span>Added by an RM</span><span class="num">2</span></div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Investor interest from this event</div><div class="card-actions"><span class="faint text-sm">Recorded by RMs at check-in or on follow-up</span></div></div>
+                <div class="card-body">
+                  <div class="roi">
+                    <div>High interest<b>3</b></div>
+                    <div>Medium<b>2</b></div>
+                    <div>Not recorded yet<b>9</b></div>
+                  </div>
+                  <div class="row-link mt-3"><span class="ic"><svg class="i"><use href="#i-target"/></svg></span><span>SIP start or top-up</span><span class="num">3</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-target"/></svg></span><span>Term insurance cover</span><span class="num">1</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-target"/></svg></span><span>ITR e-filing</span><span class="num">1</span></div>
+                  <div class="help mt-3">Interest sits on each attendee’s profile. <a href="12-opportunities.html">Turn it into an opportunity</a> from the attendee panel.</div>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Agenda</div></div>
+                <div class="card-body">
+                  <div class="row-link"><span class="faint" style="width:70px">1:30 PM</span><span>Welcome and firm update<span class="faint"> · Rajesh Sharma</span></span></div>
+                  <div class="row-link"><span class="faint" style="width:70px">1:45 PM</span><span>Market outlook 2027<span class="faint"> · Meera Kulkarni, fund manager (AMC partner)</span></span></div>
+                  <div class="row-link"><span class="faint" style="width:70px">2:30 PM</span><span>SIP and goal planning: what to do now<span class="faint"> · Neha Kapoor</span></span></div>
+                  <div class="row-link"><span class="faint" style="width:70px">2:50 PM</span><span>Questions, and book a 1:1 review at the desk</span></div>
+                </div>
+              </section>
+            </div>
+
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Details</div></div>
+                <div class="card-body">
+                  <dl class="kv">
+                    <dt>Description</dt><dd>Year-ahead market view and what it means for your SIPs and goals. Followed by a 1:1 review desk.</dd>
+                    <dt>Category</dt><dd>Investor Awareness</dd>
+                    <dt>Status</dt><dd><span class="badge badge-dot badge-info">Upcoming</span> <span class="faint text-sm">· Draft → Upcoming → Completed, or Cancelled</span></dd>
+                    <dt>Organizer</dt><dd>Neha Kapoor <span class="faint">· co-organizer Priya Nair</span></dd>
+                    <dt>Format</dt><dd>In person · 80 seats · waitlist on</dd>
+                    <dt>Audience</dt><dd>Tier A and B clients, open leads</dd>
+                    <dt>Plus-one</dt><dd>Allowed, counts toward capacity</dd>
+                    <dt>Sponsor</dt><dd>AMC partner · ₹20,000</dd>
+                    <dt>Approval</dt><dd><span class="badge badge-dot badge-success">Approved by Rajesh Sharma · 1 Nov</span></dd>
+                    <dt>Registration page</dt><dd>sharmawealth.in/e/outlook-2027</dd>
+                  </dl>
+                </div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title"><span class="card-icon ci-ai"><svg class="i"><use href="#i-sparkles"/></svg></span>Suggestions</div></div>
+                <div class="card-body">
+                  <div class="banner banner-ai"><svg class="i"><use href="#i-sparkles"/></svg><span><b>66 people have not replied.</b> Send one more WhatsApp nudge at 1:00 PM? The last reminder got 11 replies in 2 hours.</span></div>
+                  <div class="banner banner-ai mt-3"><svg class="i"><use href="#i-sparkles"/></svg><span><b>Rahul Verma and 3 other Tier A clients</b> have checked in. Their RMs were notified to greet them.</span></div>
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= GUESTS ================= -->
+        <div data-tab-panel="guests" data-tab-scope="ev">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search guest, mobile or RM"></label>
+              <div class="segmented" data-segmented><button aria-pressed="true">All <span class="faint">148</span></button><button>Accepted <span class="faint">62</span></button><button>Declined <span class="faint">9</span></button><button>Pending <span class="faint">77</span></button><button>Present <span class="faint">14</span></button></div>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn btn-secondary" onclick="AK.toast('Reminder sent to 77 people with a pending RSVP')"><svg class="i"><use href="#i-whatsapp"/></svg>Remind pending</button>
+              <button class="btn btn-secondary" onclick="AK.toast('Attendee list exported (CSV)', {undo:false})"><svg class="i"><use href="#i-download"/></svg>Export</button>
+              <button class="btn btn-secondary" data-open-drawer="drawer-add"><svg class="i"><use href="#i-plus"/></svg>Add guests</button>
+            </div>
+          </div>
+          <div class="sel-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:var(--sp-3);font-size:13px;color:var(--text-2)"><span>Bulk actions on selected guests:</span><button class="btn btn-secondary btn-sm" onclick="AK.toast('Marked present')">Mark present</button><button class="btn btn-secondary btn-sm" onclick="AK.toast('Marked absent')">Mark absent</button><button class="btn btn-secondary btn-sm" onclick="AK.toast('Invitation resent on WhatsApp')">Resend invitation</button><button class="btn btn-secondary btn-sm" data-open-drawer="drawer-follow">Create follow-ups</button></div>
+          <div class="table-card">
+            <div class="table-wrap">
+              <table class="table">
+                <thead><tr><th class="col-check"><label class="check"><input type="checkbox"></label></th><th>Guest</th><th>Type</th><th>RM</th><th>Invitation</th><th>RSVP</th><th>Attendance</th><th>Interest</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm ">RV</span><span><button class="ev-link" data-open-drawer="drawer-guest">Rahul Verma</button><div class="cell-sub">Verma Family · +1 guest</div></span></span></td>
+                    <td><span class="badge badge-neutral">Client · Tier A</span></td><td>Neha Kapoor</td><td><span class="badge badge-dot badge-success">Read</span></td><td><span class="badge badge-dot badge-success">Accepted</span></td><td><span class="badge badge-dot badge-success">Present · 1:02 PM</span></td><td><span class="badge badge-success">High · SIP top-up</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a2">SI</span><span><button class="ev-link" data-open-drawer="drawer-guest">Suresh Iyer</button><div class="cell-sub">Iyer Family</div></span></span></td>
+                    <td><span class="badge badge-neutral">Client · Tier B</span></td><td>Rohan Mehta</td><td><span class="badge badge-dot badge-success">Read</span></td><td><span class="badge badge-dot badge-success">Accepted</span></td><td><span class="badge badge-dot badge-success">Present · 1:05 PM</span></td><td><span class="badge badge-warning">Medium · Term cover</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a4">NR</span><span><button class="ev-link" data-open-drawer="drawer-guest">Nisha Reddy</button><div class="cell-sub">Referred by Suresh Iyer</div></span></span></td>
+                    <td><span class="badge badge-info">Lead · Contacted</span></td><td>Sneha Iyer</td><td><span class="badge badge-dot badge-success">Read</span></td><td><span class="badge badge-dot badge-success">Accepted</span></td><td><span class="badge badge-dot badge-success">Present · 1:08 PM</span></td><td><span class="badge badge-success">High · ITR + SIP</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a5">DN</span><span><button class="ev-link" data-open-drawer="drawer-guest">Deepak Nambiar</button><div class="cell-sub">Walk-in · lead created 1:09 PM</div></span></span></td>
+                    <td><span class="badge badge-info">New lead</span></td><td>Sneha Iyer <span class="faint text-sm">(next in turn)</span></td><td><span class="faint">—</span></td><td><span class="badge badge-dot badge-neutral">Walk-in</span></td><td><span class="badge badge-dot badge-success">Present · 1:09 PM</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a3">AV</span><span><button class="ev-link" data-open-drawer="drawer-guest">Anjali Verma</button><div class="cell-sub">Verma Family</div></span></span></td>
+                    <td><span class="badge badge-neutral">Client · Tier B</span></td><td>Neha Kapoor</td><td><span class="badge badge-dot badge-success">Read</span></td><td><span class="badge badge-dot badge-success">Accepted</span></td><td><span class="faint">Not yet</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button><button class="btn btn-secondary btn-sm" onclick="AK.toast('Checked in manually')">Check in</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a2">KM</span><span><button class="ev-link" data-open-drawer="drawer-guest">Karan Malhotra</button><div class="cell-sub">Hot lead · MF-SIP · ₹5,00,000</div></span></span></td>
+                    <td><span class="badge badge-danger">Lead · Hot</span></td><td>Neha Kapoor</td><td><span class="badge badge-dot badge-success">Read</span></td><td><span class="badge badge-dot badge-success">Accepted</span></td><td><span class="faint">Not yet</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button><button class="btn btn-secondary btn-sm" onclick="AK.toast('Checked in manually')">Check in</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a5">FQ</span><span><button class="ev-link" data-open-drawer="drawer-guest">Farah Qureshi</button><div class="cell-sub">Created at registration</div></span></span></td>
+                    <td><span class="badge badge-info">New lead</span></td><td>Kavya Menon <span class="faint text-sm">(sub-broker)</span></td><td><span class="badge badge-dot badge-success">Delivered</span></td><td><span class="badge badge-dot badge-success">Accepted</span></td><td><span class="faint">Not yet</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button><button class="btn btn-secondary btn-sm" onclick="AK.toast('Checked in manually')">Check in</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a3">PB</span><span><button class="ev-link" data-open-drawer="drawer-guest">Pooja Bansal</button><div class="cell-sub">Bansal Family</div></span></span></td>
+                    <td><span class="badge badge-neutral">Client · Tier C</span></td><td>Sneha Iyer</td><td><span class="badge badge-dot badge-info">Delivered · email</span></td><td><span class="badge badge-dot badge-warning">Pending</span></td><td><span class="faint">—</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a5">SK</span><span><button class="ev-link" data-open-drawer="drawer-guest">Sameer Khan</button><div class="cell-sub">Lead · MF-SIP</div></span></span></td>
+                    <td><span class="badge badge-info">Lead · Follow-up</span></td><td>Neha Kapoor</td><td><span class="badge badge-dot badge-success">Read</span></td><td><span class="badge badge-dot badge-warning">Pending</span></td><td><span class="faint">—</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                  <tr><td><label class="check"><input type="checkbox"></label></td>
+                    <td><span class="person"><span class="avatar avatar-sm a4">PP</span><span><button class="ev-link" data-open-drawer="drawer-guest">Mr. Pillai</button><div class="cell-sub">Client · Tier C</div></span></span></td>
+                    <td><span class="badge badge-neutral">Client · Tier C</span></td><td>Rohan Mehta</td><td><span class="badge badge-dot badge-danger">Failed · invalid number</span></td><td><span class="badge badge-dot badge-neutral">Declined</span></td><td><span class="faint">—</span></td><td><span class="faint">—</span></td>
+                    <td><span class="row-actions"><button class="btn btn-ghost btn-sm" data-open-drawer="drawer-guest">View</button></span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination"><span>Showing 10 of 148 · sample rows · Delivery: delivered 146, read 117, failed 2</span></div>
+          </div>
+        </div>
+
+        <!-- ================= INVITATIONS ================= -->
+        <div data-tab-panel="invites" data-tab-scope="ev">
+          <div class="cols">
+            <section class="card">
+              <div class="card-header"><div class="card-title">Automated invitation sequence</div><div class="card-actions"><span class="badge badge-dot badge-success">Running</span><button class="btn btn-secondary btn-sm" onclick="AK.toast('Sequence paused: no more messages will go out')"><svg class="i"><use href="#i-pause"/></svg>Pause</button></div></div>
+              <div>
+                <div class="seq-card"><span class="seq-n is-done">✓</span><div><div class="seq-t">1 · Invitation with RSVP link</div><div class="seq-s">3 Nov · 10:00 AM · WhatsApp 141 + email 7 (7 had no WhatsApp opt-in)</div></div><div class="seq-stats"><div><b>148</b>Sent</div><div><b>117</b>Opened</div><div><b>47</b>Replied</div></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+                <div class="seq-card"><span class="seq-n is-done">✓</span><div><div class="seq-t">2 · Reminder to people who have not replied</div><div class="seq-s">7 Nov · 10:00 AM · WhatsApp · 101 people</div></div><div class="seq-stats"><div><b>101</b>Sent</div><div><b>74</b>Opened</div><div><b>24</b>Replied</div></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+                <div class="seq-card"><span class="seq-n is-done">✓</span><div><div class="seq-t">3 · Registration confirmation and reminder with directions</div><div class="seq-s">Sent on registration, then 13 Nov · 6:00 PM · To accepted guests and 11 undecided · 73 people</div></div><div class="seq-stats"><div><b>73</b>Sent</div><div><b>69</b>Opened</div><div><b>—</b>Replied</div></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+                <div class="seq-card"><span class="seq-n is-done">✓</span><div><div class="seq-t">4 · QR pass</div><div class="seq-s">Today · 11:30 AM · Unique QR and Add to Calendar · 62 registered</div></div><div class="seq-stats"><div><b>62</b>Sent</div><div><b>51</b>Opened</div><div><b>1</b>Failed</div></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+                <div class="seq-card"><span class="seq-n is-done">✓</span><div><div class="seq-t">5 · “Starting in 30 minutes”</div><div class="seq-s">Today · 1:00 PM · To accepted guests and 11 undecided</div></div><div class="seq-stats"><div><b>73</b>Sent</div><div><b>31</b>Opened</div><div><b>—</b></div></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+                <div class="seq-card"><span class="seq-n is-next">6</span><div><div class="seq-t">6 · Thank-you for attending</div><div class="seq-s">Today · 3:30 PM · Attendees only, with speaker deck and a 1-minute feedback link</div></div><div class="seq-stats"><span class="badge badge-dot badge-info">Scheduled</span></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+                <div class="seq-card"><span class="seq-n">7</span><div><div class="seq-t">7 · “Sorry we missed you”</div><div class="seq-s">Sun 15 Nov · 10:00 AM · Registered but did not attend, with the recording or deck</div></div><div class="seq-stats"><span class="badge badge-dot badge-neutral">Scheduled</span></div><label class="switch" title="Turn this message on or off"><input type="checkbox" checked aria-label="Message on or off"><span></span></label></div>
+              </div>
+              <div class="card-footer text-sm"><svg class="i i-sm"><use href="#i-info"/></svg>1 QR pass failed: Mr. Pillai’s number is invalid. <a href="#" onclick="AK.toast('Fix number and resend');return false">Fix and resend</a></div>
+            </section>
+
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Delivery and responses</div></div>
+                <div class="card-body">
+                  <div class="funnel">
+                    <span class="l">Sent</span><span class="t"><i style="--w:1"></i></span><span class="v">148</span>
+                    <span class="l">Delivered</span><span class="t"><i class="c2" style="--w:.986"></i></span><span class="v">146</span>
+                    <span class="l">Read</span><span class="t"><i class="c2" style="--w:.79"></i></span><span class="v">117</span>
+                    <span class="l">Failed</span><span class="t"><i class="c4" style="--w:.014"></i></span><span class="v">2</span>
+                  </div>
+                  <div class="roi mt-3">
+                    <div>Accepted<b>62</b></div>
+                    <div>Declined<b>9</b></div>
+                    <div>Pending<b>77</b></div>
+                  </div>
+                  <div class="help mt-3">71 of 148 have responded (48%). Failed numbers can be fixed and resent from the Guests tab.</div>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-header"><div class="card-title">Message preview</div><div class="card-actions"><select class="select" style="width:auto" aria-label="Language"><option>English</option><option>Hindi</option><option>Marathi</option></select></div></div>
+                <div class="card-body">
+                  <div class="wa-preview">Hi {{Name}}, this is {{RM name}} from Sharma Wealth Partners.
+You are invited to our Market Outlook 2027 investor meet.
+📅 Sat 14 Nov, 1:30 PM
+📍 Andheri office hall
+Seats are limited. Please confirm your seat below.<span class="wa-btn">Confirm my seat</span></div>
+                  <div class="help mt-3">Approved WhatsApp template. Each guest gets their own link, so replies and registrations are matched to them.</div>
+                  <button class="btn btn-ai btn-sm mt-3" onclick="AK.toast('AI drafts a Hindi version for your approval')"><svg class="i"><use href="#i-sparkles"/></svg>Draft in another language</button>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-header"><div class="card-title">Rules</div></div>
+                <div class="card-body">
+                  <div class="row-link"><span>Skip people who opted out of WhatsApp</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="row-link"><span>Stop reminders once someone replies</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="row-link"><span>Email when WhatsApp is not possible</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                  <div class="row-link"><span>Send QR pass only to confirmed guests</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= CHECK-IN ================= -->
+        <div data-tab-panel="checkin" data-tab-scope="ev">
+          <div class="banner banner-info" style="margin-bottom:var(--sp-4)"><svg class="i"><use href="#i-check"/></svg><span><b>Check-in is open</b> since 1:00 PM. Three desks are active. Guests who arrive without a QR can be found by name or mobile.</span></div>
+          <div class="cols">
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Arrivals, 5-minute slots</div><div class="card-actions"><span class="legend"><span class="legend-item"><span class="legend-swatch" style="background:var(--chart-1)"></span>Arrived</span><span class="legend-item"><span class="legend-swatch" style="background:var(--chart-3)"></span>Expected</span></span></div></div>
+                <div class="card-body">
+                  <div class="arr" aria-label="Arrivals chart">
+                    <div><b>6</b><i style="--h:30"></i>1:00</div>
+                    <div><b>8</b><i style="--h:40"></i>1:05</div>
+                    <div><b></b><i class="fc" style="--h:70"></i>1:10</div>
+                    <div><b></b><i class="fc" style="--h:85"></i>1:15</div>
+                    <div><b></b><i class="fc" style="--h:100"></i>1:20</div>
+                    <div><b></b><i class="fc" style="--h:80"></i>1:25</div>
+                    <div><b></b><i class="fc" style="--h:50"></i>1:30</div>
+                    <div><b></b><i class="fc" style="--h:30"></i>1:35</div>
+                    <div><b></b><i class="fc" style="--h:18"></i>1:40</div>
+                    <div><b></b><i class="fc" style="--h:10"></i>1:45</div>
+                    <div><b></b><i class="fc" style="--h:6"></i>1:50</div>
+                    <div><b></b><i class="fc" style="--h:4"></i>1:55</div>
+                  </div>
+                </div>
+                <div class="card-footer text-sm"><svg class="i i-sm"><use href="#i-info"/></svg>Expected curve is built from the last two events. It is a guide only.</div>
+              </section>
+
+              <section class="card">
+                <div class="card-header"><div class="card-title">Desks and methods</div></div>
+                <div class="card-body">
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-scan"/></svg></span><span>Desk 1 · <b>Priya Nair</b></span><span class="num">8</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-scan"/></svg></span><span>Desk 2 · <b>Arjun Desai</b></span><span class="num">4</span></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-user-plus"/></svg></span><span>Walk-in desk · <b>Sneha Iyer</b></span><span class="num">2</span></div>
+                  <div class="help mt-3">By method: QR scan 11 · manual check-in 1 · walk-in 2. When the event ends, accepted guests who did not check in are marked <b>Absent</b> (you can change it).</div>
+                  <button class="btn btn-secondary btn-sm mt-3" data-open-drawer="drawer-manual"><svg class="i"><use href="#i-search"/></svg>Manual check-in</button>
+                </div>
+              </section>
+            </div>
+
+            <div class="stack">
+              <section class="card">
+                <div class="card-header"><div class="card-title">Arriving now</div></div>
+                <div class="card-body">
+                  <div class="vip banner banner-info"><svg class="i"><use href="#i-star"/></svg><span><b>Rahul Verma</b> · Tier A · family AUM ₹1.86 Cr arrived 1:02 PM. Neha Kapoor was notified.</span></div>
+                  <div class="scan-row mt-3"><span class="avatar avatar-sm a5">DN</span><span><b>Deepak Nambiar</b> <span class="faint">· walk-in, new lead</span></span><span class="t">1:09 PM</span></div>
+                  <div class="scan-row"><span class="avatar avatar-sm a4">NR</span><span><b>Nisha Reddy</b> <span class="faint">· existing lead</span></span><span class="t">1:08 PM</span></div>
+                  <div class="scan-row"><span class="avatar avatar-sm a2">SI</span><span><b>Suresh Iyer</b> <span class="faint">· Tier B client</span></span><span class="t">1:05 PM</span></div>
+                  <div class="scan-row"><span class="avatar avatar-sm">RV</span><span><b>Rahul Verma</b> <span class="faint">· +1 guest</span></span><span class="t">1:02 PM</span></div>
+                </div>
+              </section>
+              <section class="card">
+                <div class="card-header"><div class="card-title">Day-of tools</div></div>
+                <div class="card-body">
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-qr"/></svg></span><span>Venue QR for self check-in</span><button class="btn btn-secondary btn-sm ml-auto" onclick="AK.toast('Poster PDF downloaded')">Print</button></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-tag"/></svg></span><span>Name badges · 62</span><button class="btn btn-secondary btn-sm ml-auto" onclick="AK.toast('Badges PDF downloaded')">Print</button></div>
+                  <div class="row-link"><span class="ic"><svg class="i"><use href="#i-download"/></svg></span><span>Offline guest list (works with no network)</span><button class="btn btn-secondary btn-sm ml-auto" onclick="AK.toast('Guest list CSV downloaded')">Download</button></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TASKS ================= -->
+        <div data-tab-panel="tasks" data-tab-scope="ev">
+          <div class="cols">
+            <section class="card">
+              <div class="card-header"><div class="card-title">Planning checklist</div><div class="card-actions"><span class="faint text-sm">6 of 7 done</span></div></div>
+              <div class="card-body">
+                <div class="row-link"><label class="check"><input type="checkbox" checked></label><span>Book hall and confirm capacity</span><span class="num faint">Priya Nair · 20 Oct</span></div>
+                <div class="row-link"><label class="check"><input type="checkbox" checked></label><span>Confirm speaker and send brief</span><span class="num faint">Neha Kapoor · 25 Oct</span></div>
+                <div class="row-link"><label class="check"><input type="checkbox" checked></label><span>Print standees and badges</span><span class="num faint">Arjun Desai · 10 Nov</span></div>
+                <div class="row-link"><label class="check"><input type="checkbox" checked></label><span>Order refreshments</span><span class="num faint">Priya Nair · 12 Nov</span></div>
+                <div class="row-link"><label class="check"><input type="checkbox" checked></label><span>Test projector and mic</span><span class="num faint">Arjun Desai · 13 Nov</span></div>
+                <div class="row-link"><label class="check"><input type="checkbox" checked></label><span>Brief desk staff on scanner</span><span class="num faint">Neha Kapoor · 13 Nov</span></div>
+                <div class="row-link"><label class="check"><input type="checkbox"></label><span><b>Collect AMC sponsorship balance ₹10,000</b></span><span class="num"><span class="overdue"><svg class="i i-sm"><use href="#i-clock"/></svg>Due 20 Nov</span></span></div>
+              </div>
+              <div class="card-footer text-sm"><svg class="i i-sm"><use href="#i-info"/></svg>Planning tasks also show in <a href="09-tasks-list.html">Tasks</a> and <a href="02-my-day.html">My Day</a> for each owner.</div>
+            </section>
+
+            <section class="card">
+              <div class="card-header"><div class="card-title">After-event follow-up</div></div>
+              <div class="card-body">
+                <div class="banner banner-info"><svg class="i"><use href="#i-info"/></svg><span>When someone checks in, a task <b>“Call within 48 hours”</b> is created for their RM. <b>9 created so far.</b></span></div>
+                <div class="roi mt-3"><div>Pending<b>8</b></div><div>In progress<b>1</b></div><div>Done<b>0</b></div></div>
+                <div class="row-link mt-3"><span class="person"><span class="avatar avatar-sm a5">DN</span><span><b>Call Deepak Nambiar</b><div class="cell-sub">New walk-in · Sneha Iyer · due 16 Nov</div></span></span><span class="num"><span class="badge badge-dot badge-warning">Pending</span></span></div>
+                <div class="row-link"><span class="person"><span class="avatar avatar-sm a4">NR</span><span><b>Call Nisha Reddy</b><div class="cell-sub">ITR e-filing · Sneha Iyer · due 16 Nov</div></span></span><span class="num"><span class="badge badge-dot badge-warning">Pending</span></span></div>
+                <div class="row-link"><span class="person"><span class="avatar avatar-sm">RV</span><span><b>Thank Rahul Verma, book SIP review</b><div class="cell-sub">Neha Kapoor · due 16 Nov · note: wants SIP raised to ₹15,000</div></span></span><span class="num"><span class="badge badge-dot badge-info">In progress</span></span></div>
+                <div class="row-link"><span class="faint">+ 6 more</span><a class="ml-auto" href="09-tasks-list.html">Open in Tasks</a></div>
+                <button class="btn btn-secondary btn-sm mt-3" data-open-drawer="drawer-follow"><svg class="i"><use href="#i-plus"/></svg>Create follow-up</button>
+                <div class="help mt-3">Attendees who show interest (“wants a retirement plan”) can also be turned into <a href="12-opportunities.html">opportunities</a> with one click.</div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <!-- ================= BUDGET ================= -->
+        <div data-tab-panel="budget" data-tab-scope="ev">
+          <div class="cols">
+            <section class="card">
+              <div class="card-header"><div class="card-title">Budget</div><div class="card-actions"><button class="btn btn-secondary btn-sm" onclick="AK.toast('Add expense: description, amount and bill')"><svg class="i"><use href="#i-plus"/></svg>Add expense</button></div></div>
+              <div class="table-wrap">
+                <table class="table bud">
+                  <thead><tr><th>Item</th><th class="num">Planned</th><th class="num">Actual</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td>Hall rent</td><td class="num">₹18,000</td><td class="num">₹18,000</td><td><span class="badge badge-dot badge-success">Paid</span></td></tr>
+                    <tr><td>Refreshments</td><td class="num">₹16,000</td><td class="num">₹8,000</td><td><span class="badge badge-dot badge-warning">Advance paid</span></td></tr>
+                    <tr><td>Standees and printing</td><td class="num">₹4,500</td><td class="num">₹4,300</td><td><span class="badge badge-dot badge-success">Paid</span></td></tr>
+                    <tr><td>Photographer</td><td class="num">₹3,000</td><td class="num faint">—</td><td><span class="badge badge-dot badge-neutral">Pay on the day</span></td></tr>
+                    <tr><td>WhatsApp and email · ~450 messages</td><td class="num">₹500</td><td class="num">₹310</td><td><span class="badge badge-dot badge-success">Auto from messages sent</span></td></tr>
+                    <tr class="total-row"><td>Total spend</td><td class="num">₹42,000</td><td class="num">₹30,610</td><td></td></tr>
+                    <tr><td>AMC sponsorship</td><td class="num">−₹20,000</td><td class="num">−₹10,000</td><td><span class="badge badge-dot badge-warning">Balance due 20 Nov</span></td></tr>
+                    <tr class="total-row"><td>Net cost</td><td class="num">₹22,000</td><td class="num">₹20,610</td><td></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+            <section class="card">
+              <div class="card-header"><div class="card-title">Return on this event</div></div>
+              <div class="card-body">
+                <div class="roi">
+                  <div>Cost per registration<b>₹355</b></div>
+                  <div>Cost per lead<b>₹2,000</b></div>
+                  <div>Business so far<b>₹0</b></div>
+                </div>
+                <div class="help mt-3">Cost per registration is net cost ₹22,000 over 62. Business comes from MF Box once leads invest, for 90 days after the event. Last similar event: ELSS seminar, ₹92 L for ₹58,000.</div>
+                <div class="banner banner-ai mt-3"><svg class="i"><use href="#i-sparkles"/></svg><span>At the ELSS seminar, 7 of 41 leads invested. A similar rate here means about 2 clients.</span></div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <aside class="drawer" id="drawer-add" aria-label="Add guests" style="width:min(560px,100vw)">
+    <div class="drawer-header"><div><div class="drawer-title">Add guests</div><div class="drawer-sub">Pick from CRM contacts and leads, or record a registration by hand</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="toolbar-left" style="margin-bottom:var(--sp-3)"><label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Name, PAN or mobile"></label>
+        <select class="select" style="width:auto" aria-label="Contact type"><option>Clients and leads</option><option>Clients only</option><option>Leads only</option></select>
+        <select class="select" style="width:auto" aria-label="Tier"><option>Any tier</option><option>Tier A</option><option>Tier B</option><option>Tier C</option></select></div>
+      <div class="banner banner-info"><svg class="i"><use href="#i-info"/></svg><span><b>25 selected on this page.</b> <a href="#" onclick="AK.toast('All 396 matching contacts selected');return false">Select all 396 matching</a></span></div>
+      <div class="mt-3">
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span class="person"><span class="avatar avatar-sm a3">PB</span><span>Pooja Bansal<div class="cell-sub">Client · Tier C</div></span></span><span class="badge badge-neutral ml-auto">Not invited</span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span class="person"><span class="avatar avatar-sm a5">TB</span><span>Tarun Bhide<div class="cell-sub">Client · Tier B</div></span></span><span class="badge badge-neutral ml-auto">Not invited</span></div>
+        <div class="aud-row"><label class="check"><input type="checkbox" checked></label><span class="person"><span class="avatar avatar-sm a2">AK</span><span>Amit Kulkarni<div class="cell-sub">Lead · Cold</div></span></span><span class="badge badge-neutral ml-auto">Not invited</span></div>
+        <div class="aud-row" style="opacity:.7"><label class="check"><input type="checkbox" disabled></label><span class="person"><span class="avatar avatar-sm">RV</span><span>Rahul Verma<div class="cell-sub">Client · Tier A</div></span></span><span class="badge badge-dot badge-warning ml-auto">Already registered</span></div>
+      </div>
+      <div class="banner banner-warning mt-3"><svg class="i"><use href="#i-info"/></svg><span><b>Duplicate blocked.</b> Rahul Verma is already registered, so the same mobile or PAN cannot register twice for this event.</span></div>
+      <div class="dd-sec" style="margin-top:18px">Or record a registration by hand</div>
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Full name</label><input class="input" placeholder="Full name"></div>
+        <div class="field"><label class="label">Mobile</label><input class="input" placeholder="+91"></div>
+        <div class="field"><label class="label">RSVP</label><select class="select"><option>Accepted</option><option>Declined</option><option>Pending</option></select></div>
+        <div class="field"><label class="label">Owner</label><select class="select"><option>Neha Kapoor</option><option>Sneha Iyer</option></select></div>
+        <div class="field"><label class="label">Plus-one</label><select class="select"><option>No</option><option>Yes</option></select></div>
+      </div>
+      <div class="help mt-3">18 seats left of 80. Over capacity, new registrations join the waitlist.</div>
+      <label class="opt mt-3" style="display:flex;gap:8px;font-size:13px"><input type="checkbox" checked> Send the registration confirmation and QR pass now</label>
+    </div>
+    <div class="drawer-footer"><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-add');AK.toast('3 guests added and invited · 1 duplicate skipped')">Add and invite</button></div>
+  </aside>
+
+  <aside class="drawer" id="drawer-guest" aria-label="Attendee details" style="width:min(560px,100vw)">
+    <div class="drawer-header"><div><div class="drawer-title">Rahul Verma</div><div class="drawer-sub">Client · Tier A · Verma Family · <a href="08-client-360.html">Open Client 360</a></div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="roi">
+        <div>RSVP<b>Accepted</b></div>
+        <div>Attendance<b>Present</b></div>
+        <div>Invitation<b>Read</b></div>
+      </div>
+      <div class="dd-sec">Details</div>
+      <dl class="kv">
+        <dt>Mobile</dt><dd>+91 98••• ••210 · WhatsApp opt-in</dd>
+        <dt>RM</dt><dd>Neha Kapoor</dd>
+        <dt>Registered</dt><dd>3 Nov · WhatsApp link · +1 guest</dd>
+        <dt>Checked in</dt><dd>1:02 PM · Desk 1 · QR scan</dd>
+      </dl>
+      <div class="dd-sec">Mark attendance</div>
+      <div class="segmented" data-segmented><button aria-pressed="true">Present</button><button aria-pressed="false">Absent</button></div>
+      <div class="help mt-3">Absent is set automatically for accepted guests who do not check in. You can change it here.</div>
+      <div class="dd-sec">Interest and notes</div>
+      <div class="form-grid">
+        <div class="field"><label class="label">Investor interest</label><select class="select"><option>High</option><option>Medium</option><option>Low</option><option>None</option></select></div>
+        <div class="field"><label class="label">Interested in</label><select class="select"><option>SIP start or top-up</option><option>Lumpsum</option><option>Term insurance</option><option>Health insurance</option><option>NPS</option></select></div>
+        <div class="field span-2"><label class="label">Meeting notes and remarks</label><textarea class="textarea" rows="3">Asked about raising one SIP from ₹10,000 to ₹15,000 from December. Came with his wife; she wants a retirement plan.</textarea></div>
+      </div>
+      <div class="dd-sec">Event history</div>
+      <div class="row-link"><span>Market Outlook 2027 – Investor Meet</span><span class="num"><span class="badge badge-dot badge-success">Present</span></span></div>
+      <div class="row-link"><span>Tax-saving ELSS Seminar · 8 Nov</span><span class="num"><span class="badge badge-dot badge-success">Present</span></span></div>
+      <div class="row-link"><span>Diwali Branch Day · 1 Nov</span><span class="num"><span class="badge badge-dot badge-danger">Absent</span></span></div>
+      <div class="help mt-3">Attended 2 of 3 events this year. This history also appears on the Client 360 timeline.</div>
+      <div class="dd-sec">Follow-up</div>
+      <div class="row-link"><span><b>Thank Rahul Verma, book SIP review</b><div class="cell-sub">Neha Kapoor · due 16 Nov</div></span><span class="num"><span class="badge badge-dot badge-info">In progress</span></span></div>
+    </div>
+    <div class="drawer-footer"><a class="btn btn-ghost" href="12-opportunities.html"><svg class="i"><use href="#i-target"/></svg>Create opportunity</a><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Close</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-guest');AK.toast('Attendee details saved')">Save</button></div>
+  </aside>
+
+  <aside class="drawer" id="drawer-manual" aria-label="Manual check-in">
+    <div class="drawer-header"><div><div class="drawer-title">Manual check-in</div><div class="drawer-sub">For guests without their QR pass</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" value="Anjali"></label>
+      <div class="mt-3">
+        <div class="aud-row"><span class="person"><span class="avatar avatar-sm a3">AV</span><span><b>Anjali Verma</b><div class="cell-sub">Client · Tier B · +91 98••• ••144 · Accepted</div></span></span><button class="btn btn-primary btn-sm ml-auto" onclick="AK.closeDrawer('drawer-manual');AK.toast('Anjali Verma checked in manually')">Check in</button></div>
+        <div class="aud-row"><span class="person"><span class="avatar avatar-sm a5">AJ</span><span><b>Anjali Joshi</b><div class="cell-sub">Lead · not registered</div></span></span><button class="btn btn-secondary btn-sm ml-auto" onclick="AK.toast('Registered and checked in as a walk-in')">Add as walk-in</button></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Close</button></div>
+  </aside>
+
+  <aside class="drawer" id="drawer-follow" aria-label="Create follow-up">
+    <div class="drawer-header"><div><div class="drawer-title">Create follow-up</div><div class="drawer-sub">Assigned to a relationship manager and tracked in Tasks</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Attendees</label><input class="input" value="Deepak Nambiar, Nisha Reddy"><div class="help">Or select guests in the Guests tab first and use “Create follow-ups”.</div></div>
+        <div class="field span-2"><label class="label">Task <span class="req">*</span></label><input class="input" value="Call within 48 hours after the event"></div>
+        <div class="field"><label class="label">Assign to <span class="req">*</span></label><select class="select"><option>Guest’s own RM</option><option>Neha Kapoor</option><option>Sneha Iyer</option><option>Rohan Mehta</option></select></div>
+        <div class="field"><label class="label">Due date</label><input class="input" value="16 Nov 2026"></div>
+        <div class="field"><label class="label">Status</label><select class="select"><option>Pending</option><option>In progress</option><option>Done</option></select></div>
+        <div class="field"><label class="label">Investor interest</label><select class="select"><option>Not recorded</option><option>High</option><option>Medium</option><option>Low</option></select></div>
+        <div class="field span-2"><label class="label">Notes and remarks</label><textarea class="textarea" rows="3" placeholder="What was discussed, what to say on the call"></textarea></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Cancel</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-follow');AK.toast('2 follow-up tasks created')">Create follow-ups</button></div>
+  </aside>
+
+  <aside class="drawer" id="drawer-edit" aria-label="Edit event" style="width:min(560px,100vw)">
+    <div class="drawer-header"><div><div class="drawer-title">Edit event</div><div class="drawer-sub">Market Outlook 2027 – Investor Meet</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field span-2"><label class="label">Event name <span class="req">*</span></label><input class="input" value="Market Outlook 2027 – Investor Meet"></div>
+        <div class="field span-2"><label class="label">Description</label><textarea class="textarea" rows="3">Year-ahead market view and what it means for your SIPs and goals. Followed by a 1:1 review desk.</textarea></div>
+        <div class="field"><label class="label">Category</label><select class="select"><option>Investor Awareness</option><option>Webinar</option><option>Seminar</option><option>Client Meet</option><option>Workshop</option></select></div>
+        <div class="field"><label class="label">Status</label><select class="select"><option>Upcoming</option><option>Draft</option><option>Completed</option><option>Cancelled</option></select></div>
+        <div class="field"><label class="label">Date</label><input class="input" value="14 Nov 2026"></div>
+        <div class="field"><label class="label">Time</label><input class="input" value="1:30 PM – 3:00 PM"></div>
+        <div class="field span-2"><label class="label">Venue or online meeting link</label><input class="input" value="Andheri office hall"></div>
+        <div class="field"><label class="label">Capacity</label><input class="input" value="80"><div class="help">62 registered. You cannot go below that.</div></div>
+        <div class="field"><label class="label">Organizer</label><select class="select"><option>Neha Kapoor</option><option>Sneha Iyer</option><option>Vikram Rao</option></select></div>
+      </div>
+    </div>
+    <div class="drawer-footer"><button class="btn btn-danger-ghost" data-close-drawer data-open-drawer="drawer-cancel"><svg class="i"><use href="#i-trash"/></svg>Cancel or delete</button><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Close</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-edit');AK.toast('Event updated · registered guests notified of changes')">Save changes</button></div>
+  </aside>
+
+  <aside class="drawer" id="drawer-cancel" aria-label="Cancel or delete event" style="width:min(460px,100vw)">
+    <div class="drawer-header"><div><div class="drawer-title">Cancel or delete event</div><div class="drawer-sub">Market Outlook 2027 – Investor Meet</div></div><button class="btn btn-ghost btn-icon ml-auto" data-close-drawer aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="drawer-body">
+      <div class="banner banner-warning"><svg class="i"><use href="#i-info"/></svg><span><b>62 people are registered and 14 have checked in.</b> Cancel keeps the event and its history. Delete is only for drafts and cancelled events.</span></div>
+      <div class="form-grid mt-3"><div class="field span-2"><label class="label">Reason <span class="faint">· shown to guests</span></label><textarea class="textarea" rows="3"></textarea></div></div>
+    </div>
+    <div class="drawer-footer"><span class="spacer"></span><button class="btn btn-secondary" data-close-drawer>Keep event</button><button class="btn btn-primary" onclick="AK.closeDrawer('drawer-cancel');AK.toast('Event cancelled and guests notified')">Cancel event</button></div>
+  </aside>
+
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search).get('tab');
+      if (q) document.addEventListener('DOMContentLoaded', function () { setTimeout(function () { var t = document.querySelector('[data-tabs="ev"] [data-tab="' + q + '"]'); if (t) t.click(); }, 0); });
+    })();
+  </script>
+</body>
+</html>

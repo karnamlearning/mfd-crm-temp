@@ -119,6 +119,8 @@
     'activity': '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
     'key': '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/>',
     'undo': '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
+    'ticket': '<path d="M3 9a2 2 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a2 2 0 0 1 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M13 5v2M13 11v2M13 17v2"/>',
+    'scan': '<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',
     'note': '<path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5z"/><path d="M15 3v6h6"/>',
   };
   function buildSprite() {
@@ -142,6 +144,7 @@
       { id: 'clients', text: 'Clients', icon: 'users', href: '07-clients-list.html' },
       { id: 'opportunities', text: 'Opportunities', icon: 'target', href: '12-opportunities.html' },
       { id: 'campaigns', text: 'Campaigns', icon: 'send', href: '22-campaigns.html' },
+      { id: 'events', text: 'Events', icon: 'ticket', href: '23-events.html', count: '1', live: true },
       { id: 'tasks', text: 'Tasks', icon: 'check-square', href: '09-tasks-list.html', count: '3', danger: true },
       { id: 'meetings', text: 'Meetings', icon: 'video', href: '13-meetings.html' },
       { id: 'service', text: 'Service Requests', icon: 'life-buoy', href: '16-service-requests.html', count: '3' },
@@ -219,6 +222,8 @@
     ['Actions', 'video', 'Schedule meeting', 'c then m', '13-meetings.html'],
     ['Actions', 'note', 'Log meeting outcome', '', '14-meeting-detail.html'],
     ['Actions', 'user-plus', 'Add lead', 'c then l', '05-lead-create.html'],
+    ['Actions', 'ticket', 'Create event', 'c then e', '23-events.html?open=drawer-event'],
+    ['Go to', 'ticket', 'Events', 'g then v', '23-events.html'],
     ['Go to', 'sun', 'My Day', 'g then d', '02-my-day.html'],
     ['Go to', 'target', 'Opportunities', 'g then o', '12-opportunities.html'],
     ['Go to', 'activity', 'Team Activity', 'g then a', '18-team-activity.html'],

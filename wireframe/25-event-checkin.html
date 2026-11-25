@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Event check-in · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Check-in scanner: page-specific styles (tokens only) ---- */
+    .stage { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--sp-6); align-items: start; }
+    .phone { width: 360px; max-width: 100%; margin: 0 auto; border: 1px solid var(--border-strong); border-radius: 36px; background: var(--surface); box-shadow: var(--shadow-lg); padding: 14px; }
+    .phone-in { border-radius: 24px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); }
+    .ph-top { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .ph-top b { font-size: 14px; display: block; line-height: 18px; }
+    .ph-top span { font-size: 12px; color: var(--text-3); }
+    .ph-count { margin-left: auto; text-align: right; }
+    .ph-count b { font-size: 20px; font-variant-numeric: tabular-nums; }
+
+    .view { position: relative; margin: 12px; border-radius: var(--r-lg); background: var(--text); height: 250px; overflow: hidden; display: grid; place-items: center; }
+    .view::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent 0 14px, var(--overlay-soft, rgba(255,255,255,.04)) 14px 28px); }
+    .frame { position: relative; width: 170px; height: 170px; }
+    .frame i { position: absolute; width: 30px; height: 30px; border: 3px solid var(--on-primary); }
+    .frame i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; border-radius: 10px 0 0 0; }
+    .frame i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; border-radius: 0 10px 0 0; }
+    .frame i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 10px; }
+    .frame i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; border-radius: 0 0 10px 0; }
+    .beam { position: absolute; left: 8px; right: 8px; height: 2px; background: var(--success); top: 50%; box-shadow: 0 0 10px var(--success); animation: sweep 2.4s ease-in-out infinite alternate; }
+    @keyframes sweep { from { top: 12%; } to { top: 88%; } }
+    @media (prefers-reduced-motion: reduce) { .beam { animation: none; } }
+    .view-hint { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 12px; color: var(--on-primary); opacity: .85; }
+
+    .res { margin: 0 12px 12px; border-radius: var(--r-lg); padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; border: 1px solid; }
+    .res .ric { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+    .res .ric .i { width: 18px; height: 18px; }
+    .res b { display: block; font-size: 15px; line-height: 20px; }
+    .res .sub { font-size: 12.5px; margin-top: 2px; color: var(--text-2); }
+    .res .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .res.ok { background: var(--success-soft); border-color: var(--success); }
+    .res.ok .ric { background: var(--success); color: var(--on-primary); }
+    .res.warn { background: var(--warning-soft); border-color: var(--warning); }
+    .res.warn .ric { background: var(--warning); color: var(--on-primary); }
+    .res.bad { background: var(--danger-soft); border-color: var(--danger); }
+    .res.bad .ric { background: var(--danger); color: var(--on-primary); }
+    .ph-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 12px; }
+    .ph-actions .btn { justify-content: center; }
+    .ph-recent { padding: 4px 14px 14px; }
+    .ph-recent h4 { margin: 0 0 6px; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 600; }
+    .rrow { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .rrow:last-child { border-bottom: 0; }
+    .rrow .t { margin-left: auto; color: var(--text-3); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+    .states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .state-cap { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 600; margin-bottom: 6px; }
+    .states .res { margin: 0; flex-direction: column; }
+    .row-link { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .row-link:last-child { border-bottom: 0; }
+    .row-link .num { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 1100px) { .stage { grid-template-columns: 1fr; } .states { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body data-page="events" data-crumb="Events|Market Outlook 2027|Check-in scanner">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Check-in scanner</h1>
+            <p class="page-sub">What a desk volunteer sees on their phone. Open it from the link in the QR pass message or from this page.</p>
+          </div>
+          <div class="page-actions">
+            <a class="btn btn-secondary" href="24-event-detail.html?tab=checkin"><svg class="i"><use href="#i-activity"/></svg>Live dashboard</a>
+            <a class="btn btn-secondary" href="24-event-detail.html">Back to event</a>
+          </div>
+        </div>
+
+        <div class="stage">
+          <!-- ===== Phone ===== -->
+          <div class="phone" role="group" aria-label="Phone preview of the scanner">
+            <div class="phone-in">
+              <div class="ph-top">
+                <span class="avatar avatar-sm">PN</span>
+                <div><b>Desk 1 · Priya Nair</b><span>Market Outlook 2027 · 1:10 PM</span></div>
+                <div class="ph-count"><b>14</b><span>of 62</span></div>
+              </div>
+              <div class="view">
+                <div class="frame"><i></i><i></i><i></i><i></i><span class="beam"></span></div>
+                <div class="view-hint">Point the camera at the guest’s QR pass</div>
+              </div>
+              <div class="res ok" id="live-result" aria-live="polite">
+                <span class="ric"><svg class="i"><use href="#i-check"/></svg></span>
+                <div>
+                  <b>Suresh Iyer · checked in</b>
+                  <div class="sub">Client · Tier B · RM Rohan Mehta</div>
+                  <div class="tags"><span class="badge badge-neutral">Registered</span><span class="badge badge-info">Name tag printed</span></div>
+                </div>
+              </div>
+              <div class="ph-actions">
+                <button class="btn btn-secondary" onclick="AK.toast('Search by name or mobile')"><svg class="i"><use href="#i-search"/></svg>Find guest</button>
+                <button class="btn btn-secondary" onclick="AK.toast('Walk-in form: name, mobile, owner')"><svg class="i"><use href="#i-user-plus"/></svg>Add walk-in</button>
+              </div>
+              <div class="ph-recent">
+                <h4>Recent</h4>
+                <div class="rrow"><span class="avatar avatar-sm a5">DN</span>Deepak Nambiar <span class="faint">· walk-in</span><span class="t">1:09</span></div>
+                <div class="rrow"><span class="avatar avatar-sm a4">NR</span>Nisha Reddy<span class="t">1:08</span></div>
+                <div class="rrow"><span class="avatar avatar-sm a2">SI</span>Suresh Iyer<span class="t">1:05</span></div>
+                <div class="rrow"><span class="avatar avatar-sm">RV</span>Rahul Verma <span class="faint">· +1</span><span class="t">1:02</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Right column ===== -->
+          <div class="stack">
+            <section class="card">
+              <div class="card-header"><div class="card-title">What the scanner tells the volunteer</div></div>
+              <div class="card-body">
+                <div class="states">
+                  <div><div class="state-cap">Valid pass</div>
+                    <div class="res ok"><span class="ric"><svg class="i"><use href="#i-check"/></svg></span><div><b>Rahul Verma · checked in</b><div class="sub">Client · Tier A · family AUM ₹1.86 Cr · RM Neha Kapoor</div><div class="tags"><span class="badge badge-ai">VIP</span><span class="badge badge-neutral">+1 guest</span></div></div></div></div>
+                  <div><div class="state-cap">Already checked in</div>
+                    <div class="res warn"><span class="ric"><svg class="i"><use href="#i-clock"/></svg></span><div><b>Suresh Iyer</b><div class="sub">Already checked in at 1:05 PM, Desk 1. Please do not admit twice.</div></div></div></div>
+                  <div><div class="state-cap">Not valid</div>
+                    <div class="res bad"><span class="ric"><svg class="i"><use href="#i-x"/></svg></span><div><b>Pass is for a different event</b><div class="sub">This QR belongs to “SIP Awareness for Salaried”. Use Find guest.</div></div></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-header"><div class="card-title">What happens on every scan</div></div>
+              <div class="card-body">
+                <div class="row-link"><span>Guest is marked <b>checked in</b> with time and desk</span><span class="num"><svg class="i i-sm"><use href="#i-check"/></svg></span></div>
+                <div class="row-link"><span>The <b>RM gets a notification</b> if the guest is Tier A or has an open opportunity</span><span class="num"><svg class="i i-sm"><use href="#i-bell"/></svg></span></div>
+                <div class="row-link"><span>A <b>“Call within 48 hours”</b> task is created for the RM</span><span class="num"><svg class="i i-sm"><use href="#i-check-square"/></svg></span></div>
+                <div class="row-link"><span>An entry appears on the <b>Client 360 or Lead timeline</b> (“Checked in at …”)</span><span class="num"><svg class="i i-sm"><use href="#i-activity"/></svg></span></div>
+                <div class="row-link"><span><b>Walk-ins</b> are matched to MF Box and leads first, then created as a lead with source “Event” and given to the next RM in turn</span><span class="num"><svg class="i i-sm"><use href="#i-user-plus"/></svg></span></div>
+              </div>
+            </section>
+
+            <section class="card">
+              <div class="card-header"><div class="card-title">Scanner settings</div></div>
+              <div class="card-body">
+                <div class="row-link"><span>Works offline, syncs when the network returns</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                <div class="row-link"><span>Sound and vibration on each scan</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+                <div class="row-link"><span>Let guests check themselves in with the venue QR</span><span class="num"><label class="switch"><input type="checkbox"><span></span></label></span></div>
+                <div class="row-link"><span>Hide AUM from volunteers (show tier only)</span><span class="num"><label class="switch"><input type="checkbox" checked><span></span></label></span></div>
+              </div>
+              <div class="card-footer text-sm"><svg class="i i-sm"><use href="#i-info"/></svg>Sub-brokers and volunteers see only name, tier and RM. Portfolio values stay hidden.</div>
+            </section>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+</body>
+</html>

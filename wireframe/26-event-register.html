@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guest pages · Events · AdvisorKhoj CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="assets/app.js"></script>
+  <style>
+    /* ---- Guest pages: page-specific styles (tokens only) ---- */
+    .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: var(--sp-6); align-items: start; }
+    .cap { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 600; margin-bottom: 8px; }
+    .phone { width: 360px; max-width: 100%; margin: 0 auto; border: 1px solid var(--border-strong); border-radius: 36px; background: var(--surface); box-shadow: var(--shadow-lg); padding: 14px; }
+    .phone-in { border-radius: 24px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); }
+    .g-brand { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .g-brand .sb-logo { width: 28px; height: 28px; }
+    .g-brand b { font-size: 14px; display: block; line-height: 17px; }
+    .g-brand span { font-size: 11.5px; color: var(--text-3); }
+    .g-hero { padding: 18px 16px 14px; background: var(--primary-soft); border-bottom: 1px solid var(--border); }
+    .g-hero h2 { margin: 0 0 6px; font-size: 19px; line-height: 24px; letter-spacing: -.01em; }
+    .g-line { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text-2); margin-top: 4px; }
+    .g-line .i { width: 14px; height: 14px; color: var(--primary-text); flex: none; }
+    .g-body { padding: 16px; display: grid; gap: 12px; }
+    .g-body .btn { width: 100%; justify-content: center; }
+    .g-seats { font-size: 12.5px; color: var(--text-2); }
+    .g-foot { padding: 10px 16px 14px; font-size: 11.5px; color: var(--text-3); text-align: center; }
+    .opt { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--text-2); }
+
+    .pass { margin: 16px; border: 1px solid var(--border-strong); border-radius: var(--r-xl, 16px); background: var(--surface); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .pass-top { padding: 14px 16px; background: var(--primary); color: var(--on-primary); }
+    .pass-top small { opacity: .85; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+    .pass-top b { display: block; font-size: 16px; margin-top: 2px; line-height: 21px; }
+    .pass-mid { padding: 16px; text-align: center; border-bottom: 1px dashed var(--border-strong); }
+    .qr { width: 168px; height: 168px; margin: 0 auto 10px; border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px; background: var(--surface); }
+    .qr svg { width: 100%; height: 100%; display: block; color: var(--text); }
+    .pass-name { font-weight: 600; font-size: 16px; }
+    .pass-sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+    .pass-info { padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; color: var(--text-3); }
+    .pass-info b { display: block; color: var(--text); font-size: 13px; margin-top: 2px; }
+    .ph-btns { display: grid; gap: 8px; padding: 0 16px 16px; }
+    .ph-btns .btn { justify-content: center; }
+  </style>
+</head>
+<body data-page="events" data-crumb="Events|Market Outlook 2027|Guest pages">
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Guest pages</h1>
+            <p class="page-sub">What your guest sees on their phone: the registration page, and the QR pass they show at the door. No login needed.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-secondary" onclick="AK.toast('Link copied: sharmawealth.in/e/outlook-2027', {undo:false})"><svg class="i"><use href="#i-copy"/></svg>Copy registration link</button>
+            <a class="btn btn-secondary" href="24-event-detail.html">Back to event</a>
+          </div>
+        </div>
+
+        <div class="pair">
+          <!-- ===== Registration page ===== -->
+          <div>
+            <div class="cap">1 · Registration page (from the WhatsApp or email link)</div>
+            <div class="phone">
+              <div class="phone-in">
+                <div class="g-brand"><div class="sb-logo">SW</div><div><b>Sharma Wealth Partners</b><span>AMFI-registered Mutual Fund Distributor · ARN-104512</span></div></div>
+                <div class="g-hero">
+                  <h2>Market Outlook 2027 – Investor Meet</h2>
+                  <div class="g-line"><svg class="i"><use href="#i-calendar"/></svg>Saturday 14 Nov 2026, 1:30–3:00 PM</div>
+                  <div class="g-line"><svg class="i"><use href="#i-building"/></svg>Andheri office hall · <a href="#">Map</a></div>
+                  <div class="g-line"><svg class="i"><use href="#i-user"/></svg>Speaker: Meera Kulkarni, fund manager</div>
+                </div>
+                <div class="g-body">
+                  <div class="g-seats"><b>18 seats left</b> of 80</div>
+                  <div class="field"><label class="label">Will you attend?</label><div class="choice-group" data-single><button class="choice" aria-pressed="true">Accept</button><button class="choice" aria-pressed="false">Decline</button></div><div class="help">Declining frees the seat for the next person.</div></div>
+                  <div class="field"><label class="label">Full name <span class="req">*</span></label><input class="input" value="Farah Qureshi"></div>
+                  <div class="field"><label class="label">Mobile <span class="req">*</span></label><input class="input" value="+91 98••• ••612"><div class="help">We send your QR pass on WhatsApp.</div></div>
+                  <div class="field"><label class="label">Email</label><input class="input" placeholder="Optional"></div>
+                  <div class="field"><label class="label">Coming with</label><select class="select"><option>Just me</option><option>+1 guest</option></select></div>
+                  <div class="field"><label class="label">What would you like to hear about?</label><select class="select"><option>SIP and goal planning</option><option>Tax saving</option><option>Retirement</option><option>Insurance</option></select></div>
+                  <label class="opt"><input type="checkbox" checked>Send me the event details and reminders on WhatsApp.</label>
+                  <button class="btn btn-primary btn-lg" onclick="AK.toast('Registered. QR pass sent on WhatsApp', {undo:false})">Reserve my seat</button>
+                </div>
+                <div class="g-foot">Mutual fund investments are subject to market risks. Read all scheme-related documents carefully.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== QR pass ===== -->
+          <div>
+            <div class="cap">2 · QR pass (WhatsApp, email and Add to Wallet)</div>
+            <div class="phone">
+              <div class="phone-in">
+                <div class="g-brand"><div class="sb-logo">SW</div><div><b>Sharma Wealth Partners</b><span>Your seat is confirmed</span></div></div>
+                <div class="pass">
+                  <div class="pass-top"><small>Entry pass</small><b>Market Outlook 2027 – Investor Meet</b></div>
+                  <div class="pass-mid">
+                    <div class="qr" role="img" aria-label="QR code for Farah Qureshi">
+                      <svg viewBox="0 0 21 21" shape-rendering="crispEdges" fill="currentColor"><path d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zM15 1v5h5V1zM16 2h3v3h-3zM0 14h7v7H0zM1 15v5h5v-5zM2 16h3v3H2zM8 0h1v1H8zM10 1h2v1h-2zM8 3h1v2H8zM11 3h1v1h-1zM9 5h3v1H9zM8 8h2v1H8zM12 8h1v2h-1zM10 10h1v2h-1zM8 12h1v1H8zM14 9h2v1h-2zM17 8h2v2h-2zM19 11h2v1h-2zM14 12h1v2h-1zM16 13h2v1h-2zM8 15h2v2H8zM11 14h1v1h-1zM12 16h2v2h-2zM10 18h1v2h-1zM15 15h1v1h-1zM17 16h2v1h-2zM15 18h3v1h-3zM19 18h2v3h-2zM13 19h1v2h-1zM8 20h1v1H8z"/></svg>
+                    </div>
+                    <div class="pass-name">Farah Qureshi</div>
+                    <div class="pass-sub">Pass no. EV-2611-0062 · 1 guest</div>
+                  </div>
+                  <div class="pass-info">
+                    <div>Date<b>Sat 14 Nov, 1:30 PM</b></div>
+                    <div>Venue<b>Andheri office hall</b></div>
+                    <div>Doors open<b>1:00 PM</b></div>
+                    <div>Your contact<b>Kavya Menon</b></div>
+                  </div>
+                </div>
+                <div class="ph-btns">
+                  <button class="btn btn-primary" onclick="AK.toast('Added to calendar', {undo:false})"><svg class="i"><use href="#i-calendar"/></svg>Add to calendar</button>
+                  <button class="btn btn-secondary" onclick="AK.toast('Opening directions', {undo:false})"><svg class="i"><use href="#i-external"/></svg>Get directions</button>
+                  <button class="btn btn-ghost" onclick="AK.toast('Cancellation frees the seat for the waitlist', {undo:false})">I can’t make it</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="card mt-4" style="margin-top:var(--sp-6)">
+          <div class="card-header"><div class="card-title">What happens when a guest registers</div></div>
+          <div class="card-body">
+            <ol class="stack-sm" style="margin:0;padding-left:20px;font-size:13.5px;line-height:22px;color:var(--text-2)">
+              <li>A <b>duplicate</b> (same mobile or PAN already registered) is blocked with a friendly message. A <b>registration confirmation</b> is sent straight away.</li>
+              <li>The mobile number is checked against <b>MF Box clients</b> and existing leads. A match is linked, so nobody is created twice.</li>
+              <li>A new person becomes a <b>lead</b> with source “Event: Market Outlook 2027” and goes to the next RM in turn. The sub-broker whose link they used is recorded as the referrer.</li>
+              <li>The <b>QR pass</b> is sent on WhatsApp straight away (or email if there is no opt-in), and reminders follow the invitation sequence.</li>
+              <li>If seats run out, the guest joins a <b>waitlist</b> and is promoted automatically when someone cancels.</li>
+            </ol>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+</body>
+</html>
