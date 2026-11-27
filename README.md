@@ -117,9 +117,9 @@ MFBOX_CRM_Wireframe/
 | 05 | [Lead detail & create](wireframe/05-lead-create.html) | Stage stepper, timeline, Create Lead drawer with MF Box duplicate check | [guide](wireframe/guide/05_Lead_Detail_and_Create.md) |
 | 06 | [Leads pipeline](wireframe/06-leads-pipeline.html) | Kanban with Won/Lost drop zones; stages, products, sources, auto-assignment config | [guide](wireframe/guide/06_Leads_Pipeline.md) |
 | 12 | [Opportunities](wireframe/12-opportunities.html) | Kanban ⇄ table; AI-identified opportunities with explained score, human approval | [guide](wireframe/guide/12_Opportunities.md) |
-| 22 | [Campaigns](wireframe/22-campaigns.html) | Campaign spend, leads, clients and business by channel; referral and thank-you tracking | [guide](wireframe/guide/22_Campaigns.md) |
-| 23 | [Events](wireframe/23-events.html) | Plan investor meets and webinars, automated WhatsApp/email invitations, QR registration and check-in, attendees become leads and follow-up tasks | |
-| 24 | [Event detail](wireframe/24-event-detail.html) | Funnel, guest list, invitation sequence, live check-in, planning and follow-up tasks, budget and ROI | |
+| 22 | [Campaigns](wireframe/22-campaigns.html) | Campaign spend, leads, clients and business by channel; an event is one activity inside a campaign and its numbers roll up here; referral and thank-you tracking | [guide](wireframe/guide/22_Campaigns.md) |
+| 23 | [Events](wireframe/23-events.html) | Plan investor meets and webinars, automated WhatsApp/email invitations, QR registration and check-in, attendees become leads and follow-up tasks; each event links to a campaign, which reports its cost and business | |
+| 24 | [Event detail](wireframe/24-event-detail.html) | Funnel, guest list, invitation sequence, live check-in, planning and follow-up tasks, budget (read-only return, rolled up to its campaign) | |
 | 25 | [Check-in scanner](wireframe/25-event-checkin.html) | Phone view for desk volunteers: scan, duplicate and invalid results, walk-ins | |
 | 26 | [Guest pages](wireframe/26-event-register.html) | Public registration page and QR entry pass | |
 | **Clients & service** ||||

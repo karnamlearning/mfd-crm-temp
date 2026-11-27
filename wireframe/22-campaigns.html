@@ -25,6 +25,10 @@
     .seg-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; color: var(--text-2); }
     .diff-neg { color: var(--danger); font-weight: 600; }
     .rate { font-variant-numeric: tabular-nums; }
+    .from-ev { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+    .from-ev .i { width: 12px; height: 12px; }
+    .act-ic { width: 24px; height: 24px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--primary-soft); color: var(--primary-text); flex: none; }
+    .act-ic .i { width: 13px; height: 13px; }
     .rate.is-good { color: var(--success); font-weight: 600; }
     .rate.is-low { color: var(--danger); font-weight: 600; }
     .camp-link { font-weight: 600; color: var(--text); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; font: inherit; font-weight: 600; }
@@ -93,15 +97,15 @@
         </div>
 
         <div class="kpis">
-          <div class="stat stat-info kpi"><div class="stat-label">Active campaigns</div><div class="stat-value">2</div><div class="stat-meta">1 scheduled · 4 completed</div></div>
-          <div class="stat kpi"><div class="stat-label">Leads generated</div><div class="stat-value">194</div><div class="stat-meta">Last 90 days · 6 campaigns</div></div>
-          <div class="stat stat-success kpi"><div class="stat-label">Clients converted</div><div class="stat-value">31</div><div class="stat-meta"><span class="delta-up fw-600">16.0%</span> of campaign leads</div></div>
+          <div class="stat stat-info kpi"><div class="stat-label">Active campaigns</div><div class="stat-value">3</div><div class="stat-meta">1 scheduled · 4 completed</div></div>
+          <div class="stat kpi"><div class="stat-label">Leads generated</div><div class="stat-value">205</div><div class="stat-meta">Last 90 days · 7 campaigns · events included</div></div>
+          <div class="stat stat-success kpi"><div class="stat-label">Clients converted</div><div class="stat-value">31</div><div class="stat-meta"><span class="delta-up fw-600">15.1%</span> of campaign leads</div></div>
           <div class="stat kpi"><div class="stat-label">Business generated</div><div class="stat-value">₹3.53 Cr</div><div class="stat-meta">Lump sums, SIPs and first-year premium</div></div>
-          <div class="stat stat-warning kpi"><div class="stat-label">Spend · per client</div><div class="stat-value">₹1.72 L</div><div class="stat-meta">₹5,548 per converted client</div></div>
+          <div class="stat stat-warning kpi"><div class="stat-label">Spend · per client</div><div class="stat-value">₹1.93 L</div><div class="stat-meta">₹6,213 per converted client</div></div>
         </div>
 
         <div class="tabs" data-tabs="camp" role="tablist">
-          <button class="tab is-active" data-tab="campaigns">Campaigns <span class="count">7</span></button>
+          <button class="tab is-active" data-tab="campaigns">Campaigns <span class="count">8</span></button>
           <button class="tab" data-tab="referrals">Referrals <span class="count">11</span></button>
         </div>
 
@@ -109,8 +113,8 @@
         <div data-tab-panel="campaigns" data-tab-scope="camp" class="is-active">
           <div class="toolbar">
             <div class="toolbar-left">
-              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search campaign or channel"></label>
-              <div class="segmented" data-segmented><button aria-pressed="true">All</button><button>Active <span class="faint">2</span></button><button>Scheduled <span class="faint">1</span></button><button>Completed <span class="faint">4</span></button></div>
+              <label class="input-group"><svg class="i"><use href="#i-search"/></svg><input class="input" placeholder="Search campaign, channel or event"></label>
+              <div class="segmented" data-segmented><button aria-pressed="true">All</button><button>Active <span class="faint">3</span></button><button>Scheduled <span class="faint">1</span></button><button>Completed <span class="faint">4</span></button></div>
             </div>
             <div class="toolbar-right">
               <select class="select" style="width:auto" aria-label="Period"><option>Last 90 days</option><option>This financial year</option><option>Last 12 months</option><option>Custom range…</option></select>
@@ -124,10 +128,16 @@
                 <thead><tr><th>Campaign</th><th>Target</th><th>Status · dates</th><th class="num">Spend</th><th class="num">Leads</th><th class="num">Clients</th><th class="num">Conv.</th><th class="num">Business</th><th class="num">Per client</th></tr></thead>
                 <tbody>
                   <tr>
-                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Diwali SIP Drive</button><div class="cell-sub">WhatsApp broadcast + QR poster</div></span></span></td>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Diwali SIP Drive</button><div class="cell-sub">WhatsApp broadcast + QR poster · 1 event: <a href="24-event-detail.html">Diwali Branch Day</a></div></span></span></td>
                     <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>Clients with no SIP · 84</span></td>
                     <td><span class="badge badge-dot badge-info">Active</span><div class="cell-sub">20 Oct – 15 Nov</div></td>
                     <td class="num">₹32,000</td><td class="num">58</td><td class="num">9</td><td class="num rate">15.5%</td><td class="num fw-600">₹86 L</td><td class="num">₹3,556</td>
+                  </tr>
+                  <tr>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-ticket"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Market outlook series</button><div class="cell-sub">Event · 1 event: <a href="24-event-detail.html">Market Outlook 2027 – Investor Meet</a> · today</div></span></span></td>
+                    <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>Tier A and B clients, open leads · 148</span></td>
+                    <td><span class="badge badge-dot badge-info">Active</span><div class="cell-sub">1 – 30 Nov</div></td>
+                    <td class="num">₹20,610<div><span class="from-ev" title="Read from the event: budget, registrations and check-in"><svg class="i"><use href="#i-ticket"/></svg>from event</span></div></td><td class="num">11</td><td class="num">0</td><td class="num faint">—</td><td class="num faint">₹0 <span class="text-sm">so far</span></td><td class="num faint">—</td>
                   </tr>
                   <tr>
                     <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Term cover cross-sell</button><div class="cell-sub">WhatsApp · RM-led follow-up</div></span></span></td>
@@ -136,16 +146,16 @@
                     <td class="num">₹4,000</td><td class="num">7</td><td class="num">2</td><td class="num rate is-good">28.6%</td><td class="num fw-600">₹3 L</td><td class="num">₹2,000</td>
                   </tr>
                   <tr>
-                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-video"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Retirement planning webinar</button><div class="cell-sub">Webinar · registrations open · <a href="24-event-detail.html">Open event</a></div></span></span></td>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-ticket"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Retirement planning webinar</button><div class="cell-sub">Event · 1 event: <a href="24-event-detail.html">Retirement Planning Webinar</a> · 2 Dec, online</div></span></span></td>
                     <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-filter"/></svg>Tier A and B, age 45+ · 128</span></td>
                     <td><span class="badge badge-dot badge-neutral">Scheduled</span><div class="cell-sub">2 Dec</div></td>
-                    <td class="num faint">₹6,000 <span class="text-sm">planned</span></td><td class="num">34 <span class="faint text-sm">reg.</span></td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td>
+                    <td class="num faint">₹6,000 <span class="text-sm">planned</span><div><span class="from-ev" title="Read from the event: budget, registrations and check-in"><svg class="i"><use href="#i-ticket"/></svg>from event</span></div></td><td class="num">34 <span class="faint text-sm">reg.</span></td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td><td class="num faint">—</td>
                   </tr>
                   <tr>
-                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-users"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Tax-saving ELSS seminar</button><div class="cell-sub">Seminar · Andheri club hall · <a href="23-events.html">Open event</a></div></span></span></td>
+                    <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-ticket"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Tax-saving ELSS seminar</button><div class="cell-sub">Event · 1 event: <a href="24-event-detail.html">Tax-saving ELSS Seminar</a> · 8 Nov, Andheri club hall</div></span></span></td>
                     <td><span class="seg-chip"><svg class="i i-sm"><use href="#i-globe"/></svg>Open invitation</span></td>
                     <td><span class="badge badge-dot badge-success">Completed</span><div class="cell-sub">5 – 10 Nov</div></td>
-                    <td class="num">₹58,000</td><td class="num">41</td><td class="num">7</td><td class="num rate">17.1%</td><td class="num fw-600">₹92 L</td><td class="num">₹8,286</td>
+                    <td class="num">₹58,000<div><span class="from-ev" title="Read from the event: budget, registrations and check-in"><svg class="i"><use href="#i-ticket"/></svg>from event</span></div></td><td class="num">41</td><td class="num">7</td><td class="num rate">17.1%</td><td class="num fw-600">₹92 L</td><td class="num">₹8,286</td>
                   </tr>
                   <tr>
                     <td><span class="ch"><span class="ch-ic"><svg class="i"><use href="#i-globe"/></svg></span><span><button class="camp-link" data-open-drawer="drawer-detail">Website SIP calculator</button><div class="cell-sub">Website · paid search</div></span></span></td>
@@ -165,11 +175,11 @@
                     <td><span class="badge badge-dot badge-success">Completed</span><div class="cell-sub">15 Sep – 15 Oct</div></td>
                     <td class="num">₹36,000</td><td class="num">19</td><td class="num">2</td><td class="num rate is-low">10.5%</td><td class="num fw-600">₹14 L</td><td class="num diff-neg">₹18,000</td>
                   </tr>
-                  <tr class="total-row"><td>All campaigns · last 90 days</td><td></td><td></td><td class="num">₹1,72,000</td><td class="num">194</td><td class="num">31</td><td class="num">16.0%</td><td class="num">₹3.53 Cr</td><td class="num">₹5,548</td></tr>
+                  <tr class="total-row"><td>All campaigns · last 90 days</td><td></td><td></td><td class="num">₹1,92,610</td><td class="num">205</td><td class="num">31</td><td class="num">15.1%</td><td class="num">₹3.53 Cr</td><td class="num">₹6,213</td></tr>
                 </tbody>
               </table>
             </div>
-            <div class="pagination"><span>7 campaigns · expenses are entered by the campaign owner, business generated comes from MF Box</span></div>
+            <div class="pagination"><span>8 campaigns · an event is one activity inside a campaign. Event spend, registrations and leads are read from the event, not typed here. Other expenses are entered by the campaign owner. Business generated comes from MF Box.</span></div>
           </div>
 
           <div class="row-b">
@@ -179,21 +189,21 @@
               <div class="card-body">
                 <div class="cbars">
                   <span class="nm">Social media</span><div class="cbar"><i class="hot" style="--w:1"></i><b>₹18,000</b></div>
-                  <span class="nm">Seminar</span><div class="cbar"><i style="--w:.46"></i><b>₹8,286</b></div>
+                  <span class="nm">Events</span><div class="cbar"><i style="--w:.46"></i><b>₹8,286</b></div>
                   <span class="nm">Website</span><div class="cbar"><i style="--w:.22"></i><b>₹4,000</b></div>
                   <span class="nm">Referral</span><div class="cbar"><i style="--w:.2"></i><b>₹3,600</b></div>
                   <span class="nm">WhatsApp</span><div class="cbar"><i style="--w:.18"></i><b>₹3,273</b></div>
                 </div>
               </div>
-              <div class="card-footer"><svg class="i i-sm"><use href="#i-info"/></svg>Spend divided by clients who invested through MF Box. Last 90 days.</div>
+              <div class="card-footer"><svg class="i i-sm"><use href="#i-info"/></svg>Spend divided by clients who invested through MF Box. Last 90 days · events count once completed.</div>
             </section>
             <section class="card vcard">
               <div class="card-header"><div class="card-title">Lead to client conversion, by channel</div></div>
-              <p class="take"><svg class="i text-success"><use href="#i-trending-up"/></svg><span><b>Referrals convert best</b> at 22.7%, then seminars at 17.1%.</span></p>
+              <p class="take"><svg class="i text-success"><use href="#i-trending-up"/></svg><span><b>Referrals convert best</b> at 22.7%, then events at 17.1%.</span></p>
               <div class="card-body">
                 <div class="cbars">
                   <span class="nm">Referral</span><div class="cbar"><i style="--w:1"></i><b>22.7% <span class="faint">5 of 22</span></b></div>
-                  <span class="nm">Seminar</span><div class="cbar"><i style="--w:.75"></i><b>17.1% <span class="faint">7 of 41</span></b></div>
+                  <span class="nm">Events</span><div class="cbar"><i style="--w:.75"></i><b>17.1% <span class="faint">7 of 41</span></b></div>
                   <span class="nm">WhatsApp</span><div class="cbar"><i style="--w:.74"></i><b>16.9% <span class="faint">11 of 65</span></b></div>
                   <span class="nm">Website</span><div class="cbar"><i style="--w:.56"></i><b>12.8% <span class="faint">6 of 47</span></b></div>
                   <span class="nm">Social media</span><div class="cbar"><i style="--w:.46"></i><b>10.5% <span class="faint">2 of 19</span></b></div>
@@ -254,14 +264,14 @@
           <div class="choice-group" data-segmented>
             <button class="choice" aria-pressed="true"><svg class="i"><use href="#i-whatsapp"/></svg>WhatsApp</button>
             <button class="choice"><svg class="i"><use href="#i-mail"/></svg>Email</button>
-            <button class="choice"><svg class="i"><use href="#i-users"/></svg>Seminar</button>
-            <button class="choice"><svg class="i"><use href="#i-video"/></svg>Webinar</button>
+            <button class="choice"><svg class="i"><use href="#i-ticket"/></svg>Event</button>
             <button class="choice"><svg class="i"><use href="#i-globe"/></svg>Website</button>
             <button class="choice"><svg class="i"><use href="#i-hash"/></svg>Social</button>
             <button class="choice"><svg class="i"><use href="#i-gift"/></svg>Referral</button>
           </div>
+          <span class="help">Seminar, webinar or investor meet? Pick <b>Event</b>. Saving opens <a href="23-events.html">Create event</a> already linked to this campaign, and the event's spend, registrations and leads count here automatically.</span>
         </div>
-        <div class="field"><label class="label">Lead source <span class="req">*</span></label><select class="select"><option>WhatsApp</option><option>Seminar</option><option>QR</option><option>Website</option><option>Referral</option></select><span class="help">Same list as in Leads › Configurations</span></div>
+        <div class="field"><label class="label">Lead source <span class="req">*</span></label><select class="select"><option>WhatsApp</option><option>Event</option><option>QR code</option><option>Website form</option><option>Referral</option></select><span class="help">Same list as in Leads › Configurations</span></div>
         <div class="field"><label class="label">Owner</label><select class="select"><option>Neha Kapoor</option><option>Rohan Mehta</option><option>Sneha Iyer</option></select></div>
 
         <div class="field span-2 drawer-sec">Who to reach</div>
@@ -315,12 +325,19 @@
         <span class="l">Clients</span><span class="t"><i style="--w:.01"></i></span><span class="v">9</span>
       </div>
 
+      <div class="dd-sec">Activities</div>
+      <div>
+        <div class="exp-row"><span class="person"><span class="act-ic"><svg class="i"><use href="#i-whatsapp"/></svg></span><span>WhatsApp broadcast<div class="cell-sub">1,240 messages · 20 Oct – 15 Nov</div></span></span><span class="num">46 leads</span></div>
+        <div class="exp-row"><span class="person"><span class="act-ic"><svg class="i"><use href="#i-ticket"/></svg></span><span><a class="cell-title" href="24-event-detail.html">Diwali Branch Day – SIP Drive</a><div class="cell-sub">Event · 1 Nov · 31 of 44 registered attended</div></span></span><span class="num">12 leads</span></div>
+      </div>
+      <button class="btn btn-secondary btn-sm mt-3" onclick="location.href='23-events.html'"><svg class="i"><use href="#i-plus"/></svg>Add event to this campaign</button>
+
       <div class="dd-sec">Spend <span class="ml-auto">₹32,000 of ₹40,000 budget</span></div>
       <div class="progress p-success"><span style="width:80%"></span></div>
       <div style="margin-top:10px">
         <div class="exp-row"><span>WhatsApp broadcast · 1,240 messages</span><span class="num">₹12,400</span></div>
         <div class="exp-row"><span>QR posters and printing</span><span class="num">₹8,000</span></div>
-        <div class="exp-row"><span>Branch event day</span><span class="num">₹11,600</span></div>
+        <div class="exp-row"><span>Branch event day <span class="from-ev"><svg class="i"><use href="#i-ticket"/></svg>from event budget</span></span><span class="num">₹11,600</span></div>
       </div>
       <button class="btn btn-secondary btn-sm mt-3" onclick="AK.toast('Add expense: description, amount and bill')"><svg class="i"><use href="#i-plus"/></svg>Add expense</button>
 
